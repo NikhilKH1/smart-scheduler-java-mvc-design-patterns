@@ -1,5 +1,11 @@
 package calendarapp.model;
 
-public class CalendarEvent {
+import java.time.LocalDateTime;
+
+public interface CalendarEvent {
+  String getSubject();
+  LocalDateTime getStartDateTime();
+  LocalDateTime getEndDateTime();
+
 
 }
