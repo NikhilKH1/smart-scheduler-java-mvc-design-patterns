@@ -2,6 +2,8 @@ package calendarapp.controller;
 
 import calendarapp.model.CalendarEvent;
 import calendarapp.model.CalendarModel;
+import calendarapp.model.Command;
+import calendarapp.model.CreateEventCommand;
 import calendarapp.model.SingleEvent;
 import calendarapp.view.CalendarView;
 
@@ -24,29 +26,30 @@ public class CalendarController {
     Command cmd;
     try {
       cmd = parser.parse(commandInput);
-    }
-    catch (IllegalArgumentException e) {
+    } catch (IllegalArgumentException e) {
       view.displayError("Parsing error: " + e.getMessage());
       return false;
     }
-    if(cmd instanceof CreateEventCommand) {
+    if (cmd instanceof CreateEventCommand) {
       CreateEventCommand createCmd = (CreateEventCommand) cmd;
-
       CalendarEvent event = new SingleEvent(
               createCmd.getEventName(),
               createCmd.getStartDateTime(),
-              createCmd.getEndDateTime()
-              );
+              createCmd.getEndDateTime(),
+              createCmd.getDescription(),
+              createCmd.getLocation(),
+              createCmd.isPublic(),
+              createCmd.isAllDay()
+      );
       boolean success = false;
       try {
         success = model.addEvent(event, createCmd.isAutoDecline());
       } catch (Exception e) {
         throw new RuntimeException(e);
       }
-      if(success) {
+      if (success) {
         view.displayMessage("Event created successfully");
-      }
-      else {
+      } else {
         view.displayError("Event creation failed");
       }
       return success;
