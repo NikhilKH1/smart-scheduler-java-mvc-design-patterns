@@ -66,8 +66,9 @@ public class SingleEvent implements CalendarEvent {
     if (location != null && !location.isEmpty()) {
       sb.append(" | Location: ").append(location);
     }
-    sb.append(" | Visibility: ").append(isPublic ? "Public" : "Private");
-
+    if (!isPublic) {
+      sb.append(" | Visibility: Private");
+    }
     if (isAllDay) {
       sb.append(" | (All Day Event)");
     }

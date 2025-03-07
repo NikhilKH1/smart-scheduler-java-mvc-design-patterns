@@ -12,12 +12,12 @@ public class CommandParser {
 
   public Command parse(String command) {
     List<String> tokens = tokenize(command);
-    if (tokens == null || tokens.size() == 0) {
+    if (tokens == null || tokens.isEmpty()) {
       return null;
     }
 
     String mainCommand = tokens.get(0).toLowerCase();
-    if (mainCommand.equals("create")) {
+    if ("create".equals(mainCommand)) {
       return parseCreateEvent(tokens);
     }
     return null;
@@ -41,34 +41,50 @@ public class CommandParser {
     }
     String eventName = stripQuotes(tokens.get(index++));
 
-    if (index >= tokens.size() || !tokens.get(index).equalsIgnoreCase("from")) {
-      throw new IllegalArgumentException("Expected 'from' after event name");
+    if (index >= tokens.size()) {
+      throw new IllegalArgumentException("Expected 'from' or 'on' after event name");
     }
-    index++;
 
     LocalDateTime startDateTime;
-    try {
-      startDateTime = LocalDateTime.parse(tokens.get(index++));
-    } catch (DateTimeParseException e) {
-      throw new IllegalArgumentException("Invalid start date/time format");
-    }
-
     LocalDateTime endDateTime;
     boolean isAllDay;
-    if (index < tokens.size() && tokens.get(index).equalsIgnoreCase("to")) {
+
+    String dateKeyword = tokens.get(index).toLowerCase();
+
+    if (index < tokens.size() && tokens.get(index).equalsIgnoreCase("from")) {
       index++;
       try {
-        endDateTime = LocalDateTime.parse(tokens.get(index++));
-        if (endDateTime.isBefore(startDateTime)) {
-          throw new IllegalArgumentException("End date should be after start date");
-        }
-        isAllDay = false;
+        startDateTime = LocalDateTime.parse(tokens.get(index++));
       } catch (DateTimeParseException e) {
-        throw new IllegalArgumentException("Invalid end date/time format");
+        throw new IllegalArgumentException("Invalid start date/time format");
       }
-    } else {
+
+      if (index < tokens.size() && tokens.get(index).equalsIgnoreCase("to")) {
+        index++;
+        try {
+          endDateTime = LocalDateTime.parse(tokens.get(index++));
+          if (endDateTime.isBefore(startDateTime)) {
+            throw new IllegalArgumentException("End date should be after start date");
+          }
+          isAllDay = false;
+        } catch (DateTimeParseException e) {
+          throw new IllegalArgumentException("Invalid end date/time format");
+        }
+      } else {
+        endDateTime = startDateTime.toLocalDate().atTime(23, 59, 59);
+        isAllDay = true;
+      }
+    } else if (dateKeyword.equalsIgnoreCase("on")) {
+      index++;
+      try {
+        startDateTime = LocalDateTime.parse(tokens.get(index++));
+      } catch (DateTimeParseException e) {
+        throw new IllegalArgumentException("Invalid date/time format for all-day event");
+      }
       endDateTime = startDateTime.toLocalDate().atTime(23, 59, 59);
       isAllDay = true;
+    } else {
+      throw new IllegalArgumentException("Expected 'from' or 'on' after event name");
     }
 
     boolean isRecurring = false;
@@ -102,7 +118,7 @@ public class CommandParser {
     // Optional parameters parsing (description, location, public/private)
     String description = "";
     String location = "";
-    boolean isPublic = true; // default visibility
+    boolean isPublic = true;
 
     while (index < tokens.size()) {
       String token = tokens.get(index++).toLowerCase();
@@ -141,9 +157,6 @@ public class CommandParser {
             repeatUntil
     );
   }
-
-
-
 
   private String stripQuotes(String token) {
     if (token.startsWith("\"") && token.endsWith("\"") && token.length() > 1) {
