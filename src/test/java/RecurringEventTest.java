@@ -45,7 +45,7 @@ public class RecurringEventTest {
             LocalDateTime.of(2025, 4, 1, 10, 0),
             "TR",
             0,
-            LocalDateTime.of(2025, 4, 10, 0, 0)
+            LocalDateTime.of(2025, 4, 10, 23, 59) // Clearly corrected time
     );
 
     List<SingleEvent> occurrences = recurringEvent.generateOccurrences();
@@ -57,20 +57,21 @@ public class RecurringEventTest {
     assertEquals(LocalDateTime.of(2025, 4, 10, 9, 0), occurrences.get(3).getStartDateTime()); // Next Thursday
   }
 
-//  @Test
-//  public void testNoOccurrencesGenerated() {
-//    recurringEvent = new RecurringEvent(
-//            "Empty Class",
-//            LocalDateTime.of(2025, 5, 1, 9, 0),
-//            LocalDateTime.of(2025, 5, 1, 10, 0),
-//            "",
-//            5,
-//            null
-//    );
-//
-//    List<SingleEvent> occurrences = recurringEvent.generateOccurrences();
-//    assertTrue("Expected no occurrences to be generated", occurrences.isEmpty());
-//  }
+
+  @Test
+  public void testNoOccurrencesGenerated() {
+    recurringEvent = new RecurringEvent(
+            "Empty Class",
+            LocalDateTime.of(2025, 5, 1, 9, 0),
+            LocalDateTime.of(2025, 5, 1, 10, 0),
+            "",
+            5,
+            null
+    );
+
+    List<SingleEvent> occurrences = recurringEvent.generateOccurrences();
+    assertTrue("Expected no occurrences to be generated", occurrences.isEmpty());
+  }
 
   @Test
   public void testOccurrencesRespectWeekdays() {

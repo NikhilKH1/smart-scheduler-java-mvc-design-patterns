@@ -57,6 +57,10 @@ public class RecurringEvent implements CalendarEvent {
 
   public List<SingleEvent> generateOccurrences() {
     List<SingleEvent> occurrences = new ArrayList<>();
+
+    if (weekdays == null || weekdays.isEmpty()) {
+      return occurrences;
+    }
     LocalDateTime currentStart = startDateTime;
     LocalDateTime currentEnd = endDateTime;
 
