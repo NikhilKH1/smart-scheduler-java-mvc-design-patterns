@@ -22,6 +22,24 @@ public class CalendarModel {
     return true;
   }
 
+  public boolean addRecurringEvent(RecurringEvent recurringEvent, boolean autoDecline) {
+    List<SingleEvent> occurrences = recurringEvent.generateOccurrences();
+
+    for (SingleEvent occurrence : occurrences) {
+      for (CalendarEvent existingEvent : events) {
+        if (ConflictChecker.hasConflict(existingEvent, occurrence)) {
+          if (autoDecline) {
+            return false;
+          }
+        }
+      }
+    }
+
+    events.addAll(occurrences);
+    return true;
+  }
+
+
   public List<CalendarEvent> getEvents() {
     return new ArrayList<>(events);
   }

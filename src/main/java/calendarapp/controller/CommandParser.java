@@ -1,5 +1,6 @@
 package calendarapp.controller;
 
+import calendarapp.model.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
@@ -7,10 +8,8 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import calendarapp.model.Command;
-import calendarapp.model.CreateEventCommand;
-
 public class CommandParser {
+
   public Command parse(String command) {
     List<String> tokens = tokenize(command);
     if (tokens == null || tokens.size() == 0) {
@@ -19,12 +18,12 @@ public class CommandParser {
 
     String mainCommand = tokens.get(0).toLowerCase();
     if (mainCommand.equals("create")) {
-      return parserCreateEvent(tokens);
+      return parseCreateEvent(tokens);
     }
     return null;
   }
 
-  CreateEventCommand parserCreateEvent(List<String> tokens) {
+  private Command parseCreateEvent(List<String> tokens) {
     int index = 1;
     if (index >= tokens.size() || !tokens.get(index).equalsIgnoreCase("event")) {
       throw new IllegalArgumentException("Expected 'event' after create");
@@ -36,6 +35,7 @@ public class CommandParser {
       autoDecline = true;
       index++;
     }
+
     if (index >= tokens.size()) {
       throw new IllegalArgumentException("Missing event name");
     }
@@ -53,8 +53,8 @@ public class CommandParser {
       throw new IllegalArgumentException("Invalid start date/time format");
     }
 
-    LocalDateTime endDateTime = null;
-    boolean isAllDay = false;
+    LocalDateTime endDateTime;
+    boolean isAllDay;
     if (index < tokens.size() && tokens.get(index).equalsIgnoreCase("to")) {
       index++;
       try {
@@ -62,53 +62,89 @@ public class CommandParser {
         if (endDateTime.isBefore(startDateTime)) {
           throw new IllegalArgumentException("End date should be after start date");
         }
+        isAllDay = false;
       } catch (DateTimeParseException e) {
         throw new IllegalArgumentException("Invalid end date/time format");
       }
     } else {
-      // No end time provided: mark as all day event.
-      isAllDay = true;
-      // Set end time to end of the day (23:59:59) of the start date.
       endDateTime = startDateTime.toLocalDate().atTime(23, 59, 59);
+      isAllDay = true;
     }
 
-    // Parse optional parameters: description, location, event type (public/private)
-    String description = "";
-    String location = "";
-    boolean isPublic = true; // default is public
+    boolean isRecurring = false;
+    String weekdays = "";
+    int repeatCount = 0;
+    LocalDateTime repeatUntil = null;
 
-    while (index < tokens.size()) {
-      String token = tokens.get(index);
-      if (token.equalsIgnoreCase("description")) {
+    if (index < tokens.size() && tokens.get(index).equalsIgnoreCase("repeats")) {
+      isRecurring = true;
+      index++;
+
+      if (index >= tokens.size()) {
+        throw new IllegalArgumentException("Missing weekdays after 'repeats'");
+      }
+      weekdays = tokens.get(index++).toUpperCase();
+
+      if (index < tokens.size() && tokens.get(index).equalsIgnoreCase("for")) {
         index++;
-        if (index < tokens.size()) {
-          description = stripQuotes(tokens.get(index++));
-        } else {
-          throw new IllegalArgumentException("Expected description text after 'description'");
+        repeatCount = Integer.parseInt(tokens.get(index++));
+        if (index >= tokens.size() || !tokens.get(index++).equalsIgnoreCase("times")) {
+          throw new IllegalArgumentException("Expected 'times' after repeat count");
         }
-      } else if (token.equalsIgnoreCase("location")) {
+      } else if (index < tokens.size() && tokens.get(index).equalsIgnoreCase("until")) {
         index++;
-        if (index < tokens.size()) {
-          location = stripQuotes(tokens.get(index++));
-        } else {
-          throw new IllegalArgumentException("Expected location text after 'location'");
-        }
-      } else if (token.equalsIgnoreCase("public")) {
-        isPublic = true;
-        index++;
-      } else if (token.equalsIgnoreCase("private")) {
-        isPublic = false;
-        index++;
+        repeatUntil = LocalDateTime.parse(tokens.get(index++));
       } else {
-        throw new IllegalArgumentException("Unknown token: " + token);
+        throw new IllegalArgumentException("Expected 'for' or 'until' after weekdays");
       }
     }
 
-    return new CreateEventCommand(eventName, startDateTime, endDateTime,
-            autoDecline, description, location, isPublic, isAllDay);
+    // Optional parameters parsing (description, location, public/private)
+    String description = "";
+    String location = "";
+    boolean isPublic = true; // default visibility
+
+    while (index < tokens.size()) {
+      String token = tokens.get(index++).toLowerCase();
+      switch (token) {
+        case "description":
+          if (index >= tokens.size()) throw new IllegalArgumentException("Missing description");
+          description = stripQuotes(tokens.get(index++));
+          break;
+        case "location":
+          if (index >= tokens.size()) throw new IllegalArgumentException("Missing location");
+          location = stripQuotes(tokens.get(index++));
+          break;
+        case "private":
+          isPublic = false;
+          break;
+        case "public":
+          isPublic = true;
+          break;
+        default:
+          throw new IllegalArgumentException("Unknown token: " + token);
+      }
+    }
+
+    return new CreateEventCommand(
+            eventName,
+            startDateTime,
+            endDateTime,
+            autoDecline,
+            description,
+            location,
+            isPublic,
+            isAllDay,
+            isRecurring,
+            weekdays,
+            repeatCount,
+            repeatUntil
+    );
   }
 
-  // Utility method to remove surrounding quotes (if any)
+
+
+
   private String stripQuotes(String token) {
     if (token.startsWith("\"") && token.endsWith("\"") && token.length() > 1) {
       return token.substring(1, token.length() - 1);

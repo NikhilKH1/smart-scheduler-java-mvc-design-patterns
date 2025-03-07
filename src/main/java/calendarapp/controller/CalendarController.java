@@ -1,10 +1,6 @@
 package calendarapp.controller;
 
-import calendarapp.model.CalendarEvent;
-import calendarapp.model.CalendarModel;
-import calendarapp.model.Command;
-import calendarapp.model.CreateEventCommand;
-import calendarapp.model.SingleEvent;
+import calendarapp.model.*;
 import calendarapp.view.CalendarView;
 
 public class CalendarController {
@@ -27,34 +23,45 @@ public class CalendarController {
     try {
       cmd = parser.parse(commandInput);
     } catch (IllegalArgumentException e) {
-      view.displayError("Parsing error: " + e.getMessage());
+      view.displayError("Parsing Error: " + e.getMessage());
       return false;
     }
+
     if (cmd instanceof CreateEventCommand) {
       CreateEventCommand createCmd = (CreateEventCommand) cmd;
-      CalendarEvent event = new SingleEvent(
-              createCmd.getEventName(),
-              createCmd.getStartDateTime(),
-              createCmd.getEndDateTime(),
-              createCmd.getDescription(),
-              createCmd.getLocation(),
-              createCmd.isPublic(),
-              createCmd.isAllDay()
-      );
-      boolean success = false;
-      try {
+      boolean success;
+
+      if (createCmd.isRecurring()) {
+        RecurringEvent recurringEvent = new RecurringEvent(
+                createCmd.getEventName(),
+                createCmd.getStartDateTime(),
+                createCmd.getEndDateTime(),
+                createCmd.getWeekdays(),
+                createCmd.getRepeatCount(),
+                createCmd.getRepeatUntil()
+        );
+        success = model.addRecurringEvent(recurringEvent, createCmd.isAutoDecline());
+      } else {
+        CalendarEvent event = new SingleEvent(
+                createCmd.getEventName(),
+                createCmd.getStartDateTime(),
+                createCmd.getEndDateTime(),
+                createCmd.getDescription(),
+                createCmd.getLocation(),
+                createCmd.isPublic(),
+                createCmd.isAllDay()
+        );
         success = model.addEvent(event, createCmd.isAutoDecline());
-      } catch (Exception e) {
-        throw new RuntimeException(e);
       }
+
       if (success) {
         view.displayMessage("Event created successfully");
       } else {
-        view.displayError("Event creation failed");
+        view.displayError("Event creation failed due to conflict");
       }
       return success;
     }
-    view.displayError("Command not implemented");
+    view.displayError("Unknown or unimplemented command");
     return false;
   }
 }

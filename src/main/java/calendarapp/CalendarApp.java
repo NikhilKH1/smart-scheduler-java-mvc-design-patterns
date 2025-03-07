@@ -22,7 +22,7 @@ public class CalendarApp {
       } else if (mode.equals("headless") && args.length == 3) {
         runHeadlessMode(controller, model, view, args[2]);
       } else {
-        System.err.println("Usage: --mode interactive OR --mode headless");
+        System.err.println("Usage: --mode interactive OR --mode headless <commands-file>");
         System.exit(1);
       }
     } else {
@@ -32,7 +32,7 @@ public class CalendarApp {
 
   private static void runInteractiveMode(CalendarController controller, CalendarModel model, CalendarView view) {
     Scanner scanner = new Scanner(System.in);
-    System.out.println("Enter commands type 'exit' to quit):");
+    System.out.println("Enter commands (type 'exit' to quit):");
     while (true) {
       System.out.print("> ");
       String command = scanner.nextLine();
