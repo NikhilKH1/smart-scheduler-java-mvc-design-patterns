@@ -3,7 +3,6 @@ package calendarapp;
 import calendarapp.controller.CalendarController;
 import calendarapp.model.CalendarModel;
 import calendarapp.view.CalendarView;
-
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -40,9 +39,12 @@ public class CalendarApp {
         break;
       }
       controller.processCommand(command);
-      System.out.println("----- All Events -----");
-      view.displayEvents(model.getEvents());
-      System.out.println("----------------------");
+      // Only print the full calendar if the command is not a query.
+      if (!command.trim().toLowerCase().startsWith("query")) {
+        System.out.println("----- All Events -----");
+        view.displayEvents(model.getEvents());
+        System.out.println("----------------------");
+      }
     }
     scanner.close();
   }
@@ -54,9 +56,12 @@ public class CalendarApp {
         if (command.trim().isEmpty()) continue;
         if (command.equalsIgnoreCase("exit")) break;
         controller.processCommand(command);
-        System.out.println("----- All Events -----");
-        view.displayEvents(model.getEvents());
-        System.out.println("----------------------");
+        // Only print the full calendar if the command is not a query.
+        if (!command.trim().toLowerCase().startsWith("query")) {
+          System.out.println("----- All Events -----");
+          view.displayEvents(model.getEvents());
+          System.out.println("----------------------");
+        }
       }
     } catch (IOException e) {
       System.err.println("Error reading commands file: " + e.getMessage());
