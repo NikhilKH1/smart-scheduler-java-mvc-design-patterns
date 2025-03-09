@@ -18,7 +18,6 @@ public class RecurringEvent implements CalendarEvent {
   private final boolean isPublic;
   private final boolean isAllDay;
 
-
   public RecurringEvent(String subject, LocalDateTime startDateTime, LocalDateTime endDateTime,
                         String description, String location, boolean isPublic, boolean isAllDay,
                         String weekdays, int repeatCount, LocalDateTime repeatUntil) {
@@ -39,7 +38,6 @@ public class RecurringEvent implements CalendarEvent {
     this(subject, startDateTime, endDateTime, "", "", true, false, weekdays, repeatCount, repeatUntil);
   }
 
-
   @Override
   public String getSubject() {
     return subject;
@@ -53,6 +51,21 @@ public class RecurringEvent implements CalendarEvent {
   @Override
   public LocalDateTime getEndDateTime() {
     return endDateTime;
+  }
+
+  // Added getter for weekdays
+  public String getWeekdays() {
+    return this.weekdays;
+  }
+
+  // Added getter for repeat count
+  public int getRepeatCount() {
+    return this.repeatCount;
+  }
+
+  // Added getter for repeat until date
+  public LocalDateTime getRepeatUntil() {
+    return this.repeatUntil;
   }
 
   public List<SingleEvent> generateOccurrences() {
