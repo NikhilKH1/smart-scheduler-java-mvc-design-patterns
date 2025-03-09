@@ -14,6 +14,10 @@ public class CalendarModel {
   }
 
   public boolean addEvent(CalendarEvent event, boolean autoDecline) {
+    // Check for duplicate event.
+    if (duplicateExists(event)) {
+      throw new IllegalArgumentException("Duplicate event: subject, start and end are identical. Please modify at least one field.");
+    }
     for (CalendarEvent existing : events) {
       if (ConflictChecker.hasConflict(existing, event)) {
         if (autoDecline) {
@@ -28,6 +32,9 @@ public class CalendarModel {
   public boolean addRecurringEvent(RecurringEvent recurringEvent, boolean autoDecline) {
     List<SingleEvent> occurrences = recurringEvent.generateOccurrences();
     for (SingleEvent occurrence : occurrences) {
+      if (duplicateExists(occurrence)) {
+        throw new IllegalArgumentException("Duplicate event in recurring series: subject, start and end are identical. Please modify at least one field.");
+      }
       for (CalendarEvent existingEvent : events) {
         if (ConflictChecker.hasConflict(existingEvent, occurrence)) {
           if (autoDecline) {
@@ -55,11 +62,10 @@ public class CalendarModel {
 
   public List<CalendarEvent> getEventsBetween(LocalDateTime startDateTime, LocalDateTime endDateTime) {
     return events.stream()
-            .filter(event -> event.getStartDateTime().isBefore(endDateTime.plusSeconds(1)) // Include events ending exactly at the end time
-                    && event.getEndDateTime().isAfter(startDateTime.minusSeconds(1))) // Include events starting exactly at the start time
+            .filter(event -> event.getStartDateTime().isBefore(endDateTime)
+                    && event.getEndDateTime().isAfter(startDateTime))
             .collect(Collectors.toList());
   }
-
 
   public boolean isBusyAt(LocalDateTime dateTime) {
     for (CalendarEvent event : events) {
@@ -83,6 +89,18 @@ public class CalendarModel {
     return null;
   }
 
+  // Returns true if an event with the same subject, start, and end already exists.
+  private boolean duplicateExists(CalendarEvent newEvent) {
+    for (CalendarEvent existing : events) {
+      if (existing.getSubject().equals(newEvent.getSubject()) &&
+              existing.getStartDateTime().equals(newEvent.getStartDateTime()) &&
+              existing.getEndDateTime().equals(newEvent.getEndDateTime())) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   // Edits a single event by replacing oldEvent with newEvent after conflict checking.
   public boolean editEvent(CalendarEvent oldEvent, CalendarEvent newEvent) {
     events.remove(oldEvent);
@@ -96,10 +114,9 @@ public class CalendarModel {
     return true;
   }
 
+  // Edit a single event (by unique identification).
   public boolean editSingleEvent(String property, String eventName, LocalDateTime originalStart, LocalDateTime originalEnd, String newValue) {
     List<CalendarEvent> matchingEvents = new ArrayList<>();
-
-    // Identify all matching single events
     for (CalendarEvent event : events) {
       if (event instanceof SingleEvent &&
               event.getSubject().equals(eventName) &&
@@ -108,29 +125,21 @@ public class CalendarModel {
         matchingEvents.add(event);
       }
     }
-
     if (matchingEvents.isEmpty()) {
-      return false; // No matching event found
+      return false;
     }
-
-    // Remove matching events before updating
     events.removeAll(matchingEvents);
     List<CalendarEvent> updatedEvents = new ArrayList<>();
-
     for (CalendarEvent oldEvent : matchingEvents) {
       SingleEvent updatedEvent = createUpdatedEvent((SingleEvent) oldEvent, property, newValue);
       updatedEvents.add(updatedEvent);
     }
-
-    // Add updated events back
     events.addAll(updatedEvents);
     return true;
   }
 
-
   // Edit events that start exactly at the given date/time.
   public boolean editEventsFrom(String property, String eventName, LocalDateTime fromDateTime, String newValue) {
-    // Gather matching events.
     List<CalendarEvent> matchingEvents = new ArrayList<>();
     for (CalendarEvent event : events) {
       if (event.getSubject().equals(eventName) && event.getStartDateTime().equals(fromDateTime)) {
@@ -140,14 +149,11 @@ public class CalendarModel {
       }
     }
     if (matchingEvents.isEmpty()) return false;
-
-    // Temporarily remove matching events.
     events.removeAll(matchingEvents);
     List<CalendarEvent> updatedEvents = new ArrayList<>();
     for (CalendarEvent event : matchingEvents) {
       SingleEvent se = (SingleEvent) event;
       SingleEvent newEvent = createUpdatedEvent(se, property, newValue);
-      // Check conflict against events not being updated.
       boolean conflict = false;
       for (CalendarEvent other : events) {
         if (ConflictChecker.hasConflict(other, newEvent)) {
@@ -156,60 +162,51 @@ public class CalendarModel {
         }
       }
       if (conflict) {
-        // Conflict detected: roll back the removal.
         events.addAll(matchingEvents);
         return false;
       }
       updatedEvents.add(newEvent);
     }
-    // No conflicts; add updated events back.
     events.addAll(updatedEvents);
     return true;
   }
 
+  // Edit all events with the given event name.
   public boolean editEventsAll(String property, String eventName, String newValue) {
     List<CalendarEvent> matchingEvents = new ArrayList<>();
-
-    // Find all instances of the event
     for (CalendarEvent event : events) {
       if (event.getSubject().equals(eventName)) {
         matchingEvents.add(event);
       }
     }
-
-    if (matchingEvents.isEmpty()) {
-      return false; // No matching events found
-    }
-
-    // Remove matching events before updating
+    if (matchingEvents.isEmpty()) return false;
     events.removeAll(matchingEvents);
     List<CalendarEvent> updatedEvents = new ArrayList<>();
-
-    for (CalendarEvent oldEvent : matchingEvents) {
-      if (oldEvent instanceof SingleEvent) {
-        updatedEvents.add(createUpdatedEvent((SingleEvent) oldEvent, property, newValue));
-      } else if (oldEvent instanceof RecurringEvent) {
-        // Update all occurrences of the recurring event
-        RecurringEvent recurring = (RecurringEvent) oldEvent;
-        List<SingleEvent> occurrences = recurring.generateOccurrences();
-        for (SingleEvent occurrence : occurrences) {
-          updatedEvents.add(createUpdatedEvent(occurrence, property, newValue));
-        }
+    for (CalendarEvent event : matchingEvents) {
+      if (event instanceof SingleEvent) {
+        updatedEvents.add(createUpdatedEvent((SingleEvent) event, property, newValue));
       }
     }
-
-    // Add updated events back
     events.addAll(updatedEvents);
     return true;
   }
 
   // Helper method: creates a new SingleEvent with the updated property.
+  // Now supports editing:
+  // - name, description, location
+  // - startDateTime, endDateTime (full date-time)
+  // - startDate, endDate (only the date portion)
+  // - startTime, endTime (only the time portion)
+  // - public (event visibility)
   private SingleEvent createUpdatedEvent(SingleEvent oldEvent, String property, String newValue) {
     String newSubject = oldEvent.getSubject();
     String newDescription = oldEvent.getDescription();
     String newLocation = oldEvent.getLocation();
+    LocalDateTime newStartDateTime = oldEvent.getStartDateTime();
+    LocalDateTime newEndDateTime = oldEvent.getEndDateTime();
+    boolean newIsPublic = oldEvent.isPublic();
 
-    switch (property) {
+    switch (property.toLowerCase()) {
       case "name":
         newSubject = newValue;
         break;
@@ -219,19 +216,46 @@ public class CalendarModel {
       case "location":
         newLocation = newValue;
         break;
+      case "startdatetime":
+        newStartDateTime = LocalDateTime.parse(newValue);
+        if (newStartDateTime.isAfter(newEndDateTime)) {
+          throw new IllegalArgumentException("Start time cannot be after end time.");
+        }
+        break;
+      case "enddatetime":
+        newEndDateTime = LocalDateTime.parse(newValue);
+        if (newEndDateTime.isBefore(newStartDateTime)) {
+          throw new IllegalArgumentException("End time cannot be before start time.");
+        }
+        break;
+      case "startdate":
+        newStartDateTime = LocalDate.parse(newValue).atTime(newStartDateTime.toLocalTime());
+        break;
+      case "enddate":
+        newEndDateTime = LocalDate.parse(newValue).atTime(newEndDateTime.toLocalTime());
+        break;
+      case "starttime":
+        newStartDateTime = newStartDateTime.toLocalDate().atTime(java.time.LocalTime.parse(newValue));
+        break;
+      case "endtime":
+        newEndDateTime = newEndDateTime.toLocalDate().atTime(java.time.LocalTime.parse(newValue));
+        break;
+      case "public":
+        newIsPublic = Boolean.parseBoolean(newValue);
+        break;
       default:
         throw new IllegalArgumentException("Unsupported property: " + property);
     }
 
     return new SingleEvent(
             newSubject,
-            oldEvent.getStartDateTime(),
-            oldEvent.getEndDateTime(),
+            newStartDateTime,
+            newEndDateTime,
             newDescription,
             newLocation,
-            oldEvent.isPublic(),
-            oldEvent.isAllDay()
+            newIsPublic,
+            oldEvent.isAllDay(),
+            oldEvent.getSeriesId()
     );
   }
-
 }

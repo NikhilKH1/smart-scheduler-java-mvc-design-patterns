@@ -29,9 +29,7 @@ public class CommandParser {
     throw new IllegalArgumentException("Unknown command: " + mainCommand);
   }
 
-  // For commands like:
-  // print events on <dateString>
-  // print events from <dateTime> to <dateTime>
+  // Parses "print events on <date>" and "print events from <dateTime> to <dateTime>"
   private Command parsePrintCommand(List<String> tokens) {
     if (tokens.size() < 2)
       throw new IllegalArgumentException("Incomplete print command");
@@ -55,21 +53,30 @@ public class CommandParser {
       if (tokens.size() < 6)
         throw new IllegalArgumentException("Incomplete print events range command");
       try {
-        LocalDateTime start = LocalDateTime.parse(tokens.get(3));
+        LocalDateTime start;
+        LocalDateTime end;
+        try {
+          start = LocalDateTime.parse(tokens.get(3));
+        } catch (DateTimeParseException e) {
+          start = LocalDate.parse(tokens.get(3)).atStartOfDay();
+        }
         if (!tokens.get(4).equalsIgnoreCase("to"))
           throw new IllegalArgumentException("Expected 'to' after start date/time");
-        LocalDateTime end = LocalDateTime.parse(tokens.get(5));
+        try {
+          end = LocalDateTime.parse(tokens.get(5));
+        } catch (DateTimeParseException e) {
+          end = LocalDate.parse(tokens.get(5)).atTime(23, 59, 59);
+        }
         return new QueryRangeDateTimeCommand(start, end);
       } catch (DateTimeParseException e) {
-        throw new IllegalArgumentException("Invalid date/time format. Use ISO format, e.g., 2025-03-08T10:00");
+        throw new IllegalArgumentException("Invalid date/time format. Use YYYY-MM-DD or YYYY-MM-DDTHH:MM");
       }
     } else {
       throw new IllegalArgumentException("Expected 'on' or 'from' after 'print events'");
     }
   }
 
-  // For commands like:
-  // show status on <dateTime>
+  // Parses "show status on <dateTime>"
   private Command parseShowCommand(List<String> tokens) {
     if (tokens.size() < 2 || !tokens.get(1).equalsIgnoreCase("status"))
       throw new IllegalArgumentException("Expected 'status' after 'show'");
@@ -85,10 +92,13 @@ public class CommandParser {
     }
   }
 
-  // Parse the "edit" commands (remains as in your previous implementation)
+  // Parses edit event commands.
+  // Format for single event:
+  //   edit event <property> <eventName> from <start> to <end> with <NewValue>
+  // Format for multiple events:
+  //   edit events <property> <eventName> from <start> with <NewValue>
+  //   or edit events <property> <eventName> <NewValue>
   private Command parseEditEventCommand(List<String> tokens) {
-    // For simplicity, assume previous parsing for edit commands is used.
-    // (See your previous implementation for formats A, B, C)
     if (tokens.size() < 2) {
       throw new IllegalArgumentException("Incomplete edit command");
     }
@@ -153,7 +163,10 @@ public class CommandParser {
     }
   }
 
-  // Existing create event parsing remains unchanged.
+  // Parses create event commands.
+  // Example formats:
+  //   create event "Team Meeting" from 2025-03-08T10:00 to 2025-03-08T11:00 description "..." location "..."
+  //   create event "Team Meeting" on 2025-03-08 repeats MTW for 3 times description "..." location "..."
   private Command parseCreateEvent(List<String> tokens) {
     int index = 1;
     if (index >= tokens.size() || !tokens.get(index).equalsIgnoreCase("event")) {
@@ -179,17 +192,15 @@ public class CommandParser {
     LocalDateTime startDateTime;
     LocalDateTime endDateTime;
     boolean isAllDay;
-
     String dateKeyword = tokens.get(index).toLowerCase();
 
-    if (index < tokens.size() && tokens.get(index).equalsIgnoreCase("from")) {
+    if (tokens.get(index).equalsIgnoreCase("from")) {
       index++;
       try {
         startDateTime = LocalDateTime.parse(tokens.get(index++));
       } catch (DateTimeParseException e) {
         throw new IllegalArgumentException("Invalid start date/time format");
       }
-
       if (index < tokens.size() && tokens.get(index).equalsIgnoreCase("to")) {
         index++;
         try {
@@ -218,23 +229,24 @@ public class CommandParser {
       throw new IllegalArgumentException("Expected 'from' or 'on' after event name");
     }
 
+    // Recurring event branch
     boolean isRecurring = false;
     String weekdays = "";
     int repeatCount = 0;
     LocalDateTime repeatUntil = null;
-
     if (index < tokens.size() && tokens.get(index).equalsIgnoreCase("repeats")) {
       isRecurring = true;
       index++;
-
       if (index >= tokens.size()) {
         throw new IllegalArgumentException("Missing weekdays after 'repeats'");
       }
       weekdays = tokens.get(index++).toUpperCase();
-
       if (index < tokens.size() && tokens.get(index).equalsIgnoreCase("for")) {
         index++;
         repeatCount = Integer.parseInt(tokens.get(index++));
+        if (repeatCount <= 0) {
+          throw new IllegalArgumentException("Repeat count must be a positive number");
+        }
         if (index >= tokens.size() || !tokens.get(index++).equalsIgnoreCase("times")) {
           throw new IllegalArgumentException("Expected 'times' after repeat count");
         }
@@ -249,7 +261,6 @@ public class CommandParser {
     String description = "";
     String location = "";
     boolean isPublic = true;
-
     while (index < tokens.size()) {
       String token = tokens.get(index++).toLowerCase();
       switch (token) {
