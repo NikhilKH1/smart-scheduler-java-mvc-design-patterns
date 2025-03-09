@@ -2,19 +2,27 @@ package calendarapp.model;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
+import java.time.LocalTime;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class CalendarModel {
   private final List<CalendarEvent> events;
+
+  // Map to store recurrence parameters for recurring events by seriesId.
+  private static final Map<String, RecurrenceParameters> recurrenceMap = new HashMap<>();
+
+  public static class RecurrenceParameters {
+    public String weekdays;
+    public int repeatCount;
+    public LocalDateTime repeatUntil;
+  }
 
   public CalendarModel() {
     events = new ArrayList<>();
   }
 
   public boolean addEvent(CalendarEvent event, boolean autoDecline) {
-    // Check for duplicate event.
     if (duplicateExists(event)) {
       throw new IllegalArgumentException("Duplicate event: subject, start and end are identical. Please modify at least one field.");
     }
@@ -44,6 +52,15 @@ public class CalendarModel {
       }
     }
     events.addAll(occurrences);
+    // Store recurrence parameters using the seriesId from the first occurrence.
+    if (!occurrences.isEmpty()) {
+      String seriesId = occurrences.get(0).getSeriesId();
+      RecurrenceParameters params = new RecurrenceParameters();
+      params.weekdays = recurringEvent.getWeekdays();
+      params.repeatCount = recurringEvent.getRepeatCount();
+      params.repeatUntil = recurringEvent.getRepeatUntil();
+      recurrenceMap.put(seriesId, params);
+    }
     return true;
   }
 
@@ -101,7 +118,6 @@ public class CalendarModel {
     return false;
   }
 
-  // Edits a single event by replacing oldEvent with newEvent after conflict checking.
   public boolean editEvent(CalendarEvent oldEvent, CalendarEvent newEvent) {
     events.remove(oldEvent);
     for (CalendarEvent e : events) {
@@ -114,7 +130,6 @@ public class CalendarModel {
     return true;
   }
 
-  // Edit a single event (by unique identification).
   public boolean editSingleEvent(String property, String eventName, LocalDateTime originalStart, LocalDateTime originalEnd, String newValue) {
     List<CalendarEvent> matchingEvents = new ArrayList<>();
     for (CalendarEvent event : events) {
@@ -138,7 +153,6 @@ public class CalendarModel {
     return true;
   }
 
-  // Edit events that start exactly at the given date/time.
   public boolean editEventsFrom(String property, String eventName, LocalDateTime fromDateTime, String newValue) {
     List<CalendarEvent> matchingEvents = new ArrayList<>();
     for (CalendarEvent event : events) {
@@ -171,7 +185,6 @@ public class CalendarModel {
     return true;
   }
 
-  // Edit all events with the given event name.
   public boolean editEventsAll(String property, String eventName, String newValue) {
     List<CalendarEvent> matchingEvents = new ArrayList<>();
     for (CalendarEvent event : events) {
@@ -180,24 +193,105 @@ public class CalendarModel {
       }
     }
     if (matchingEvents.isEmpty()) return false;
-    events.removeAll(matchingEvents);
-    List<CalendarEvent> updatedEvents = new ArrayList<>();
-    for (CalendarEvent event : matchingEvents) {
-      if (event instanceof SingleEvent) {
-        updatedEvents.add(createUpdatedEvent((SingleEvent) event, property, newValue));
+
+    // If the property is a recurrence property, update recurrence parameters.
+    if (property.equalsIgnoreCase("repeattimes") ||
+            property.equalsIgnoreCase("repeatuntil") ||
+            property.equalsIgnoreCase("repeatingdays")) {
+      // Collect unique series IDs from the matching events.
+      Set<String> seriesIds = new HashSet<>();
+      for (CalendarEvent event : matchingEvents) {
+        if (event instanceof SingleEvent) {
+          String seriesId = ((SingleEvent) event).getSeriesId();
+          if (seriesId != null) {
+            seriesIds.add(seriesId);
+          }
+        }
+      }
+      boolean allSuccess = true;
+      for (String seriesId : seriesIds) {
+        boolean res = editRecurringProperties(seriesId, property, newValue);
+        if (!res) {
+          allSuccess = false;
+        }
+      }
+      return allSuccess;
+    } else {
+      // Otherwise, update properties normally.
+      events.removeAll(matchingEvents);
+      List<CalendarEvent> updatedEvents = new ArrayList<>();
+      for (CalendarEvent event : matchingEvents) {
+        if (event instanceof SingleEvent) {
+          updatedEvents.add(createUpdatedEvent((SingleEvent) event, property, newValue));
+        }
+      }
+      events.addAll(updatedEvents);
+      return true;
+    }
+  }
+
+
+  // NEW: Edit recurrence properties for recurring events.
+  // Supported properties: "repeattimes", "repeatuntil", "repeatingdays"
+  public boolean editRecurringProperties(String seriesId, String property, String newValue) {
+    RecurrenceParameters params = recurrenceMap.get(seriesId);
+    if (params == null) {
+      throw new IllegalArgumentException("No recurrence parameters found for series: " + seriesId);
+    }
+    switch (property.toLowerCase()) {
+      case "repeattimes":
+        int newCount = Integer.parseInt(newValue);
+        if (newCount <= 0) {
+          throw new IllegalArgumentException("Repeat count must be a positive number.");
+        }
+        params.repeatCount = newCount;
+        break;
+      case "repeatuntil":
+        params.repeatUntil = LocalDateTime.parse(newValue);
+        break;
+      case "repeatingdays":
+        params.weekdays = newValue.toUpperCase();
+        break;
+      default:
+        throw new IllegalArgumentException("Unsupported recurring property: " + property);
+    }
+    // Find the base event for this series (the earliest event with the given seriesId).
+    SingleEvent baseEvent = null;
+    for (CalendarEvent e : events) {
+      if (e instanceof SingleEvent) {
+        SingleEvent se = (SingleEvent) e;
+        if (seriesId.equals(se.getSeriesId())) {
+          if (baseEvent == null || se.getStartDateTime().isBefore(baseEvent.getStartDateTime())) {
+            baseEvent = se;
+          }
+        }
       }
     }
-    events.addAll(updatedEvents);
+    if (baseEvent == null) return false;
+    // Rebuild the recurring event with the updated recurrence parameters.
+    RecurringEvent newRecurring = new RecurringEvent(
+            baseEvent.getSubject(),
+            baseEvent.getStartDateTime(),
+            baseEvent.getEndDateTime(),
+            baseEvent.getDescription(),
+            baseEvent.getLocation(),
+            true, // assuming public
+            baseEvent.isAllDay(),
+            params.weekdays,
+            params.repeatCount,
+            params.repeatUntil
+    );
+    // Remove all events in this series.
+    events.removeIf(e -> e instanceof SingleEvent && seriesId.equals(((SingleEvent) e).getSeriesId()));
+    List<SingleEvent> newOccurrences = newRecurring.generateOccurrences();
+    events.addAll(newOccurrences);
+    recurrenceMap.put(seriesId, params);
     return true;
   }
 
   // Helper method: creates a new SingleEvent with the updated property.
-  // Now supports editing:
-  // - name, description, location
-  // - startDateTime, endDateTime (full date-time)
-  // - startDate, endDate (only the date portion)
-  // - startTime, endTime (only the time portion)
-  // - public (event visibility)
+  // Supports editing: name, description, location,
+  // startDateTime, endDateTime, startDate, endDate, startTime, endTime, public.
   private SingleEvent createUpdatedEvent(SingleEvent oldEvent, String property, String newValue) {
     String newSubject = oldEvent.getSubject();
     String newDescription = oldEvent.getDescription();
@@ -235,10 +329,10 @@ public class CalendarModel {
         newEndDateTime = LocalDate.parse(newValue).atTime(newEndDateTime.toLocalTime());
         break;
       case "starttime":
-        newStartDateTime = newStartDateTime.toLocalDate().atTime(java.time.LocalTime.parse(newValue));
+        newStartDateTime = newStartDateTime.toLocalDate().atTime(LocalTime.parse(newValue));
         break;
       case "endtime":
-        newEndDateTime = newEndDateTime.toLocalDate().atTime(java.time.LocalTime.parse(newValue));
+        newEndDateTime = newEndDateTime.toLocalDate().atTime(LocalTime.parse(newValue));
         break;
       case "public":
         newIsPublic = Boolean.parseBoolean(newValue);

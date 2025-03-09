@@ -175,7 +175,7 @@ public class CommandParser {
     index++;
 
     boolean autoDecline = false;
-    if (index < tokens.size() && tokens.get(index).equalsIgnoreCase("--autoDecline")) {
+    if (index < tokens.size() && tokens.get(index).equalsIgnoreCase("--autodecline")) {
       autoDecline = true;
       index++;
     }
@@ -229,7 +229,7 @@ public class CommandParser {
       throw new IllegalArgumentException("Expected 'from' or 'on' after event name");
     }
 
-    // Recurring event branch
+    // Recurring event branch.
     boolean isRecurring = false;
     String weekdays = "";
     int repeatCount = 0;
@@ -256,6 +256,12 @@ public class CommandParser {
       } else {
         throw new IllegalArgumentException("Expected 'for' or 'until' after weekdays");
       }
+    }
+
+    // New check for recurring events: Ensure the event does not span more than 24 hours.
+    // For example, if an event starts at 2025-10-03T10:00, it must end no later than 2025-10-04T10:00.
+    if (isRecurring && endDateTime.isAfter(startDateTime.plusHours(24))) {
+      throw new IllegalArgumentException("Recurring event must end within 24 hours of the start time.");
     }
 
     String description = "";

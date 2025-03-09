@@ -33,28 +33,34 @@ public class CalendarController {
     if (cmd instanceof CreateEventCommand) {
       CreateEventCommand createCmd = (CreateEventCommand) cmd;
       boolean success;
-      if (createCmd.isRecurring()) {
-        RecurringEvent recurringEvent = new RecurringEvent(
-                createCmd.getEventName(),
-                createCmd.getStartDateTime(),
-                createCmd.getEndDateTime(),
-                createCmd.getWeekdays(),
-                createCmd.getRepeatCount(),
-                createCmd.getRepeatUntil()
-        );
-        success = model.addRecurringEvent(recurringEvent, createCmd.isAutoDecline());
-      } else {
-        CalendarEvent event = new SingleEvent(
-                createCmd.getEventName(),
-                createCmd.getStartDateTime(),
-                createCmd.getEndDateTime(),
-                createCmd.getDescription(),
-                createCmd.getLocation(),
-                createCmd.isPublic(),
-                createCmd.isAllDay()
-        );
-        success = model.addEvent(event, createCmd.isAutoDecline());
+      try {
+        if (createCmd.isRecurring()) {
+          RecurringEvent recurringEvent = new RecurringEvent(
+                  createCmd.getEventName(),
+                  createCmd.getStartDateTime(),
+                  createCmd.getEndDateTime(),
+                  createCmd.getWeekdays(),
+                  createCmd.getRepeatCount(),
+                  createCmd.getRepeatUntil()
+          );
+          success = model.addRecurringEvent(recurringEvent, createCmd.isAutoDecline());
+        } else {
+          CalendarEvent event = new SingleEvent(
+                  createCmd.getEventName(),
+                  createCmd.getStartDateTime(),
+                  createCmd.getEndDateTime(),
+                  createCmd.getDescription(),
+                  createCmd.getLocation(),
+                  createCmd.isPublic(),
+                  createCmd.isAllDay()
+          );
+          success = model.addEvent(event, createCmd.isAutoDecline());
+        }
+      } catch (IllegalArgumentException ex) {
+        view.displayError(ex.getMessage());
+        return false;
       }
+
       if (success) {
         view.displayMessage("Event created successfully");
       } else {
@@ -97,7 +103,6 @@ public class CalendarController {
       return true;
     }
     else if (cmd instanceof EditEventCommand) {
-      // (Edit command handling remains unchanged from your previous implementation)
       EditEventCommand editCmd = (EditEventCommand) cmd;
       boolean success = false;
       switch (editCmd.getMode()) {
