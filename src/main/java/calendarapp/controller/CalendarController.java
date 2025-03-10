@@ -1,26 +1,39 @@
 package calendarapp.controller;
 
-import calendarapp.model.*;
-import calendarapp.view.CalendarView;
+import calendarapp.model.CalendarModel;
+import calendarapp.model.event.CalendarEvent;
+import calendarapp.model.event.RecurringEvent;
+import calendarapp.model.event.SingleEvent;
+import calendarapp.model.commands.BusyQueryCommand;
+import calendarapp.model.commands.Command;
+import calendarapp.model.commands.CreateEventCommand;
+import calendarapp.model.commands.EditEventCommand;
+import calendarapp.model.commands.EditRecurringEventCommand;
+import calendarapp.model.commands.QueryByDateCommand;
+import calendarapp.model.commands.QueryRangeDateTimeCommand;
+import calendarapp.view.ICalendarView;
+import calendarapp.utils.ModelHelper;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
-public class CalendarController {
+public class CalendarController implements ICalendarController {
   private final CalendarModel model;
-  private final CalendarView view;
+  private final ICalendarView view;
   private final CommandParser parser;
 
-  public CalendarController(CalendarModel model, CalendarView view) {
+  public CalendarController(CalendarModel model, ICalendarView view) {
     this(model, view, new CommandParser());
   }
 
-  public CalendarController(CalendarModel model, CalendarView view, CommandParser parser) {
+  public CalendarController(CalendarModel model, ICalendarView view, CommandParser parser) {
     this.model = model;
     this.view = view;
     this.parser = parser;
   }
 
+  @Override
   public boolean processCommand(String commandInput) {
     Command cmd;
     try {
@@ -41,8 +54,13 @@ public class CalendarController {
                   createCmd.getEndDateTime(),
                   createCmd.getWeekdays(),
                   createCmd.getRepeatCount(),
-                  createCmd.getRepeatUntil()
+                  createCmd.getRepeatUntil(),
+                  createCmd.getDescription(),
+                  createCmd.getLocation(),
+                  createCmd.isPublic(),
+                  createCmd.isAllDay()
           );
+
           success = model.addRecurringEvent(recurringEvent, createCmd.isAutoDecline());
         } else {
           CalendarEvent event = new SingleEvent(
@@ -52,7 +70,8 @@ public class CalendarController {
                   createCmd.getDescription(),
                   createCmd.getLocation(),
                   createCmd.isPublic(),
-                  createCmd.isAllDay()
+                  createCmd.isAllDay(),
+                  null
           );
           success = model.addEvent(event, createCmd.isAutoDecline());
         }
@@ -60,7 +79,6 @@ public class CalendarController {
         view.displayError(ex.getMessage());
         return false;
       }
-
       if (success) {
         view.displayMessage("Event created successfully");
       } else {
@@ -125,8 +143,19 @@ public class CalendarController {
       }
       return success;
     }
-
-    view.displayError("Unknown or unimplemented command");
-    return false;
+    else if (cmd instanceof EditRecurringEventCommand) {
+      EditRecurringEventCommand recCmd = (EditRecurringEventCommand) cmd;
+      boolean success = model.editRecurringEvent(recCmd.getEventName(), recCmd.getProperty(), recCmd.getNewValue());
+      if (success) {
+        view.displayMessage("Recurring event modified successfully.");
+      } else {
+        view.displayError("Failed to modify recurring event.");
+      }
+      return success;
+    }
+    else {
+      view.displayError("Unknown or unimplemented command");
+      return false;
+    }
   }
 }

@@ -1,12 +1,13 @@
 package calendarapp;
 
-import calendarapp.controller.CalendarController;
-import calendarapp.model.CalendarModel;
-import calendarapp.view.CalendarView;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Scanner;
+
+import calendarapp.controller.CalendarController;
+import calendarapp.model.CalendarModel;
+import calendarapp.view.CalendarView;
 
 public class CalendarApp {
   public static void main(String[] args) {
