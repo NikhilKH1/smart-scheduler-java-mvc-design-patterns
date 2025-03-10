@@ -1,7 +1,7 @@
 package calendarapp.controller;
 
+import calendarapp.model.CalendarModel;
 import calendarapp.model.commands.*;
-import calendarapp.model.event.CalendarEvent;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -12,6 +12,12 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class CommandParser {
+
+
+  private CalendarModel model;
+  public CommandParser(CalendarModel model) {
+    this.model = model;
+  }
 
   public Command parse(String command) {
     List<String> tokens = tokenize(command);
@@ -27,9 +33,26 @@ public class CommandParser {
       return parseShowCommand(tokens);
     } else if ("edit".equals(mainCommand)) {
       return parseEditCommand(tokens);
+    } else if ("export".equals(mainCommand)) {
+      return parseExportCommand(tokens);
     }
     throw new IllegalArgumentException("Unknown command: " + mainCommand);
   }
+
+  private Command parseExportCommand(List<String> tokens) {
+    if (tokens.size() != 3) {
+      throw new IllegalArgumentException("Invalid export command format. Expected: export cal fileName.csv");
+    }
+    if (!"cal".equalsIgnoreCase(tokens.get(1))) {
+      throw new IllegalArgumentException("Invalid export command. Expected 'cal' after export.");
+    }
+    String fileName = tokens.get(2);
+    if (!fileName.toLowerCase().endsWith(".csv")) {
+      throw new IllegalArgumentException("Invalid file name. Must be a CSV file ending with .csv");
+    }
+    return new ExportCalendarCommand(model, fileName);
+  }
+
 
   private Command parsePrintCommand(List<String> tokens) {
     if (tokens.size() < 2)
@@ -78,7 +101,7 @@ public class CommandParser {
 
   private Command parseShowCommand(List<String> tokens) {
     if (tokens.size() < 4 || !tokens.get(1).equalsIgnoreCase("status") || !tokens.get(2).equalsIgnoreCase("on"))
-      throw new IllegalArgumentException("Usage: show status on <dateTime>");
+      throw new IllegalArgumentException("Show status on <dateTime>");
     try {
       LocalDateTime queryTime = LocalDateTime.parse(tokens.get(3));
       return new BusyQueryCommand(queryTime);
@@ -91,9 +114,7 @@ public class CommandParser {
     if (tokens.size() < 4)
       throw new IllegalArgumentException("Incomplete edit command");
     String type = tokens.get(1).toLowerCase();
-    // For recurring event property edits, we use "events" and expect a recurrence property.
     if ("events".equals(type)) {
-      // If the third token (property) starts with "repeat", assume it's a recurrence edit.
       String property = tokens.get(2).toLowerCase();
       String eventName = stripQuotes(tokens.get(3));
       if (tokens.size() != 5) {
@@ -102,7 +123,6 @@ public class CommandParser {
       String newValue = stripQuotes(tokens.get(4));
       return new EditRecurringEventCommand(property, eventName, newValue);
     } else if ("event".equals(type)) {
-      // Format: edit event <property> <eventName> from <start> to <end> with <newValue>
       if (tokens.size() < 10)
         throw new IllegalArgumentException("Incomplete edit event command");
       String property = tokens.get(2).toLowerCase();

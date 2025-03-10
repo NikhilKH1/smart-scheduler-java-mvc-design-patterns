@@ -6,4 +6,8 @@ public interface CalendarEvent {
   String getSubject();
   LocalDateTime getStartDateTime();
   LocalDateTime getEndDateTime();
-}
+  String getDescription();
+  String getLocation();
+  boolean isAllDay();
+  boolean isPublic();
+  }

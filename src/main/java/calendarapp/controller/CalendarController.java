@@ -1,6 +1,7 @@
 package calendarapp.controller;
 
 import calendarapp.model.CalendarModel;
+import calendarapp.model.commands.ExportCalendarCommand;
 import calendarapp.model.event.CalendarEvent;
 import calendarapp.model.event.RecurringEvent;
 import calendarapp.model.event.SingleEvent;
@@ -24,8 +25,9 @@ public class CalendarController implements ICalendarController {
   private final CommandParser parser;
 
   public CalendarController(CalendarModel model, ICalendarView view) {
-    this(model, view, new CommandParser());
+    this(model, view, new CommandParser(model));
   }
+
 
   public CalendarController(CalendarModel model, ICalendarView view, CommandParser parser) {
     this.model = model;
@@ -152,6 +154,10 @@ public class CalendarController implements ICalendarController {
         view.displayError("Failed to modify recurring event.");
       }
       return success;
+    }
+    else if (cmd instanceof ExportCalendarCommand) {
+      ((ExportCalendarCommand) cmd).execute();
+      return true;
     }
     else {
       view.displayError("Unknown or unimplemented command");
