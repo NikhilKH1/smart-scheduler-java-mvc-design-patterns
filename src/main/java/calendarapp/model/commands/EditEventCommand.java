@@ -17,7 +17,7 @@ public class EditEventCommand implements Command {
   private final LocalDateTime filterDateTime;
   private final String newValue;
 
-  // Constructor for editing a single event
+  // Constructor for editing a single event (SINGLE mode)
   public EditEventCommand(String property, String eventName, LocalDateTime originalStart, LocalDateTime originalEnd, String newValue) {
     this.mode = EditMode.SINGLE;
     this.property = property;
@@ -28,26 +28,26 @@ public class EditEventCommand implements Command {
     this.filterDateTime = null;
   }
 
-  // Constructor for editing events from a certain time onward
-  public EditEventCommand(String property, String eventName, LocalDateTime filterDateTime, String newValue, boolean fromMode) {
+  // Constructor for editing events from a certain time onward (FROM mode)
+  public EditEventCommand(String property, String eventName, LocalDateTime filterDateTime, String newValue) {
     this.mode = EditMode.FROM;
     this.property = property;
     this.eventName = eventName;
-    this.originalStart = null;
-    this.originalEnd = null;
     this.filterDateTime = filterDateTime;
     this.newValue = newValue;
+    this.originalStart = null;
+    this.originalEnd = null;
   }
 
-  // Constructor for editing all events with the same event name
+  // Constructor for editing all events with the same event name (ALL mode)
   public EditEventCommand(String property, String eventName, String newValue) {
     this.mode = EditMode.ALL;
     this.property = property;
     this.eventName = eventName;
+    this.newValue = newValue;
     this.originalStart = null;
     this.originalEnd = null;
     this.filterDateTime = null;
-    this.newValue = newValue;
   }
 
   public EditMode getMode() {

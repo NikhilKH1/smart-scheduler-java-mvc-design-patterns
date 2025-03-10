@@ -110,19 +110,101 @@ public class CommandParser {
     }
   }
 
+//  private Command parseEditCommand(List<String> tokens) {
+//    if (tokens.size() < 4)
+//      throw new IllegalArgumentException("Incomplete edit command");
+//    String type = tokens.get(1).toLowerCase();
+//    if ("events".equals(type)) {
+//      String property = tokens.get(2).toLowerCase();
+//      String eventName = stripQuotes(tokens.get(3));
+//      if (tokens.size() != 5) {
+//        throw new IllegalArgumentException("Invalid edit events command format for recurring properties");
+//      }
+//      String newValue = stripQuotes(tokens.get(4));
+//      return new EditRecurringEventCommand(property, eventName, newValue);
+//    } else if ("event".equals(type)) {
+//      if (tokens.size() < 10)
+//        throw new IllegalArgumentException("Incomplete edit event command");
+//      String property = tokens.get(2).toLowerCase();
+//      String eventName = stripQuotes(tokens.get(3));
+//      if (!tokens.get(4).equalsIgnoreCase("from"))
+//        throw new IllegalArgumentException("Expected 'from' after event name");
+//      LocalDateTime start;
+//      try {
+//        start = LocalDateTime.parse(tokens.get(5));
+//      } catch (DateTimeParseException e) {
+//        throw new IllegalArgumentException("Invalid start date/time format");
+//      }
+//      if (!tokens.get(6).equalsIgnoreCase("to"))
+//        throw new IllegalArgumentException("Expected 'to' after start date/time");
+//      LocalDateTime end;
+//      try {
+//        end = LocalDateTime.parse(tokens.get(7));
+//      } catch (DateTimeParseException e) {
+//        throw new IllegalArgumentException("Invalid end date/time format");
+//      }
+//      if (!tokens.get(8).equalsIgnoreCase("with"))
+//        throw new IllegalArgumentException("Expected 'with' after end date/time");
+//      String newValue = stripQuotes(tokens.get(9));
+//      return new EditEventCommand(property, eventName, start, end, newValue);
+//    }
+//    throw new IllegalArgumentException("Unsupported edit command type");
+//  }
+
   private Command parseEditCommand(List<String> tokens) {
     if (tokens.size() < 4)
       throw new IllegalArgumentException("Incomplete edit command");
+
     String type = tokens.get(1).toLowerCase();
+
+    // For editing multiple events (all events with the same event name)
     if ("events".equals(type)) {
       String property = tokens.get(2).toLowerCase();
       String eventName = stripQuotes(tokens.get(3));
-      if (tokens.size() != 5) {
-        throw new IllegalArgumentException("Invalid edit events command format for recurring properties");
+
+      // Define which properties should be edited via the recurring command.
+      boolean isRecurringProperty = property.equals("repeattimes") ||
+              property.equals("repeatuntil") ||
+              property.equals("repeatingdays");
+
+      // Case 1: edit events <property> <eventName> <NewPropertyValue>
+      if (tokens.size() == 5) {
+        String newValue = stripQuotes(tokens.get(4));
+        if (isRecurringProperty) {
+          return new EditRecurringEventCommand(property, eventName, newValue);
+        } else {
+          return new EditEventCommand(property, eventName, newValue);
+        }
       }
-      String newValue = stripQuotes(tokens.get(4));
-      return new EditRecurringEventCommand(property, eventName, newValue);
-    } else if ("event".equals(type)) {
+      // Case 2: edit events <property> <eventName> from <dateTime> with <NewPropertyValue>
+      else if (tokens.size() == 8) {
+        if (!"from".equalsIgnoreCase(tokens.get(4))) {
+          throw new IllegalArgumentException("Expected 'from' after event name");
+        }
+        LocalDateTime filterDateTime;
+        try {
+          filterDateTime = LocalDateTime.parse(tokens.get(5));
+        } catch (Exception e) {
+          throw new IllegalArgumentException("Invalid date/time format");
+        }
+        if (!"with".equalsIgnoreCase(tokens.get(6))) {
+          throw new IllegalArgumentException("Expected 'with' after date/time");
+        }
+        String newValue = stripQuotes(tokens.get(7));
+        if (isRecurringProperty) {
+          // For recurring properties, use the recurring command
+          return new EditRecurringEventCommand(property, eventName, newValue);
+        } else {
+          return new EditEventCommand(property, eventName, filterDateTime, newValue);
+        }
+      } else {
+        throw new IllegalArgumentException("Invalid edit events command format");
+      }
+    }
+    // For editing a single event instance
+    else if ("event".equals(type)) {
+      // Expected format:
+      // edit event <property> <eventName> from <startDateTime> to <endDateTime> with <NewPropertyValue>
       if (tokens.size() < 10)
         throw new IllegalArgumentException("Incomplete edit event command");
       String property = tokens.get(2).toLowerCase();
@@ -132,7 +214,7 @@ public class CommandParser {
       LocalDateTime start;
       try {
         start = LocalDateTime.parse(tokens.get(5));
-      } catch (DateTimeParseException e) {
+      } catch (Exception e) {
         throw new IllegalArgumentException("Invalid start date/time format");
       }
       if (!tokens.get(6).equalsIgnoreCase("to"))
@@ -140,7 +222,7 @@ public class CommandParser {
       LocalDateTime end;
       try {
         end = LocalDateTime.parse(tokens.get(7));
-      } catch (DateTimeParseException e) {
+      } catch (Exception e) {
         throw new IllegalArgumentException("Invalid end date/time format");
       }
       if (!tokens.get(8).equalsIgnoreCase("with"))
@@ -150,6 +232,8 @@ public class CommandParser {
     }
     throw new IllegalArgumentException("Unsupported edit command type");
   }
+
+
 
   private Command parseCreateEvent(List<String> tokens) {
     int index = 1;

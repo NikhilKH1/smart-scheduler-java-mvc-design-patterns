@@ -148,11 +148,13 @@ public class CalendarModel implements ICalendarModel {
     return true;
   }
 
-  // Edit events that start exactly at a given time.
+
   public boolean editEventsFrom(String property, String eventName, LocalDateTime fromDateTime, String newValue) {
     List<CalendarEvent> matching = new ArrayList<>();
     for (CalendarEvent event : events) {
-      if (event.getSubject().equals(eventName) && event.getStartDateTime().equals(fromDateTime)) {
+      // Change the condition here to include events starting at or after fromDateTime.
+      if (event.getSubject().equals(eventName) &&
+              (!event.getStartDateTime().isBefore(fromDateTime))) { // means start >= fromDateTime
         if (event instanceof SingleEvent) {
           matching.add(event);
         }
@@ -168,6 +170,7 @@ public class CalendarModel implements ICalendarModel {
     events.addAll(updated);
     return true;
   }
+
 
   // Edit all events with the given subject.
   public boolean editEventsAll(String property, String eventName, String newValue) {
