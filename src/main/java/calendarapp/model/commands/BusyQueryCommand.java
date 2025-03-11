@@ -12,4 +12,5 @@ public class BusyQueryCommand implements Command {
   public LocalDateTime getQueryTime() {
     return queryTime;
   }
+
 }
