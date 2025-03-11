@@ -15,19 +15,19 @@ public interface ICalendarView {
    *
    * @param events the list of calendar events to display
    */
-  void displayEvents(List<CalendarEvent> events);
+  public void displayEvents(List<CalendarEvent> events);
 
   /**
    * Displays a normal message.
    *
    * @param message the message to display
    */
-  void displayMessage(String message);
+  public void displayMessage(String message);
 
   /**
    * Displays an error message.
    *
    * @param errorMessage the error message to display
    */
-  void displayError(String errorMessage);
+  public void displayError(String errorMessage);
 }

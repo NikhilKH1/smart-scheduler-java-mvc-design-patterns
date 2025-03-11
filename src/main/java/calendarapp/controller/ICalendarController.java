@@ -10,5 +10,5 @@ public interface ICalendarController {
    * @param commandInput the command text to process
    * @return true if the command was processed successfully; false otherwise
    */
-  boolean processCommand(String commandInput);
+  public boolean processCommand(String commandInput);
 }
