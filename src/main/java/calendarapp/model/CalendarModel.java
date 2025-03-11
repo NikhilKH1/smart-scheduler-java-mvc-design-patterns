@@ -152,9 +152,8 @@ public class CalendarModel implements ICalendarModel {
   public boolean editEventsFrom(String property, String eventName, LocalDateTime fromDateTime, String newValue) {
     List<CalendarEvent> matching = new ArrayList<>();
     for (CalendarEvent event : events) {
-      // Change the condition here to include events starting at or after fromDateTime.
       if (event.getSubject().equals(eventName) &&
-              (!event.getStartDateTime().isBefore(fromDateTime))) { // means start >= fromDateTime
+              (!event.getStartDateTime().isBefore(fromDateTime))) {
         if (event instanceof SingleEvent) {
           matching.add(event);
         }

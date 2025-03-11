@@ -2,6 +2,8 @@ package calendarapp.controller;
 
 import calendarapp.model.CalendarModel;
 import calendarapp.model.commands.*;
+import calendarapp.model.commands.CreateEventCommand;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
@@ -170,7 +172,6 @@ public class CommandParser {
     return new EditEventCommand(property, eventName, start, end, newValue);
   }
 
-  // ------------------------- Create Event Command -------------------------
   private Command parseCreateEvent(List<String> tokens) {
     int index = 1;
     if (index >= tokens.size() || !tokens.get(index).equalsIgnoreCase("event"))
@@ -188,18 +189,15 @@ public class CommandParser {
     if (index >= tokens.size())
       throw new IllegalArgumentException("Expected 'from' or 'on' after event name");
 
-    // Parse event timing (start, end, isAllDay)
     EventTimingResult timing = parseEventTiming(tokens, index);
     index = timing.index;
 
-    // Parse recurring options (if any)
     RecurringResult recurring = parseRecurringSection(tokens, index);
     index = recurring.index;
     if (recurring.isRecurring && timing.end.isAfter(timing.start.plusHours(24))) {
       throw new IllegalArgumentException("Recurring event must end within 24 hours of the start time.");
     }
 
-    // Parse additional properties (description, location, privacy)
     PropertiesResult props = parseProperties(tokens, index);
 
     return new CreateEventCommand(
@@ -218,7 +216,6 @@ public class CommandParser {
     );
   }
 
-  // ------------------------- Helper Classes and Methods -------------------------
   private static class EventTimingResult {
     LocalDateTime start;
     LocalDateTime end;

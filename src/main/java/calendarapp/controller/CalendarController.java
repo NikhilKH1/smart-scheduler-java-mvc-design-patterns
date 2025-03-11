@@ -3,10 +3,10 @@ package calendarapp.controller;
 import calendarapp.model.CalendarModel;
 import calendarapp.model.commands.*;
 import calendarapp.model.event.CalendarEvent;
+import calendarapp.model.commands.CreateEventCommand;
 import calendarapp.model.event.RecurringEvent;
 import calendarapp.model.event.SingleEvent;
 import calendarapp.view.ICalendarView;
-import calendarapp.utils.ModelHelper;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;

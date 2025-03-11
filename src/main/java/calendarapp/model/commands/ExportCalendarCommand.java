@@ -16,7 +16,6 @@ public class ExportCalendarCommand implements Command {
 
   public void execute() {
     try {
-      // Assuming CalendarModel has a method to get all events as a List<CalendarEvent>
       String absolutePath = CSVExporter.exportToCSV(model.getEvents(), fileName);
       System.out.println("Calendar exported successfully to: " + absolutePath);
     } catch (IOException e) {
