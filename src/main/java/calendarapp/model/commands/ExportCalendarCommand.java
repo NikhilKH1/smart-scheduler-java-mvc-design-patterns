@@ -22,4 +22,7 @@ public class ExportCalendarCommand implements Command {
       System.err.println("Error exporting calendar: " + e.getMessage());
     }
   }
+  public String getFileName() {
+    return fileName;
+  }
 }

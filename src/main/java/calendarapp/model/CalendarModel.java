@@ -29,16 +29,21 @@ public class CalendarModel implements ICalendarModel {
     if (duplicateExists(event)) {
       throw new IllegalArgumentException("Duplicate event: subject, start and end are identical.");
     }
+
     for (CalendarEvent existing : events) {
       if (ConflictChecker.hasConflict(existing, event)) {
         if (autoDecline) {
-          return false;
+          return false; // If autoDecline is true, reject event
+        } else {
+          return false; // If there's a conflict, do not add
         }
       }
     }
-    events.add(event);
+
+    events.add(event); // Add only if no conflicts found
     return true;
   }
+
 
   @Override
   public boolean addRecurringEvent(RecurringEvent recurringEvent, boolean autoDecline) {
