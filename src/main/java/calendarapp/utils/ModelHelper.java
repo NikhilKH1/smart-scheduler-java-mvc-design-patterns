@@ -1,12 +1,29 @@
 package calendarapp.utils;
 
 import calendarapp.model.event.SingleEvent;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
+/**
+ * Utility class that provides helper methods to update calendar events.
+ */
 public class ModelHelper {
-  public static SingleEvent createUpdatedEvent(SingleEvent oldEvent, String property, String newValue) {
+
+  /**
+   * Creates an updated SingleEvent based on the old event
+   * and the property that needs to be updated.
+   * The method parses the new value and applies the change to the corresponding property.
+   *
+   * @param oldEvent the original event to be updated
+   * @param property the property to update (e.g., name, description, location etc.)
+   * @param newValue the new value for the specified property
+   * @return a new SingleEvent instance with the updated value
+   * @throws IllegalArgumentException if the property is unsupported
+   */
+  public static SingleEvent createUpdatedEvent(SingleEvent oldEvent,
+                                               String property, String newValue) {
     String newSubject = oldEvent.getSubject();
     String newDescription = oldEvent.getDescription();
     String newLocation = oldEvent.getLocation();
@@ -47,6 +64,7 @@ public class ModelHelper {
       default:
         throw new IllegalArgumentException("Unsupported property: " + property);
     }
-    return new SingleEvent(newSubject, newStart, newEnd, newDescription, newLocation, newIsPublic, oldEvent.isAllDay(), oldEvent.getSeriesId());
+    return new SingleEvent(newSubject, newStart, newEnd, newDescription,
+            newLocation, newIsPublic, oldEvent.isAllDay(), oldEvent.getSeriesId());
   }
 }

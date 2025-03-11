@@ -9,7 +9,20 @@ import calendarapp.controller.CalendarController;
 import calendarapp.model.CalendarModel;
 import calendarapp.view.CalendarView;
 
+/**
+ * Main class for running the calendar application.
+ * The application can run in interactive mode or headless mode.
+ */
 public class CalendarApp {
+
+  /**
+   * The main entry point of the application.
+   * Depending on the command-line arguments, the application runs in interactive mode or
+   * headless mode.
+   *
+   * @param args command-line arguments; use "--mode interactive" for interactive mode or
+   *             "--mode headless <commands-file>" for headless mode
+   */
   public static void main(String[] args) {
     CalendarModel model = new CalendarModel();
     CalendarView view = new CalendarView();
@@ -30,7 +43,17 @@ public class CalendarApp {
     }
   }
 
-  private static void runInteractiveMode(CalendarController controller, CalendarModel model, CalendarView view) {
+  /**
+   * Runs the application in interactive mode.
+   * Commands are read from standard input, processed,
+   * and the current list of events is displayed after each command.
+   *
+   * @param controller the CalendarController to process commands
+   * @param model      the CalendarModel holding event data
+   * @param view       the CalendarView used to display events and messages
+   */
+  private static void runInteractiveMode(CalendarController controller,
+                                         CalendarModel model, CalendarView view) {
     Scanner scanner = new Scanner(System.in);
     System.out.println("Enter commands (type 'exit' to quit):");
     while (true) {
@@ -49,7 +72,18 @@ public class CalendarApp {
     scanner.close();
   }
 
-  private static void runHeadlessMode(CalendarController controller, CalendarModel model, CalendarView view, String fileName) {
+  /**
+   * Runs the application in headless mode.
+   * Commands are read from the specified file and processed one by one.
+   * After processing each command, the current list of events is displayed.
+   *
+   * @param controller the CalendarController to process commands
+   * @param model      the CalendarModel holding event data
+   * @param view       the CalendarView used to display events and messages
+   * @param fileName   the name of the file containing commands
+   */
+  private static void runHeadlessMode(CalendarController controller,
+                                      CalendarModel model, CalendarView view, String fileName) {
     try (BufferedReader reader = new BufferedReader(new FileReader(fileName))) {
       String command;
       while ((command = reader.readLine()) != null) {
