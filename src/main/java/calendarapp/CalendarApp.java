@@ -40,8 +40,7 @@ public class CalendarApp {
         break;
       }
       controller.processCommand(command);
-      // Only print the full calendar if the command is not a query.
-      if (!command.trim().toLowerCase().startsWith("query")) {
+      if (!command.trim().toLowerCase().startsWith("print")) {
         System.out.println("----- All Events -----");
         view.displayEvents(model.getEvents());
         System.out.println("----------------------");
@@ -57,8 +56,7 @@ public class CalendarApp {
         if (command.trim().isEmpty()) continue;
         if (command.equalsIgnoreCase("exit")) break;
         controller.processCommand(command);
-        // Only print the full calendar if the command is not a query.
-        if (!command.trim().toLowerCase().startsWith("query")) {
+        if (!command.trim().toLowerCase().startsWith("print")) {
           System.out.println("----- All Events -----");
           view.displayEvents(model.getEvents());
           System.out.println("----------------------");
