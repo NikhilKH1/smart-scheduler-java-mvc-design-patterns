@@ -29,16 +29,21 @@ public class CalendarModel implements ICalendarModel {
     if (duplicateExists(event)) {
       throw new IllegalArgumentException("Duplicate event: subject, start and end are identical.");
     }
+
     for (CalendarEvent existing : events) {
       if (ConflictChecker.hasConflict(existing, event)) {
         if (autoDecline) {
-          return false;
+          return false; // If autoDecline is true, reject event
+        } else {
+          return false; // If there's a conflict, do not add
         }
       }
     }
-    events.add(event);
+
+    events.add(event); // Add only if no conflicts found
     return true;
   }
+
 
   @Override
   public boolean addRecurringEvent(RecurringEvent recurringEvent, boolean autoDecline) {
@@ -152,9 +157,8 @@ public class CalendarModel implements ICalendarModel {
   public boolean editEventsFrom(String property, String eventName, LocalDateTime fromDateTime, String newValue) {
     List<CalendarEvent> matching = new ArrayList<>();
     for (CalendarEvent event : events) {
-      // Change the condition here to include events starting at or after fromDateTime.
       if (event.getSubject().equals(eventName) &&
-              (!event.getStartDateTime().isBefore(fromDateTime))) { // means start >= fromDateTime
+              (!event.getStartDateTime().isBefore(fromDateTime))) {
         if (event instanceof SingleEvent) {
           matching.add(event);
         }

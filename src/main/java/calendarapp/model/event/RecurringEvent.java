@@ -5,18 +5,11 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RecurringEvent implements CalendarEvent {
+public class RecurringEvent extends AbstractCalendarEvent {
 
-  private final String subject;
-  private final LocalDateTime startDateTime;
-  private final LocalDateTime endDateTime;
   private final String weekdays;
   private final int repeatCount;
   private final LocalDateTime repeatUntil;
-  private final String description;
-  private final String location;
-  private final boolean isPublic;
-  private final boolean isAllDay;
 
   public RecurringEvent(String subject, LocalDateTime startDateTime, LocalDateTime endDateTime,
                         String weekdays, int repeatCount, LocalDateTime repeatUntil,
@@ -33,21 +26,6 @@ public class RecurringEvent implements CalendarEvent {
     this.isAllDay = isAllDay;
   }
 
-  @Override
-  public String getSubject() {
-    return subject;
-  }
-
-  @Override
-  public LocalDateTime getStartDateTime() {
-    return startDateTime;
-  }
-
-  @Override
-  public LocalDateTime getEndDateTime() {
-    return endDateTime;
-  }
-
   public String getWeekdays() {
     return weekdays;
   }
@@ -58,22 +36,6 @@ public class RecurringEvent implements CalendarEvent {
 
   public LocalDateTime getRepeatUntil() {
     return repeatUntil;
-  }
-
-  public String getDescription() {
-    return description;
-  }
-
-  public String getLocation() {
-    return location;
-  }
-
-  public boolean isPublic() {
-    return isPublic;
-  }
-
-  public boolean isAllDay() {
-    return isAllDay;
   }
 
   public List<SingleEvent> generateOccurrences(String seriesId) {
