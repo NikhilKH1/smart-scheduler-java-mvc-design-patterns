@@ -23,7 +23,7 @@ import java.util.regex.Pattern;
 public class CommandParser {
 
   private final CalendarModel model;
-  private final Map<String, Function<List<String>, Command>> topLevelParsers;
+  private final Map<String, Function<List<String>, Command>> Parsers;
 
   /**
    * Constructs a CommandParser with the specified calendar model.
@@ -32,12 +32,12 @@ public class CommandParser {
    */
   public CommandParser(CalendarModel model) {
     this.model = model;
-    topLevelParsers = new HashMap<>();
-    topLevelParsers.put("create", this::parseCreateEvent);
-    topLevelParsers.put("print", this::parsePrintCommand);
-    topLevelParsers.put("show", this::parseShowCommand);
-    topLevelParsers.put("edit", this::parseEditCommand);
-    topLevelParsers.put("export", this::parseExportCommand);
+    Parsers = new HashMap<>();
+    Parsers.put("create", this::parseCreateEvent);
+    Parsers.put("print", this::parsePrintCommand);
+    Parsers.put("show", this::parseShowCommand);
+    Parsers.put("edit", this::parseEditCommand);
+    Parsers.put("export", this::parseExportCommand);
   }
 
   /**
@@ -52,11 +52,11 @@ public class CommandParser {
       throw new IllegalArgumentException("Command cannot be null");
     }
     List<String> tokens = tokenize(command);
-    if (tokens == null || tokens.isEmpty()) {
+    if (tokens.isEmpty()) {
       return null;
     }
     String mainCommand = tokens.get(0).toLowerCase();
-    Function<List<String>, Command> parserFunc = topLevelParsers.get(mainCommand);
+    Function<List<String>, Command> parserFunc = Parsers.get(mainCommand);
     if (parserFunc != null) {
       return parserFunc.apply(tokens);
     }
@@ -303,16 +303,6 @@ public class CommandParser {
   }
 
   /**
-   * A helper class for storing event timing details.
-   */
-  private static class EventTimingResult {
-    LocalDateTime start;
-    LocalDateTime end;
-    boolean isAllDay;
-    int index;
-  }
-
-  /**
    * Parses the event timing section of a create event command.
    *
    * @param tokens the list of tokens
@@ -352,16 +342,6 @@ public class CommandParser {
     return result;
   }
 
-  /**
-   * A helper class for storing recurring event details.
-   */
-  private static class RecurringResult {
-    boolean isRecurring = false;
-    String weekdays = "";
-    int repeatCount = 0;
-    LocalDateTime repeatUntil = null;
-    int index;
-  }
 
   /**
    * Parses the recurring event section of a create event command.
@@ -397,15 +377,6 @@ public class CommandParser {
     return result;
   }
 
-  /**
-   * A helper class for storing event property details.
-   */
-  private static class PropertiesResult {
-    String description = "";
-    String location = "";
-    boolean isPublic = true;
-    int index;
-  }
 
   /**
    * Parses the event properties section of a create event command.

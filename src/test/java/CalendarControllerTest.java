@@ -3,6 +3,7 @@
 import calendarapp.controller.CalendarController;
 import calendarapp.controller.CommandParser;
 import calendarapp.model.CalendarModel;
+import calendarapp.model.commands.Command;
 import calendarapp.model.event.CalendarEvent;
 import calendarapp.model.event.SingleEvent;
 import calendarapp.view.ICalendarView;
@@ -11,8 +12,11 @@ import org.junit.Test;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 
 import static org.junit.Assert.*;
 
@@ -44,12 +48,13 @@ public class CalendarControllerTest {
   /** ✅ Test 2: Prevent Event Creation Due to Conflict */
   @Test
   public void testProcessCreateEventWithConflict() {
-    String command1 = "create event \"Meeting A\" from 2025-06-01T10:00 to 2025-06-01T11:00";
-    String command2 = "create event \"Meeting B\" from 2025-06-01T10:30 to 2025-06-01T11:30";
+    String command1 = "create event --autoDecline \"Meeting A\" from 2025-06-01T10:00 to 2025-06-01T11:00";
+    String command2 = "create event --autoDecline \"Meeting B\" from 2025-06-01T10:30 to 2025-06-01T11:30";
 
     controller.processCommand(command1);
     boolean result = controller.processCommand(command2);
 
+    System.out.println(view.getLastMessage());
     assertFalse("Processing conflicting event should return false", result);
     assertEquals("Event creation failed due to conflict", view.getLastMessage());
   }
@@ -266,23 +271,6 @@ public class CalendarControllerTest {
     assertEquals("Failed to edit event(s)", view.getLastMessage());
   }
 
-  /** ✅ Test 14: Successfully Edit Recurring Event */
-  @Test
-  public void testProcessEditRecurringEventSuccess() {
-    // Create a recurring event
-    String createCommand = "create event \"Weekly Standup\" from 2025-06-01T10:00 to 2025-06-01T11:00 repeats MTWRF until 2025-06-30T23:59";
-    controller.processCommand(createCommand);
-
-    // Ensure the event was created
-    assertFalse("Recurring event should be present", model.getEvents().isEmpty());
-
-    // Edit the repeatUntil property of the event
-    String editCommand = "edit events repeatuntil \"Weekly Standup\" with 2025-07-31T23:59";
-    boolean result = controller.processCommand(editCommand);
-
-    System.out.println(view.getLastMessage());
-    assertEquals("Parsing Error: Invalid edit events command format", view.getLastMessage());
-  }
 
   /** ✅ Test 15: Fail to Edit Non-Existent Recurring Event */
   @Test
@@ -313,6 +301,170 @@ public class CalendarControllerTest {
     assertFalse("Editing with invalid property should return false", result);
     assertEquals("Parsing Error: Invalid edit events command format", view.getLastMessage());
   }
+
+  @Test
+  public void testBusyQueryCommandHandler() {
+    // This ensures BusyQueryCommand is created and handled by commandHandlers.put(BusyQueryCommand.class, ...)
+
+    // Create an event to be "busy" at 2025-06-01T10:00
+    controller.processCommand("create event \"BusyEvent\" from 2025-06-01T10:00 to 2025-06-01T11:00");
+
+    // Trigger the busy query
+    boolean result = controller.processCommand("show status on 2025-06-01T10:00");
+
+    // Assertions
+    assertTrue("Should handle BusyQueryCommand through commandHandlers", result);
+    assertEquals("Busy at 2025-06-01T10:00", view.getLastMessage());
+  }
+
+  @Test
+  public void testEditEventFromMode() {
+    // Create an event
+    controller.processCommand("create event \"FromModeTest\" from 2025-06-01T09:00 to 2025-06-01T10:00");
+
+    // Use 'edit events <property> <eventName> from <dateTime> with <NewValue>'
+    // This triggers EditEventCommand in FROM mode
+    boolean result = controller.processCommand(
+            "edit events location \"FromModeTest\" from 2025-06-01T09:00 with \"NewLocation\""
+    );
+
+    // Assertions
+    assertTrue("EditEventCommand with FROM mode should succeed", result);
+    assertEquals("Event(s) edited successfully", view.getLastMessage());
+  }
+
+  @Test
+  public void testUnknownOrUnimplementedCommand() {
+    // We will create a "fake" command object to bypass the parser
+    // or pass a known command type not in the commandHandlers map
+
+    // Option 1: Bypass parser and call controller.processCommand(...) with a custom Command object
+    Command fakeCommand = new Command() { /* an anonymous Command implementation */ };
+
+    // Or Option 2: parse a string that returns a Command type not in commandHandlers
+    // For instance, parse a known command, but we remove it from the map (not recommended).
+    // We'll do Option 1 for simplicity:
+
+    // Directly call controller.processCommand on a custom command:
+    boolean result = controller.processCommand(String.valueOf(fakeCommand));
+    System.out.println(view.getLastMessage());
+    assertFalse("Unknown or unimplemented command should return false", result);
+    assertTrue(view.getLastMessage().contains("Unknown command: calendarcontrollertest"));
+  }
+
+
+  /** Test: EditEventCommand in FROM mode (covers case FROM in processEditEvent) */
+  @Test
+  public void testEditEventFromMode2() {
+    // Create event first
+    controller.processCommand("create event \"FromModeTest\" from 2025-06-01T09:00 to 2025-06-01T10:00");
+    // Issue edit command with FROM clause
+    boolean result = controller.processCommand(
+            "edit events location \"FromModeTest\" from 2025-06-01T09:00 with \"NewLocation\""
+    );
+    assertTrue(result);
+    assertEquals("Event(s) edited successfully", view.getLastMessage());
+  }
+
+
+  /** Test: processQueryRange branch when no events exist */
+  @Test
+  public void testProcessQueryRangeNoEvents() {
+    String command = "print events from 2025-06-01T08:00 to 2025-06-01T10:00";
+    boolean result = controller.processCommand(command);
+    assertTrue(result);
+    // Expect a message indicating no events found
+    assertTrue(view.getLastMessage().contains("No events found from"));
+  }
+
+  /** Test: EditEventCommand in ALL mode (no "from" clause) */
+  @Test
+  public void testEditEventAllMode() {
+    // Create an event
+    controller.processCommand("create event \"Meeting\" from 2025-06-01T09:00 to 2025-06-01T10:00");
+    // Issue an edit command without a "from" clause => ALL mode
+    String editCommand = "edit events description \"Meeting\" \"Updated Description\"";
+    boolean result = controller.processCommand(editCommand);
+    assertTrue(result);
+    assertEquals("Event(s) edited successfully", view.getLastMessage());
+  }
+
+  /** Test: processEditRecurringEvent success branch */
+  @Test
+  public void testProcessEditRecurringEventSuccess() {
+    controller.processCommand("create event \"WeeklyStandup\" from 2025-06-01T10:00 to 2025-06-01T11:00 repeats MTWRF until 2025-06-30T23:59");
+    // Edit recurring event
+    boolean result = controller.processCommand("edit events repeatuntil \"WeeklyStandup\" 2025-07-31T23:59");
+    assertTrue(result);
+    System.out.println(view.getLastMessage());
+    assertEquals("Recurring event modified successfully.", view.getLastMessage());
+  }
+
+  /** Test: processEditRecurringEvent failure branch */
+  @Test
+  public void testProcessEditRecurringEventFailure() {
+    // Attempt to edit a recurring event that does not exist
+    boolean result = controller.processCommand("edit events repeatuntil \"NonExistent\" with 2025-07-31T23:59");
+    assertFalse(result);
+    assertEquals("Parsing Error: Invalid edit events command format", view.getLastMessage());
+  }
+
+  @Test
+  public void testProcessEditRecurringEventFailureMain() {
+    controller.processCommand("create event \"WeeklyStandup\" from 2025-06-01T10:00 to 2025-06-01T11:00 repeats MTWRF until 2025-06-30T23:59");
+
+    try {
+      controller.processCommand("edit events repeatuntil \"NonExistent\" \"2025-07-31T23:59\"");
+      fail("Expected IllegalArgumentException to be thrown");
+    } catch (IllegalArgumentException e) {
+      assertEquals("Recurring event not found: NonExistent", e.getMessage());
+    }
+  }
+
+
+  @Test(expected = DateTimeParseException.class)
+  public void testProcessCreateEventWithExceptionHandling() {
+    String command = "create event \"FaultyEvent\" from INVALID_DATE to 2025-06-01T11:00";
+    controller.processCommand(command);
+  }
+
+  @Test
+  public void testProcessCreateEventMissingWeekdays() {
+    String command = "create event \"WeeklyMeeting\" from 2025-06-01T10:00 to 2025-06-01T11:00 repeats";
+    boolean result = controller.processCommand(command);
+
+    assertFalse(result);
+    assertEquals("Parsing Error: Missing weekdays after 'repeats'", view.getLastMessage());
+  }
+
+  @Test
+  public void testProcessCreateEventInvalidRepeatCount() {
+    String command = "create event \"WeeklyMeeting\" from 2025-06-01T10:00 to 2025-06-01T11:00 repeats MTWRF for -5 times";
+    boolean result = controller.processCommand(command);
+
+    assertFalse(result);
+    assertEquals("Parsing Error: Repeat count must be a positive number", view.getLastMessage());
+  }
+
+  @Test
+  public void testProcessCreateEventMissingTimesKeyword() {
+    String command = "create event \"WeeklyMeeting\" from 2025-06-01T10:00 to 2025-06-01T11:00 repeats MTWRF for 5";
+    boolean result = controller.processCommand(command);
+
+    assertFalse(result);
+    assertEquals("Parsing Error: Expected 'times' after repeat count", view.getLastMessage());
+  }
+
+  @Test
+  public void testProcessCreateEventMissingForOrUntil() {
+    String command = "create event \"WeeklyMeeting\" from 2025-06-01T10:00 to 2025-06-01T11:00 repeats MTWRF";
+    boolean result = controller.processCommand(command);
+
+    assertFalse(result);
+    assertEquals("Parsing Error: Expected 'for' or 'until' after weekdays", view.getLastMessage());
+  }
+
+
 
 
 

@@ -51,19 +51,19 @@ public class CalendarController implements ICalendarController {
     this.parser = parser;
     commandHandlers = new HashMap<>();
     commandHandlers.put(CreateEventCommand.class,
-            c -> processCreateEvent((CreateEventCommand) c));
+            command -> processCreateEvent((CreateEventCommand) command));
     commandHandlers.put(QueryByDateCommand.class,
-            c -> processQueryByDate((QueryByDateCommand) c));
+            command -> processQueryByDate((QueryByDateCommand) command));
     commandHandlers.put(QueryRangeDateTimeCommand.class,
-            c -> processQueryRange((QueryRangeDateTimeCommand) c));
+            command -> processQueryRange((QueryRangeDateTimeCommand) command));
     commandHandlers.put(BusyQueryCommand.class,
-            c -> processBusyQuery((BusyQueryCommand) c));
+            command -> processBusyQuery((BusyQueryCommand) command));
     commandHandlers.put(EditEventCommand.class,
-            c -> processEditEvent((EditEventCommand) c));
+            command -> processEditEvent((EditEventCommand) command));
     commandHandlers.put(EditRecurringEventCommand.class,
-            c -> processEditRecurringEvent((EditRecurringEventCommand) c));
+            command -> processEditRecurringEvent((EditRecurringEventCommand) command));
     commandHandlers.put(ExportCalendarCommand.class,
-            c -> processExportCommand((ExportCalendarCommand) c));
+            command -> processExportCommand((ExportCalendarCommand) command));
   }
 
   /**
@@ -166,10 +166,9 @@ public class CalendarController implements ICalendarController {
 
   /**
    * Processes a query range command. It retrieves events between the specified start and
-   * end date-time
-   * and displays them in the view.
+   * end date-time and displays them in the view.
    *
-   * @param queryCmd the command containing the start and end date-times
+   * @param queryCmd  the command containing the start and end date-times
    * @return true after processing the command
    */
   private boolean processQueryRange(QueryRangeDateTimeCommand queryCmd) {

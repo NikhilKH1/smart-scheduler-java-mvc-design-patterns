@@ -6,4 +6,3 @@ package calendarapp.model.commands;
 public interface Command {
   // This is a marker interface with no methods.
 }
-
