@@ -87,13 +87,35 @@ public class CalendarApp {
     try (BufferedReader reader = new BufferedReader(new FileReader(fileName))) {
       String command;
       while ((command = reader.readLine()) != null) {
-        if (command.trim().isEmpty()) continue;
-        if (command.equalsIgnoreCase("exit")) break;
-        controller.processCommand(command);
-        if (!command.trim().toLowerCase().startsWith("print")) {
-          System.out.println("----- All Events -----");
-          view.displayEvents(model.getEvents());
-          System.out.println("----------------------");
+        String trimmed = command.trim();
+        if (trimmed.isEmpty()) continue;
+
+        if (trimmed.equalsIgnoreCase("exit")) {
+          System.out.println("Exit command encountered. Terminating headless mode.");
+          break;
+        }
+
+        if (!trimmed.toLowerCase().matches("^(create event|edit event|edit events|"
+                + "print events on|print events from|show status on|export cal).*")) {
+          System.err.println("Error: Invalid command encountered: '" + trimmed + "'. Terminating.");
+          System.exit(1);
+        }
+
+        try {
+          boolean success = controller.processCommand(trimmed);
+          if (!success) {
+            System.err.println("Error executing command: '" + trimmed + "'. Command failed.");
+            System.exit(1);
+          }
+          if (!trimmed.toLowerCase().startsWith("print")) {
+            System.out.println("----- All Events -----");
+            view.displayEvents(model.getEvents());
+            System.out.println("----------------------");
+          }
+        } catch (Exception e) {
+          System.err.println("Error executing command: '" + trimmed + "'");
+          System.err.println("Reason: " + e.getMessage());
+          System.exit(1);
         }
       }
     } catch (IOException e) {
@@ -101,4 +123,5 @@ public class CalendarApp {
       System.exit(1);
     }
   }
+
 }
