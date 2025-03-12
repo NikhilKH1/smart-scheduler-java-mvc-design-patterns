@@ -48,6 +48,9 @@ public class CommandParser {
    * @throws IllegalArgumentException if the command is unknown or invalid
    */
   public Command parse(String command) {
+    if (command == null) {
+      throw new IllegalArgumentException("Command cannot be null");
+    }
     List<String> tokens = tokenize(command);
     if (tokens == null || tokens.isEmpty()) {
       return null;

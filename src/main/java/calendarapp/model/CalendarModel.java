@@ -45,17 +45,13 @@ public class CalendarModel implements ICalendarModel {
     if (duplicateExists(event)) {
       throw new IllegalArgumentException("Duplicate event: subject, start and end are identical.");
     }
-
     for (CalendarEvent existing : events) {
       if (ConflictChecker.hasConflict(existing, event)) {
         if (autoDecline) {
           return false;
-        } else {
-          return false;
         }
       }
     }
-
     events.add(event);
     return true;
   }
