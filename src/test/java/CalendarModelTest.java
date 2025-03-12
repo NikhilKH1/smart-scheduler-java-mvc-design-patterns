@@ -9,13 +9,19 @@ import calendarapp.view.ICalendarView;
 
 import org.junit.Before;
 import org.junit.Test;
-import static org.junit.Assert.*;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * JUnit tests for the CalendarModel class.
+ */
 public class CalendarModelTest {
   private CalendarModel model;
   private TestCalendarView view;
@@ -162,7 +168,6 @@ public class CalendarModelTest {
     assertEquals("Only the first event should exist in the calendar", 1, model.getEvents().size());
   }
 
-  /** ✅ Test: Successfully Adding a Recurring Event */
   @Test
   public void testAddRecurringEventSuccess() {
     String command = "create event \"Standup Meeting\" from 2025-06-01T10:00 to 2025-06-01T10:30 repeats MTWRF for 5 times";
@@ -183,7 +188,6 @@ public class CalendarModelTest {
   }
 
 
-  /** ✅ Test: Adding Recurring Event with Conflict but Without AutoDecline */
   @Test
   public void testAddRecurringEventWithConflictButNoAutoDecline() {
     controller.processCommand("create event \"Team Meeting\" from 2025-06-01T10:00 to 2025-06-01T10:30");
@@ -222,7 +226,6 @@ public class CalendarModelTest {
     assertEquals("Parsing Error: Incomplete edit event command. Expected format: edit event <property> <eventName> from <start> to <end> with <NewPropertyValue>", view.getLastMessage());
   }
 
-  // Additional comprehensive edge case test cases
 
   @Test(expected = IllegalArgumentException.class)
   public void testEditRecurringEventWithInvalidRepeatTimes() {
@@ -321,45 +324,12 @@ public class CalendarModelTest {
     assertEquals("Event description should be updated", "Updated Daily Planning", events.get(0).getDescription());
   }
 
-//  @Test
-//  public void testEditEventConflictAutoDecline() {
-//    controller.processCommand("create event \"Project Meeting\" from 2025-06-02T10:00 to 2025-06-02T11:00");
-//
-//    controller.processCommand("create event \"Client Call\" from 2025-06-02T10:30 to 2025-06-02T11:30");
-//
-//    boolean result = controller.processCommand(
-//            "edit event \"Project Meeting\" from 2025-06-02T10:00 to 2025-06-02T11:00 with \"2025-06-02T10:30\" "
-//    );
-//
-//    assertFalse("Edit should fail due to conflict when autoDecline is enabled", result);
-//    assertEquals("Parsing Error: Expected 'from' after event name", view.getLastMessage());
-//  }
-//
-//  @Test
-//  public void testEditEventConflictNoAutoDecline() {
-//    controller.processCommand("create event \"Project Meeting\" from 2025-06-02T10:00 to 2025-06-02T10:30");
-//
-//    controller.processCommand("create event \"Client Call\" from 2025-06-02T10:30 to 2025-06-02T11:00");
-//
-//    boolean result = controller.processCommand(
-//            "edit event start \"Project Meeting\" from 2025-06-02T10:00 to 2025-06-02T10:30 with \"2025-06-02T10:30\""
-//    );
-//
-//
-//
-//    assertTrue("Edit should succeed because autoDecline is not enabled", result);
-//    assertEquals("Event edited successfully", view.getLastMessage());
-//  }
-//
-
-  /** ✅ Test: Add Single Event Successfully */
   @Test
   public void testAddSingleEvent() {
     assertTrue(controller.processCommand("create event \"Meeting\" from 2025-06-01T09:00 to 2025-06-01T10:00"));
     assertEquals(1, model.getEvents().size());
   }
 
-  /** ✅ Test: Adding Duplicate Single Event Should Fail */
   @Test
   public void testAddDuplicateSingleEvent() {
     controller.processCommand("create event \"Meeting\" from 2025-06-01T09:00 to 2025-06-01T10:00");
@@ -371,8 +341,6 @@ public class CalendarModelTest {
   }
 
 
-
-  /** ✅ Test: Edit Event Successfully */
   @Test
   public void testEditSingleEventSuccessfully() {
     controller.processCommand("create event \"Team Sync\" from 2025-06-01T09:00 to 2025-06-01T10:00");
@@ -380,7 +348,6 @@ public class CalendarModelTest {
     assertTrue(edited);
   }
 
-  /** ✅ Test: Edit Single Event Conflict with AutoDecline Enabled */
   @Test
   public void testEditEventConflictWithAutoDecline() {
     controller.processCommand("create event --autoDecline \"Project Meeting\" from 2025-06-02T10:00 to 2025-06-02T11:00");
@@ -390,7 +357,6 @@ public class CalendarModelTest {
     assertEquals("Parsing Error: Incomplete edit event command. Expected format: edit event <property> <eventName> from <start> to <end> with <NewPropertyValue>", view.getLastMessage());
   }
 
-  /** ✅ Test: Edit Non-existing Event */
   @Test
   public void testEditNonExistingEvent() {
     boolean result = controller.processCommand("edit event description \"Nonexistent\" from 2025-01-01T09:00 to 2025-06-01T10:00 with \"Updated\"");
@@ -398,7 +364,7 @@ public class CalendarModelTest {
     assertEquals("Failed to edit event(s)", view.getLastMessage());
   }
 
-  /** ✅ Test: Add Recurring Event Successfully */
+
   @Test
   public void testAddRecurringEventSuccessMain() {
     boolean result = controller.processCommand("create event \"Standup\" from 2025-06-01T10:00 to 2025-06-01T10:30 repeats MTWRF for 3 times");
@@ -406,7 +372,6 @@ public class CalendarModelTest {
     assertEquals("Event created successfully", view.getLastMessage());
   }
 
-  /** ✅ Test: Edit Recurring Event RepeatTimes */
   @Test
   public void testEditRecurringEventRepeatTimes() {
     controller.processCommand("create event \"Scrum\" from 2025-06-01T09:00 to 2025-06-01T09:30 repeats MTWRF for 5 times");
@@ -415,14 +380,14 @@ public class CalendarModelTest {
     assertEquals(3, model.getEvents().size());
   }
 
-  /** ✅ Test: Edit Recurring Event Invalid Property */
+
   @Test(expected = IllegalArgumentException.class)
   public void testEditRecurringEventInvalidProperty() {
     controller.processCommand("create event \"Scrum\" from 2025-06-01T09:00 to 2025-06-01T09:30 repeats MTWRF for 5 times");
     model.editRecurringEvent("Scrum", "invalidProperty", "value");
   }
 
-  /** ✅ Test: Check Busy Slot */
+
   @Test
   public void testCheckBusySlot() {
     controller.processCommand("create event \"Interview\" from 2025-06-01T09:00 to 2025-06-01T10:00");
@@ -430,7 +395,6 @@ public class CalendarModelTest {
     assertFalse(model.isBusyAt(LocalDateTime.of(2025, 6, 1, 8, 0)));
   }
 
-  /** ✅ Edge Case: Event End Exactly at Next Event Start */
   @Test
   public void testAdjacentEventsNoConflict() {
     controller.processCommand("create event \"Morning Meeting\" from 2025-06-01T08:00 to 2025-06-01T09:00");
@@ -440,21 +404,15 @@ public class CalendarModelTest {
 
   @Test
   public void testEditEventSuccess() {
-    // Step 1: Create an initial event
     controller.processCommand("create event \"Team Meeting\" from 2025-06-01T09:00 to 2025-06-01T10:00");
 
-    // Step 2: Edit the event successfully (no conflict)
     boolean result = controller.processCommand(
             "edit event description \"Team Meeting\" from 2025-06-01T09:00 to 2025-06-01T10:00 with \"Updated Team Meeting\""
     );
 
-    // Step 3: Verify event is successfully edited
     assertTrue("Event should be edited successfully", result);
     assertEquals("Event(s) edited successfully", view.getLastMessage());
   }
-
-
-
 
 
   private static class TestCalendarView implements ICalendarView {

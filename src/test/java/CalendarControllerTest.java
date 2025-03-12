@@ -1,5 +1,3 @@
-
-
 import calendarapp.controller.CalendarController;
 import calendarapp.controller.CommandParser;
 import calendarapp.model.CalendarModel;
@@ -7,6 +5,7 @@ import calendarapp.model.commands.Command;
 import calendarapp.model.event.CalendarEvent;
 import calendarapp.model.event.SingleEvent;
 import calendarapp.view.ICalendarView;
+
 import org.junit.Before;
 import org.junit.Test;
 
@@ -15,11 +14,17 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
+
+/**
+ * JUnit tests for the CalendarController class.
+ */
 public class CalendarControllerTest {
 
   private CalendarController controller;
@@ -35,8 +40,6 @@ public class CalendarControllerTest {
     controller = new CalendarController(model, view, parser);
   }
 
-
-  /** ✅ Test 1: Process Valid Create Event Command */
   @Test
   public void testProcessCreateEvent() {
     String command = "create event \"Team Meeting\" from 2025-06-01T10:00 to 2025-06-01T11:00";
@@ -46,7 +49,6 @@ public class CalendarControllerTest {
     assertEquals("Event created successfully", view.getLastMessage());
   }
 
-  /** ✅ Test 2: Prevent Event Creation Due to Conflict */
   @Test
   public void testProcessCreateEventWithConflict() {
     String command1 = "create event --autoDecline \"Meeting A\" from 2025-06-01T10:00 to 2025-06-01T11:00";
@@ -60,7 +62,6 @@ public class CalendarControllerTest {
     assertEquals("Event creation failed due to conflict", view.getLastMessage());
   }
 
-  /** ✅ Test 3: Process Query by Date Command */
   @Test
   public void testProcessQueryByDate() {
     String command = "print events on 2025-06-01";
@@ -77,8 +78,6 @@ public class CalendarControllerTest {
                     view.getLastMessage().contains("Events on 2025-06-01:"));
   }
 
-
-  /** ✅ Test 4: Process Query for Empty Date */
   @Test
   public void testProcessQueryEmptyDate() {
     String command = "print events on 2025-07-01";
@@ -88,7 +87,6 @@ public class CalendarControllerTest {
     assertEquals("No events found on 2025-07-01", view.getLastMessage());
   }
 
-  /** ✅ Test 5: Process Edit Single Event Command */
   @Test
   public void testProcessEditEvent() {
     String commandCreate = "create event \"Morning Meeting\" from 2025-06-01T09:00 to 2025-06-01T10:00";
@@ -101,7 +99,6 @@ public class CalendarControllerTest {
     assertEquals("Event(s) edited successfully", view.getLastMessage());
   }
 
-  /** ✅ Test 6: Process Busy Query */
   @Test
   public void testProcessBusyQuery() {
     String commandCreate = "create event \"Work Call\" from 2025-06-01T10:00 to 2025-06-01T11:00";
@@ -114,7 +111,6 @@ public class CalendarControllerTest {
     assertEquals("Busy at 2025-06-01T10:30", view.getLastMessage());
   }
 
-  /** ✅ Test 7: Process Export Command */
   @Test
   public void testProcessExportCommand() {
     String command = "export cal calendar.csv";
@@ -124,7 +120,6 @@ public class CalendarControllerTest {
     assertNull("Export command does not display a message", view.getLastMessage());
   }
 
-  /** ✅ Test 8: Process Invalid Command */
   @Test
   public void testProcessInvalidCommand() {
     String command = "invalid command example";
@@ -134,17 +129,15 @@ public class CalendarControllerTest {
     assertEquals("Parsing Error: Unknown command: invalid", view.getLastMessage());
   }
 
-  /** ✅ Test 9: Handle Parsing Error */
   @Test
   public void testHandleParsingError() {
-    String command = "create event from 2025-06-01T10:00 to 2025-06-01T11:00"; // Missing event name
+    String command = "create event from 2025-06-01T10:00 to 2025-06-01T11:00";
     boolean result = controller.processCommand(command);
 
     assertFalse("Parsing error should return false", result);
     assertTrue(view.getLastMessage().contains("Parsing Error"));
   }
 
-  /** ✅ Test 10: Process Recurring Event Creation */
   @Test
   public void testProcessRecurringEvent() {
     String command = "create event \"Daily Standup\" from 2025-06-01T08:00 to 2025-06-01T09:00 repeats MTWRF until 2025-06-30T23:59";
@@ -154,17 +147,15 @@ public class CalendarControllerTest {
     assertEquals("Event created successfully", view.getLastMessage());
   }
 
-  /** ✅ Test 11: Query Free Status */
   @Test
   public void testProcessFreeQuery() {
-    String command = "show status on 2025-06-01T10:00"; // No event at this time
+    String command = "show status on 2025-06-01T10:00";
     boolean result = controller.processCommand(command);
 
     assertTrue("Querying free status should return true", result);
     assertEquals("Available at 2025-06-01T10:00", view.getLastMessage());
   }
 
-  /** ✅ Test 12: Process Null Command */
   @Test
   public void testProcessNullCommand() {
     boolean result = controller.processCommand(null);
@@ -178,28 +169,21 @@ public class CalendarControllerTest {
     String command1 = "create event \"Event A\" from 2025-06-01T09:00 to 2025-06-01T10:00";
     String command2 = "create event \"Event B\" from 2025-06-01T09:30 to 2025-06-01T10:30";
 
-    // Add events
     controller.processCommand(command1);
     controller.processCommand(command2);
 
-    // Ensure events exist before querying
     assertFalse("Model should contain events", model.getEvents().isEmpty());
 
-    // Process the query
     boolean result = controller.processCommand("print events from 2025-06-01T09:00 to 2025-06-01T11:00");
 
-    // Debugging output
     System.out.println("Last Message: " + view.getLastMessage());
 
-    // Assertions
     assertTrue("Querying overlapping events should return true", result);
     assertTrue("View should contain overlapping event details",
             view.getLastMessage().contains("Displaying") ||
                     view.getLastMessage().contains("Events from"));
   }
 
-
-  /** ✅ Test 14: Process Editing Non-Existent Event */
   @Test
   public void testProcessEditNonExistentEvent() {
     String commandEdit = "edit event description \"Nonexistent Event\" from 2025-06-01T09:00 to 2025-06-01T10:00 with \"Updated Description\"";
@@ -209,7 +193,6 @@ public class CalendarControllerTest {
     assertEquals("Failed to edit event(s)", view.getLastMessage());
   }
 
-  /** ✅ Test 15: Process Export Without Events */
   @Test
   public void testProcessExportEmptyCalendar() {
     String command = "export cal empty_calendar.csv";
@@ -219,17 +202,6 @@ public class CalendarControllerTest {
     assertNull("Export command does not display a message", view.getLastMessage());
   }
 
-//  /** ✅ Test 16: Process Invalid Date Format */
-//  @Test
-//  public void testProcessInvalidDateFormat() {
-//    String command = "create event \"Test Event\" from 2025/06/01 10:00 to 2025-06-01T11:00";
-//    boolean result = controller.processCommand(command);
-//
-//    assertFalse("Processing invalid date format should return false", result);
-//    assertTrue(view.getLastMessage().contains("Parsing Error"));
-//  }
-
-  /** ✅ Test 17: Process Invalid Command Structure */
   @Test
   public void testProcessInvalidCommandStructure() {
     String command = "create event 2025-06-01T10:00 to 2025-06-01T11:00";
@@ -239,7 +211,6 @@ public class CalendarControllerTest {
     assertTrue(view.getLastMessage().contains("Parsing Error"));
   }
 
-  /** ✅ Test 18: Process Query Past Date */
   @Test
   public void testProcessQueryPastDate() {
     String command = "print events on 2020-06-01";
@@ -249,7 +220,6 @@ public class CalendarControllerTest {
     assertEquals("No events found on 2020-06-01", view.getLastMessage());
   }
 
-  /** ✅ Test 19: Process Query Future Date */
   @Test
   public void testProcessQueryFutureDate() {
     String command = "print events on 2030-12-31";
@@ -260,7 +230,6 @@ public class CalendarControllerTest {
   }
 
 
-  /** ✅ Test 20: Process Edit Event with Incorrect Time */
   @Test
   public void testProcessEditEventIncorrectTime() {
     String commandCreate = "create event \"Meeting\" from 2025-06-01T10:00 to 2025-06-01T11:00";
@@ -351,10 +320,8 @@ public class CalendarControllerTest {
     assertEquals("Parsing Error: Invalid edit events command format", view.getLastMessage());
   }
 
-  /** ✅ Test 15: Fail to Edit Non-Existent Recurring Event */
   @Test
   public void testProcessEditRecurringEventFailure_NotFound() {
-    // Attempt to edit a recurring event that does not exist
     String editCommand = "edit events repeatuntil \"NonExistentEvent\" with 2025-07-31T23:59";
     boolean result = controller.processCommand(editCommand);
 
@@ -363,17 +330,13 @@ public class CalendarControllerTest {
     assertEquals("Parsing Error: Invalid edit events command format", view.getLastMessage());
   }
 
-  /** ✅ Test 16: Fail to Edit Recurring Event With Invalid Property */
   @Test
   public void testProcessEditRecurringEventFailure_InvalidProperty() {
-    // Create a recurring event
     String createCommand = "create event \"Team Sync\" from 2025-06-01T10:00 to 2025-06-01T11:00 repeats MTWRF until 2025-06-30T23:59";
     controller.processCommand(createCommand);
 
-    // Ensure the event exists
     assertFalse("Recurring event should be present", model.getEvents().isEmpty());
 
-    // Attempt to edit an unsupported property
     String editCommand = "edit events invalidproperty \"Team Sync\" with NewValue";
     boolean result = controller.processCommand(editCommand);
 
@@ -383,61 +346,39 @@ public class CalendarControllerTest {
 
   @Test
   public void testBusyQueryCommandHandler() {
-    // This ensures BusyQueryCommand is created and handled by commandHandlers.put(BusyQueryCommand.class, ...)
-
-    // Create an event to be "busy" at 2025-06-01T10:00
     controller.processCommand("create event \"BusyEvent\" from 2025-06-01T10:00 to 2025-06-01T11:00");
 
-    // Trigger the busy query
     boolean result = controller.processCommand("show status on 2025-06-01T10:00");
-
-    // Assertions
     assertTrue("Should handle BusyQueryCommand through commandHandlers", result);
     assertEquals("Busy at 2025-06-01T10:00", view.getLastMessage());
   }
 
   @Test
   public void testEditEventFromMode() {
-    // Create an event
+
     controller.processCommand("create event \"FromModeTest\" from 2025-06-01T09:00 to 2025-06-01T10:00");
 
-    // Use 'edit events <property> <eventName> from <dateTime> with <NewValue>'
-    // This triggers EditEventCommand in FROM mode
     boolean result = controller.processCommand(
             "edit events location \"FromModeTest\" from 2025-06-01T09:00 with \"NewLocation\""
     );
 
-    // Assertions
     assertTrue("EditEventCommand with FROM mode should succeed", result);
     assertEquals("Event(s) edited successfully", view.getLastMessage());
   }
 
   @Test
   public void testUnknownOrUnimplementedCommand() {
-    // We will create a "fake" command object to bypass the parser
-    // or pass a known command type not in the commandHandlers map
-
-    // Option 1: Bypass parser and call controller.processCommand(...) with a custom Command object
-    Command fakeCommand = new Command() { /* an anonymous Command implementation */ };
-
-    // Or Option 2: parse a string that returns a Command type not in commandHandlers
-    // For instance, parse a known command, but we remove it from the map (not recommended).
-    // We'll do Option 1 for simplicity:
-
-    // Directly call controller.processCommand on a custom command:
+    Command fakeCommand = new Command() {
+    };
     boolean result = controller.processCommand(String.valueOf(fakeCommand));
     System.out.println(view.getLastMessage());
     assertFalse("Unknown or unimplemented command should return false", result);
     assertTrue(view.getLastMessage().contains("Unknown command: calendarcontrollertest"));
   }
 
-
-  /** Test: EditEventCommand in FROM mode (covers case FROM in processEditEvent) */
   @Test
   public void testEditEventFromMode2() {
-    // Create event first
     controller.processCommand("create event \"FromModeTest\" from 2025-06-01T09:00 to 2025-06-01T10:00");
-    // Issue edit command with FROM clause
     boolean result = controller.processCommand(
             "edit events location \"FromModeTest\" from 2025-06-01T09:00 with \"NewLocation\""
     );
@@ -445,44 +386,34 @@ public class CalendarControllerTest {
     assertEquals("Event(s) edited successfully", view.getLastMessage());
   }
 
-
-  /** Test: processQueryRange branch when no events exist */
   @Test
   public void testProcessQueryRangeNoEvents() {
     String command = "print events from 2025-06-01T08:00 to 2025-06-01T10:00";
     boolean result = controller.processCommand(command);
     assertTrue(result);
-    // Expect a message indicating no events found
     assertTrue(view.getLastMessage().contains("No events found from"));
   }
 
-  /** Test: EditEventCommand in ALL mode (no "from" clause) */
   @Test
   public void testEditEventAllMode() {
-    // Create an event
     controller.processCommand("create event \"Meeting\" from 2025-06-01T09:00 to 2025-06-01T10:00");
-    // Issue an edit command without a "from" clause => ALL mode
     String editCommand = "edit events description \"Meeting\" \"Updated Description\"";
     boolean result = controller.processCommand(editCommand);
     assertTrue(result);
     assertEquals("Event(s) edited successfully", view.getLastMessage());
   }
 
-  /** Test: processEditRecurringEvent success branch */
   @Test
   public void testProcessEditRecurringEventSuccess() {
     controller.processCommand("create event \"WeeklyStandup\" from 2025-06-01T10:00 to 2025-06-01T11:00 repeats MTWRF until 2025-06-30T23:59");
-    // Edit recurring event
     boolean result = controller.processCommand("edit events repeatuntil \"WeeklyStandup\" 2025-07-31T23:59");
     assertTrue(result);
     System.out.println(view.getLastMessage());
     assertEquals("Recurring event modified successfully.", view.getLastMessage());
   }
 
-  /** Test: processEditRecurringEvent failure branch */
   @Test
   public void testProcessEditRecurringEventFailure() {
-    // Attempt to edit a recurring event that does not exist
     boolean result = controller.processCommand("edit events repeatuntil \"NonExistent\" with 2025-07-31T23:59");
     assertFalse(result);
     assertEquals("Parsing Error: Invalid edit events command format", view.getLastMessage());
@@ -543,10 +474,6 @@ public class CalendarControllerTest {
     assertEquals("Parsing Error: Expected 'for' or 'until' after weekdays", view.getLastMessage());
   }
 
-  /**
-   * Test: Duplicate event creation should fail.
-   * This ensures that when a duplicate event is attempted, the command returns false.
-   */
   @Test
   public void testDuplicateEventCreationFailure() {
     String command1 = "create event \"Test Event\" from 2025-06-01T10:00 to 2025-06-01T11:00";
@@ -555,20 +482,11 @@ public class CalendarControllerTest {
     boolean result1 = controller.processCommand(command1);
     boolean result2 = controller.processCommand(command2);
 
-    // First command should succeed.
     assertTrue("First event creation should succeed", result1);
-    // Second command should fail because it's a duplicate.
     assertFalse("Duplicate event creation should return false", result2);
-    // The expected error message may vary depending on whether the duplicate is detected via an exception.
-    // Update the expected message to match your implementation:
     assertEquals("Duplicate event: subject, start and end are identical.", view.getLastMessage());
   }
 
-
-  /**
-   * Test: Editing a non-existent event should fail.
-   * This forces the EditEventCommand lambda to return false.
-   */
   @Test
   public void testEditNonExistentEventFailure() {
     String command = "edit event description \"NonExistentEvent\" from 2025-06-01T10:00 to 2025-06-01T11:00 with \"New Description\"";
@@ -578,10 +496,6 @@ public class CalendarControllerTest {
     assertEquals("Failed to edit event(s)", view.getLastMessage());
   }
 
-  /**
-   * Test: Invalid command structure should return false.
-   * This helps kill the mutant that would always return true even for invalid commands.
-   */
   @Test
   public void testInvalidCommandStructureFailure() {
     String command = "create event 2025-06-01T10:00 to 2025-06-01T11:00";
@@ -591,24 +505,6 @@ public class CalendarControllerTest {
     assertTrue("Expected parsing error message", view.getLastMessage().contains("Parsing Error"));
   }
 
-  /**
-   * Test: Editing a recurring event that does not exist should throw an exception.
-   * This test confirms that the lambda for recurring event editing does not always return true.
-   */
-//  @Test
-//  public void testEditRecurringEventFailureNotFound() {
-//    try {
-//      controller.processCommand("edit events repeatuntil \"NonExistentRecurring\" with 2025-07-31T23:59");
-//      fail("Expected IllegalArgumentException for non-existent recurring event");
-//    } catch (IllegalArgumentException e) {
-//      assertEquals("Recurring event not found: NonExistentRecurring", e.getMessage());
-//    }
-//  }
-
-  /**
-   * Test: Unknown command should return false.
-   * This checks that if an unrecognized command is processed, it does not always return true.
-   */
   @Test
   public void testUnknownCommandFailure() {
     String command = "unknown command test";
@@ -617,74 +513,50 @@ public class CalendarControllerTest {
     assertFalse("Unknown command should return false", result);
     assertTrue("Expected error message about unknown command", view.getLastMessage().contains("Unknown"));
   }
-  /**
-   * Test 21: Process Query By Date Command should always return true
-   * and display "No events found ..." when no events exist.
-   */
+
   @Test
   public void testQueryByDateCommandAlwaysTrue() {
-    // When no events exist, it should return true and print an appropriate message.
     boolean result = controller.processCommand("print events on 2025-06-01");
     assertTrue("Query by date command should return true", result);
     assertEquals("No events found on 2025-06-01", view.getLastMessage());
   }
 
-  /**
-   * Test 22: Process Query Range Command should always return true
-   * and display event details when events exist.
-   */
   @Test
   public void testQueryRangeCommandAlwaysTrue() {
-    // Create an event within the range.
     controller.processCommand("create event \"RangeTest\" from 2025-06-01T09:00 to 2025-06-01T10:00");
     boolean result = controller.processCommand("print events from 2025-06-01T08:00 to 2025-06-01T11:00");
     assertTrue("Query range command should return true", result);
-    // Expect a message indicating events were found (could be "Events from ..." or "Displaying ...").
     String msg = view.getLastMessage();
     assertTrue("View message should indicate events",
             msg.contains("Events from") || msg.contains("Displaying"));
   }
 
-  /**
-   * Test 23: Process Busy Query Command should return true when busy.
-   */
+
   @Test
   public void testBusyQueryCommandAlwaysTrue() {
-    // Create an event such that the busy query returns busy.
     controller.processCommand("create event \"BusyTest\" from 2025-06-01T10:00 to 2025-06-01T11:00");
     boolean result = controller.processCommand("show status on 2025-06-01T10:30");
     assertTrue("Busy query command should return true", result);
     assertEquals("Busy at 2025-06-01T10:30", view.getLastMessage());
   }
 
-  /**
-   * Test 24: Process Edit Recurring Event Command should return true on successful edit.
-   */
+
   @Test
   public void testEditRecurringEventCommandAlwaysTrue() {
-    // Create a recurring event.
     controller.processCommand("create event \"RecurringTest\" from 2025-06-01T10:00 to 2025-06-01T11:00 repeats MTWRF until 2025-06-30T23:59");
-    // Now edit the recurring event (e.g., update the repeat-until date).
     boolean result = controller.processCommand("edit events repeatuntil \"RecurringTest\" 2025-07-31T23:59");
     assertTrue("Editing recurring event should return true", result);
     assertEquals("Recurring event modified successfully.", view.getLastMessage());
   }
 
-  /**
-   * Test 25: Process Export Calendar Command should return true.
-   */
   @Test
   public void testExportCalendarCommandAlwaysTrue() {
-    // Export command should return true regardless of events.
     boolean result = controller.processCommand("export cal exportTest.csv");
     assertTrue("Export command should return true", result);
-    // Since export command might not update the view, we expect null (or no change).
     assertNull("Export command does not update view message", view.getLastMessage());
   }
 
 
-
-  // Custom View Implementation for Testing
   private static class TestCalendarView implements ICalendarView {
     private final List<String> messages = new ArrayList<>();
 

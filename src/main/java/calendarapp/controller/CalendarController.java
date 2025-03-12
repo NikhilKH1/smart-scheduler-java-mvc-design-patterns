@@ -168,7 +168,7 @@ public class CalendarController implements ICalendarController {
    * Processes a query range command. It retrieves events between the specified start and
    * end date-time and displays them in the view.
    *
-   * @param queryCmd  the command containing the start and end date-times
+   * @param queryCmd the command containing the start and end date-times
    * @return true after processing the command
    */
   private boolean processQueryRange(QueryRangeDateTimeCommand queryCmd) {

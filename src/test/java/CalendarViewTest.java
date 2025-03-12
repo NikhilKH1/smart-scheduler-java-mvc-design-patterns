@@ -1,6 +1,7 @@
 import calendarapp.model.event.CalendarEvent;
 import calendarapp.model.event.SingleEvent;
 import calendarapp.view.CalendarView;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -11,11 +12,14 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
+/**
+ * JUnit tests for the CalendarView class.
+ */
 public class CalendarViewTest {
 
-  // Streams to capture output
+
   private final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
   private final ByteArrayOutputStream errContent = new ByteArrayOutputStream();
   private final PrintStream originalOut = System.out;
@@ -25,7 +29,6 @@ public class CalendarViewTest {
 
   @Before
   public void setUp() {
-    // Redirect System.out and System.err to our streams
     System.setOut(new PrintStream(outContent));
     System.setErr(new PrintStream(errContent));
     calendarView = new CalendarView();
@@ -33,35 +36,23 @@ public class CalendarViewTest {
 
   @After
   public void tearDown() {
-    // Restore original streams
+
     System.setOut(originalOut);
     System.setErr(originalErr);
   }
 
-  /**
-   * Test that displayMessage prints the given message.
-   */
   @Test
   public void testDisplayMessage() {
     calendarView.displayMessage("Hello, World!");
-    // System.out.println appends a newline at the end
     assertEquals("Hello, World!\n", outContent.toString());
   }
 
-  /**
-   * Test that displayError prints the error message to System.err.
-   */
   @Test
   public void testDisplayError() {
     calendarView.displayError("Error occurred");
-    // System.err.println appends a newline at the end
     assertEquals("Error occurred\n", errContent.toString());
   }
 
-  /**
-   * Test displayEvents when the event list is empty.
-   * It should print "No events found." followed by a newline.
-   */
   @Test
   public void testDisplayEventsEmpty() {
     List<CalendarEvent> events = new ArrayList<>();
@@ -69,10 +60,6 @@ public class CalendarViewTest {
     assertEquals("No events found.\n", outContent.toString());
   }
 
-  /**
-   * Test displayEvents when the event list is non-empty.
-   * It should iterate through the events and print each event's toString() followed by a newline.
-   */
   @Test
   public void testDisplayEventsNonEmpty() {
     List<CalendarEvent> events = new ArrayList<>();
