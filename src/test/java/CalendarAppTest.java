@@ -186,7 +186,7 @@ public class CalendarAppTest {
 //  }
 
   /** ✅ Test 6: Ensures `--mode headless <file>` is processed correctly */
- // @Test
+  // @Test
 //  public void testMainWithHeadlessMode() throws IOException {
 //    // Create a temporary test file
 //    File tempFile = File.createTempFile("testCommands", ".txt");

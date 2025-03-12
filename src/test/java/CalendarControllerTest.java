@@ -35,6 +35,7 @@ public class CalendarControllerTest {
     controller = new CalendarController(model, view, parser);
   }
 
+
   /** ✅ Test 1: Process Valid Create Event Command */
   @Test
   public void testProcessCreateEvent() {
@@ -258,6 +259,7 @@ public class CalendarControllerTest {
     assertEquals("No events found on 2030-12-31", view.getLastMessage());
   }
 
+
   /** ✅ Test 20: Process Edit Event with Incorrect Time */
   @Test
   public void testProcessEditEventIncorrectTime() {
@@ -271,6 +273,83 @@ public class CalendarControllerTest {
     assertEquals("Failed to edit event(s)", view.getLastMessage());
   }
 
+  @Test
+  public void testProcessQueryByDateWithNoEvents() {
+    String command = "print events on 2025-07-01";
+    boolean result = controller.processCommand(command);
+
+    assertTrue(result);
+    assertEquals("No events found on 2025-07-01", view.getLastMessage());
+  }
+
+  @Test
+  public void testProcessQueryRangeWithNoEvents() {
+    String command = "print events from 2025-06-01T08:00 to 2025-06-01T10:00";
+    boolean result = controller.processCommand(command);
+
+    assertTrue(result);
+    assertEquals("No events found from 2025-06-01T08:00 to 2025-06-01T10:00", view.getLastMessage());
+  }
+
+  @Test
+  public void testProcessBusyQueryWhenNoEventsExist() {
+    String command = "show status on 2025-06-01T10:30";
+    boolean result = controller.processCommand(command);
+
+    assertTrue(result);
+    assertEquals("Available at 2025-06-01T10:30", view.getLastMessage());
+  }
+
+  @Test
+  public void testProcessEditNonExistentRecurringEvent() {
+    String commandEdit = "edit events repeatuntil \"NonexistentEvent\" with 2025-07-31T23:59";
+    boolean result = controller.processCommand(commandEdit);
+
+    assertFalse(result);
+    assertEquals("Parsing Error: Invalid edit events command format", view.getLastMessage());
+  }
+
+  @Test
+  public void testProcessUnknownCommand() {
+    String command = "some unknown command";
+    boolean result = controller.processCommand(command);
+
+    assertFalse(result);
+    assertEquals("Parsing Error: Unknown command: some", view.getLastMessage());
+  }
+
+  @Test
+  public void testProcessEmptyCommand() {
+    boolean result = controller.processCommand("");
+
+    assertFalse(result);
+    assertEquals("Command is null", view.getLastMessage());
+  }
+
+  @Test
+  public void testCommandHandlersReturnFalse() {
+    boolean result1 = controller.processCommand("edit event description \"Fake Event\" from 2025-06-01T09:00 to 2025-06-01T10:00 with \"Updated\"");
+    boolean result2 = controller.processCommand("edit events repeatuntil \"NonexistentEvent\" with 2025-07-31T23:59");
+
+    assertFalse(result1);
+    assertFalse(result2);
+  }
+
+  @Test
+  public void testDisplayMessageCalls() {
+    String command = "create event \"Test Event\" from 2025-06-01T09:00 to 2025-06-01T10:00";
+    controller.processCommand(command);
+
+    assertEquals("Event created successfully", view.getLastMessage());
+  }
+
+  @Test
+  public void testDisplayErrorCalls() {
+    boolean result = controller.processCommand("edit events repeatuntil \"Nonexistent\" with 2025-07-31T23:59");
+
+    assertFalse(result);
+    assertEquals("Parsing Error: Invalid edit events command format", view.getLastMessage());
+  }
 
   /** ✅ Test 15: Fail to Edit Non-Existent Recurring Event */
   @Test
@@ -464,7 +543,144 @@ public class CalendarControllerTest {
     assertEquals("Parsing Error: Expected 'for' or 'until' after weekdays", view.getLastMessage());
   }
 
+  /**
+   * Test: Duplicate event creation should fail.
+   * This ensures that when a duplicate event is attempted, the command returns false.
+   */
+  @Test
+  public void testDuplicateEventCreationFailure() {
+    String command1 = "create event \"Test Event\" from 2025-06-01T10:00 to 2025-06-01T11:00";
+    String command2 = "create event \"Test Event\" from 2025-06-01T10:00 to 2025-06-01T11:00";
 
+    boolean result1 = controller.processCommand(command1);
+    boolean result2 = controller.processCommand(command2);
+
+    // First command should succeed.
+    assertTrue("First event creation should succeed", result1);
+    // Second command should fail because it's a duplicate.
+    assertFalse("Duplicate event creation should return false", result2);
+    // The expected error message may vary depending on whether the duplicate is detected via an exception.
+    // Update the expected message to match your implementation:
+    assertEquals("Duplicate event: subject, start and end are identical.", view.getLastMessage());
+  }
+
+
+  /**
+   * Test: Editing a non-existent event should fail.
+   * This forces the EditEventCommand lambda to return false.
+   */
+  @Test
+  public void testEditNonExistentEventFailure() {
+    String command = "edit event description \"NonExistentEvent\" from 2025-06-01T10:00 to 2025-06-01T11:00 with \"New Description\"";
+    boolean result = controller.processCommand(command);
+
+    assertFalse("Editing a non-existent event should return false", result);
+    assertEquals("Failed to edit event(s)", view.getLastMessage());
+  }
+
+  /**
+   * Test: Invalid command structure should return false.
+   * This helps kill the mutant that would always return true even for invalid commands.
+   */
+  @Test
+  public void testInvalidCommandStructureFailure() {
+    String command = "create event 2025-06-01T10:00 to 2025-06-01T11:00";
+    boolean result = controller.processCommand(command);
+
+    assertFalse("Invalid command structure should return false", result);
+    assertTrue("Expected parsing error message", view.getLastMessage().contains("Parsing Error"));
+  }
+
+  /**
+   * Test: Editing a recurring event that does not exist should throw an exception.
+   * This test confirms that the lambda for recurring event editing does not always return true.
+   */
+//  @Test
+//  public void testEditRecurringEventFailureNotFound() {
+//    try {
+//      controller.processCommand("edit events repeatuntil \"NonExistentRecurring\" with 2025-07-31T23:59");
+//      fail("Expected IllegalArgumentException for non-existent recurring event");
+//    } catch (IllegalArgumentException e) {
+//      assertEquals("Recurring event not found: NonExistentRecurring", e.getMessage());
+//    }
+//  }
+
+  /**
+   * Test: Unknown command should return false.
+   * This checks that if an unrecognized command is processed, it does not always return true.
+   */
+  @Test
+  public void testUnknownCommandFailure() {
+    String command = "unknown command test";
+    boolean result = controller.processCommand(command);
+
+    assertFalse("Unknown command should return false", result);
+    assertTrue("Expected error message about unknown command", view.getLastMessage().contains("Unknown"));
+  }
+  /**
+   * Test 21: Process Query By Date Command should always return true
+   * and display "No events found ..." when no events exist.
+   */
+  @Test
+  public void testQueryByDateCommandAlwaysTrue() {
+    // When no events exist, it should return true and print an appropriate message.
+    boolean result = controller.processCommand("print events on 2025-06-01");
+    assertTrue("Query by date command should return true", result);
+    assertEquals("No events found on 2025-06-01", view.getLastMessage());
+  }
+
+  /**
+   * Test 22: Process Query Range Command should always return true
+   * and display event details when events exist.
+   */
+  @Test
+  public void testQueryRangeCommandAlwaysTrue() {
+    // Create an event within the range.
+    controller.processCommand("create event \"RangeTest\" from 2025-06-01T09:00 to 2025-06-01T10:00");
+    boolean result = controller.processCommand("print events from 2025-06-01T08:00 to 2025-06-01T11:00");
+    assertTrue("Query range command should return true", result);
+    // Expect a message indicating events were found (could be "Events from ..." or "Displaying ...").
+    String msg = view.getLastMessage();
+    assertTrue("View message should indicate events",
+            msg.contains("Events from") || msg.contains("Displaying"));
+  }
+
+  /**
+   * Test 23: Process Busy Query Command should return true when busy.
+   */
+  @Test
+  public void testBusyQueryCommandAlwaysTrue() {
+    // Create an event such that the busy query returns busy.
+    controller.processCommand("create event \"BusyTest\" from 2025-06-01T10:00 to 2025-06-01T11:00");
+    boolean result = controller.processCommand("show status on 2025-06-01T10:30");
+    assertTrue("Busy query command should return true", result);
+    assertEquals("Busy at 2025-06-01T10:30", view.getLastMessage());
+  }
+
+  /**
+   * Test 24: Process Edit Recurring Event Command should return true on successful edit.
+   */
+  @Test
+  public void testEditRecurringEventCommandAlwaysTrue() {
+    // Create a recurring event.
+    controller.processCommand("create event \"RecurringTest\" from 2025-06-01T10:00 to 2025-06-01T11:00 repeats MTWRF until 2025-06-30T23:59");
+    // Now edit the recurring event (e.g., update the repeat-until date).
+    boolean result = controller.processCommand("edit events repeatuntil \"RecurringTest\" 2025-07-31T23:59");
+    assertTrue("Editing recurring event should return true", result);
+    assertEquals("Recurring event modified successfully.", view.getLastMessage());
+  }
+
+  /**
+   * Test 25: Process Export Calendar Command should return true.
+   */
+  @Test
+  public void testExportCalendarCommandAlwaysTrue() {
+    // Export command should return true regardless of events.
+    boolean result = controller.processCommand("export cal exportTest.csv");
+    assertTrue("Export command should return true", result);
+    // Since export command might not update the view, we expect null (or no change).
+    assertNull("Export command does not update view message", view.getLastMessage());
+  }
 
 
 
