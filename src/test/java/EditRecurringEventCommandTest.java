@@ -4,7 +4,7 @@ import org.junit.Test;
 
 import calendarapp.model.commands.EditRecurringEventCommand;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 /**
  * JUnit tests for the EditRecurringEventCommand class.

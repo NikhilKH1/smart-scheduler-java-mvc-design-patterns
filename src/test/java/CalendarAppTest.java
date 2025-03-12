@@ -5,8 +5,10 @@ import calendarapp.controller.CalendarController;
 import calendarapp.model.CalendarModel;
 import calendarapp.model.event.CalendarEvent;
 import calendarapp.view.ICalendarView;
+
 import org.junit.Before;
 import org.junit.Test;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
@@ -111,7 +113,6 @@ public class CalendarAppTest {
   public void testApplicationExit() {
     assertTrue("Application should exit gracefully", true);
   }
-
 
 
   private static class TestCalendarView implements ICalendarView {

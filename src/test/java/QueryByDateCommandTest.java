@@ -1,11 +1,13 @@
 
 
 import org.junit.Test;
+
 import java.time.LocalDate;
 
 import calendarapp.model.commands.QueryByDateCommand;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+
 
 /**
  * JUnit tests for the QueryByDateCommand class.

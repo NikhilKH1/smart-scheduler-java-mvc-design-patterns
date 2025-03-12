@@ -2,9 +2,16 @@ import calendarapp.controller.CalendarController;
 import calendarapp.controller.CommandParser;
 import calendarapp.model.CalendarModel;
 import calendarapp.model.commands.*;
+
 import org.junit.Before;
 import org.junit.Test;
-import static org.junit.Assert.*;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import calendarapp.model.event.CalendarEvent;
 import calendarapp.view.ICalendarView;
 
@@ -198,7 +205,7 @@ public class CommandParserTest {
   @Test(expected = IllegalArgumentException.class)
   public void testParseEditSingleEventMissingDetails() {
     String command = "edit event description";
-      parser.parse(command);
+    parser.parse(command);
     assertFalse(true);
   }
 
@@ -265,10 +272,10 @@ public class CommandParserTest {
   }
 
   @Test
-  public void testParseEditEventInvalidProperty() throws IllegalArgumentException{
+  public void testParseEditEventInvalidProperty() throws IllegalArgumentException {
     String command = "edit event invalidprop \"Meeting\" from 2025-06-01T09:00 to 2025-06-01T10:00 with \"New Value\"";
-      parser.parse(command);
-      assertFalse(false);
+    parser.parse(command);
+    assertFalse(false);
   }
 
   @Test
@@ -731,7 +738,6 @@ public class CommandParserTest {
     controller.processCommand(command);
     assertEquals("Parsing Error: Recurring event must end within 24 hours of the start time.", view.getLastMessage());
   }
-
 
 
   private static class TestCalendarViewParser implements ICalendarView {

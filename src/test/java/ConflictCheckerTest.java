@@ -2,9 +2,13 @@
 
 import calendarapp.model.ConflictChecker;
 import calendarapp.model.event.SingleEvent;
+
 import org.junit.Test;
+
 import java.time.LocalDateTime;
-import static org.junit.Assert.*;
+
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * JUnit tests for the ConflictChecker class.

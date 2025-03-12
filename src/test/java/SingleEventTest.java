@@ -1,9 +1,13 @@
 import org.junit.Test;
+
 import java.time.LocalDateTime;
 
 import calendarapp.model.event.SingleEvent;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * JUnit tests for the SingleEvent class.

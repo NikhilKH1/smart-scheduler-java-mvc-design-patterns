@@ -4,7 +4,9 @@ import calendarapp.model.CalendarModel;
 import calendarapp.model.commands.ExportCalendarCommand;
 
 import org.junit.Test;
-import static org.junit.Assert.*;
+
+import static org.junit.Assert.assertNotNull;
+
 
 /**
  * JUnit tests for the ExportCalendarCommand class.

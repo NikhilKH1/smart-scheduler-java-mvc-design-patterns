@@ -1,7 +1,13 @@
 import calendarapp.controller.PropertiesResult;
+
 import org.junit.Test;
+
 import java.lang.reflect.Field;
-import static org.junit.Assert.*;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * JUnit tests for the PropertiesResult class.
