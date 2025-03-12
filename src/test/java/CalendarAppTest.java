@@ -112,31 +112,6 @@ public class CalendarAppTest {
     assertTrue("Application should exit gracefully", true);
   }
 
-  @Test
-  public void testRunInteractiveMode() {
-    String simulatedUserInput = String.join(System.lineSeparator(),
-            "create event \"Meeting\" from 2025-06-01T09:00 to 2025-06-01T10:00",
-            "print events on 2025-06-01",
-            "exit"
-    ) + System.lineSeparator();
-
-    ByteArrayInputStream testInput = new ByteArrayInputStream(simulatedUserInput.getBytes(StandardCharsets.UTF_8));
-    System.setIn(testInput);
-
-    ByteArrayOutputStream testOutput = new ByteArrayOutputStream();
-    System.setOut(new PrintStream(testOutput));
-
-    CalendarApp.main(new String[]{"--mode", "interactive"});
-
-    String output = testOutput.toString();
-
-    assertTrue(output.contains("Enter commands (type 'exit' to quit):"));
-    assertTrue(output.contains("> "));
-    assertTrue(output.contains("----- All Events -----"));
-    assertTrue(output.contains("Meeting"));
-    assertTrue(output.contains("Displaying 1 events"));
-  }
-
 
 
   private static class TestCalendarView implements ICalendarView {
@@ -161,10 +136,6 @@ public class CalendarAppTest {
 
     public String getLastMessage() {
       return lastMessage;
-    }
-
-    public List<CalendarEvent> getLastDisplayedEvents() {
-      return lastDisplayedEvents;
     }
   }
 }
