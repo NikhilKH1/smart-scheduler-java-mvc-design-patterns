@@ -11,15 +11,15 @@ This project follows the Model-View-Controller (MVC) architecture, and demonstra
 ### Compilation
 
 1. Open a terminal in the project’s root directory.
-2. Compile all Java source files. For example:
-   ```bash
-    javac -d target/classes $(find . -name "*.java")
+2. Compile all Java source files. 
 
 #### Running the Application
 
-The main entry point of the application is the CalendarApp class.
+The main entry point of the application is the CalendarApp class. The application can run in two modes:
+Interactive mode and Headless mode.
 
 ### Interactive Mode
+In interactive mode, the user can type one of the commands mentioned below and see the result immediately. The program runs in a loop, allowing the user to execute multiple commands until the exit command is typed.
 
 Run the application in interactive mode using:
 ```bash
@@ -45,11 +45,15 @@ edit event \<property> \<eventName> from \<dateStringTtimeString> to \<dateStrin
 #### To query the calendar:
 print events on \<dateString>
 
-export cal fileName.csv
+print events from \<dateStringTtimeString> to \<dateStringTtimeString>
 
 show status on \<dateStringTtimeString>
 
+#### To export the calendar:
+export cal <filename.csv>
+
 ### Headless Mode
+In headless mode, the user can provide a file containing a sequence of commands. The commands are executed sequentially, and the current list of events is displayed after each command.
 
 Run the application in headless mode (reading commands from a file) using:
 ```bash
@@ -73,22 +77,13 @@ Edit recurring events.
 #### Exporting:
 Export calendar events to a CSV file compatible with Google Calendar.
 
-[//]: # (### Areas for Improvement)
-
-[//]: # (#### Conflict Resolution:)
-
-[//]: # (The auto-decline mechanism for conflicting events is basic and could be improved.)
-
-[//]: # (#### Command Parsing:)
-
-[//]: # (The command parser works for most cases, but further refinement could improve usability.)
-
 ## Team Contributions
 
 #### Nisha:
 Contributed to the core model, controller, and event processing logic.
 Implemented the MVC architecture and command dispatch system.
 Focused on abstraction, error handling, and overall application design.
+
 #### Nikhil:
 Worked on the view layer and command parsing logic.
 Developed utility classes (e.g., CSV exporting and helper functions).
@@ -96,6 +91,7 @@ Contributed to the design and implementation of recurring event handling.
 Key Concepts and Design Patterns
 
 ## Concepts covered in the project:
+
 #### Abstraction and Abstract Data Types:
 The project uses interfaces and abstract classes (such as CalendarEvent and AbstractCalendarEvent) to encapsulate event details and provide clear contracts.
 #### Command Pattern:
