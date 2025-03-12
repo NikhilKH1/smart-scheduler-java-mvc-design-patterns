@@ -8,6 +8,9 @@ import calendarapp.model.commands.CreateEventCommand;
 
 import static org.junit.Assert.*;
 
+/**
+ * JUnit tests for the CreateEventCommand class.
+ */
 public class CreateEventCommandTest {
   private CreateEventCommand singleEventCommand;
   private CreateEventCommand recurringEventCommand;

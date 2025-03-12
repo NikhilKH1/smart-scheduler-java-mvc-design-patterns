@@ -6,6 +6,9 @@ import calendarapp.model.commands.EditRecurringEventCommand;
 
 import static org.junit.Assert.*;
 
+/**
+ * JUnit tests for the EditRecurringEventCommand class.
+ */
 public class EditRecurringEventCommandTest {
 
   @Test

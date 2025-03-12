@@ -8,6 +8,9 @@ import java.time.LocalTime;
 
 import static org.junit.Assert.*;
 
+/**
+ * JUnit tests for the ModelHelper class.
+ */
 public class ModelHelperTest {
 
   @Test
@@ -136,11 +139,8 @@ public class ModelHelperTest {
     SingleEvent eventTrue = new SingleEvent("Event", start, end, "Desc", "Loc", true, false, null);
     SingleEvent eventFalse = new SingleEvent("Event", start, end, "Desc", "Loc", false, false, null);
 
-    // Change true -> false
     SingleEvent updatedFalse = ModelHelper.createUpdatedEvent(eventTrue, "public", "false");
     assertFalse(updatedFalse.isPublic());
-
-    // Change false -> true
     SingleEvent updatedTrue = ModelHelper.createUpdatedEvent(eventFalse, "public", "true");
     assertTrue(updatedTrue.isPublic());
   }

@@ -3,6 +3,9 @@ import org.junit.Test;
 import java.lang.reflect.Field;
 import static org.junit.Assert.*;
 
+/**
+ * JUnit tests for the PropertiesResult class.
+ */
 public class PropertiesResultTest {
 
   @Test

@@ -9,6 +9,9 @@ import calendarapp.model.event.SingleEvent;
 
 import static org.junit.Assert.*;
 
+/**
+ * JUnit tests for the RecurringEvent class.
+ */
 public class RecurringEventTest {
 
   @Test

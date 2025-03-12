@@ -14,6 +14,9 @@ import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * JUnit tests for the CommandParser class.
+ */
 public class CommandParserTest {
   private CalendarController controller;
   private CalendarModel model;
@@ -28,7 +31,6 @@ public class CommandParserTest {
     controller = new CalendarController(model, view, parser);
   }
 
-  /** ✅ Test 1: Parsing a Create Event Command */
   @Test
   public void testParseCreateEvent() {
     String command = "create event \"Meeting\" from 2025-06-01T09:00 to 2025-06-01T10:00";
@@ -41,7 +43,6 @@ public class CommandParserTest {
     assertEquals("End time should match", LocalDateTime.of(2025, 6, 1, 10, 0), createCmd.getEndDateTime());
   }
 
-  /** ✅ Test 2: Parsing Print Events Command (on specific date) */
   @Test
   public void testParsePrintEventsOnDate() {
     String command = "print events on 2025-06-01";
@@ -52,7 +53,6 @@ public class CommandParserTest {
     assertEquals("Query date should match", LocalDate.of(2025, 6, 1), queryCmd.getQueryDate());
   }
 
-  /** ✅ Test 3: Parsing Print Events Command (within date range) */
   @Test
   public void testParsePrintEventsInRange() {
     String command = "print events from 2025-06-01T09:00 to 2025-06-01T10:30";
@@ -64,7 +64,6 @@ public class CommandParserTest {
     assertEquals("End time should match", LocalDateTime.of(2025, 6, 1, 10, 30), rangeCmd.getEndDateTime());
   }
 
-  /** ✅ Test 4: Parsing Show Status Command */
   @Test
   public void testParseShowStatus() {
     String command = "show status on 2025-06-01T10:00";
@@ -75,7 +74,6 @@ public class CommandParserTest {
     assertEquals("Query time should match", LocalDateTime.of(2025, 6, 1, 10, 0), busyCmd.getQueryTime());
   }
 
-  /** ✅ Test 5: Parsing an Edit Single Event Command */
   @Test
   public void testParseEditSingleEvent() {
     String command = "edit event description \"Meeting\" from 2025-06-01T09:00 to 2025-06-01T10:00 with \"Updated Description\"";
@@ -88,7 +86,6 @@ public class CommandParserTest {
     assertEquals("New value should be 'Updated Description'", "Updated Description", editCmd.getNewValue());
   }
 
-  /** ✅ Test 6: Parsing an Edit Recurring Event Command */
   @Test
   public void testParseEditRecurringEvent() {
     String command = "edit events repeatuntil \"Team Sync\" 2025-12-31T00:00";
@@ -102,7 +99,6 @@ public class CommandParserTest {
     assertEquals("New value should be '2025-12-31T00:00'", "2025-12-31T00:00", editCmd.getNewValue());
   }
 
-  /** ✅ Test 7: Parsing an Export Command */
   @Test
   public void testParseExportCommand() {
     String command = "export cal events.csv";
@@ -113,7 +109,6 @@ public class CommandParserTest {
     assertEquals("File name should match", "events.csv", exportCmd.getFileName());
   }
 
-  /** ✅ Test 8: Handling Unknown Commands */
   @Test
   public void testParseUnknownCommand() {
     String command = "unknowncommand";
@@ -127,7 +122,7 @@ public class CommandParserTest {
 
   @Test
   public void testParseMalformedCommand() {
-    String command = "create event from 2025-06-01T09:00 to 2025-06-01T10:00"; // Missing event name
+    String command = "create event from 2025-06-01T09:00 to 2025-06-01T10:00";
     try {
       parser.parse(command);
       fail("Should throw IllegalArgumentException for malformed command");
@@ -167,7 +162,6 @@ public class CommandParserTest {
     }
   }
 
-  /** ✅ Test 11: Parsing Print Events Command with Missing Date */
   @Test
   public void testParsePrintEventsMissingDate() {
     String command = "print events on";
@@ -179,7 +173,6 @@ public class CommandParserTest {
     }
   }
 
-  /** ✅ Test 12: Parsing Print Events Command with Invalid Date Format */
   @Test
   public void testParsePrintEventsInvalidDateFormat() {
     String command = "print events on 06-01-2025";
@@ -191,7 +184,6 @@ public class CommandParserTest {
     }
   }
 
-  /** ✅ Test 13: Parsing Show Status Command with Missing Date */
   @Test
   public void testParseShowStatusMissingDate() {
     String command = "show status on";
@@ -203,7 +195,6 @@ public class CommandParserTest {
     }
   }
 
-  /** ✅ Test 14: Parsing Edit Single Event with Missing Details */
   @Test(expected = IllegalArgumentException.class)
   public void testParseEditSingleEventMissingDetails() {
     String command = "edit event description";
@@ -211,7 +202,6 @@ public class CommandParserTest {
     assertFalse(true);
   }
 
-  /** ✅ Test 15: Parsing Edit Recurring Event with Invalid Format */
   @Test
   public void testParseEditRecurringEventInvalidFormat() {
     String command = "edit events repeatuntil \"Daily Scrum\"";
@@ -223,7 +213,6 @@ public class CommandParserTest {
     }
   }
 
-  /** ✅ Test 16: Parsing Export Command with Missing File Name */
   @Test
   public void testParseExportCommandMissingFileName() {
     String command = "export cal";
@@ -235,7 +224,6 @@ public class CommandParserTest {
     }
   }
 
-  /** ✅ Test 17: Parsing Export Command with Non-CSV File */
   @Test
   public void testParseExportCommandNonCSVFile() {
     String command = "export cal events.txt";
@@ -247,7 +235,6 @@ public class CommandParserTest {
     }
   }
 
-  /** ✅ Test 18: Handling Empty Command */
   @Test
   public void testParseEmptyCommand() {
     String command = "";
@@ -255,7 +242,6 @@ public class CommandParserTest {
     assertNull("Empty command should return null", parsedCommand);
   }
 
-  /** ✅ Test 19: Handling Null Command */
   @Test
   public void testParseNullCommand() {
     try {
@@ -267,10 +253,6 @@ public class CommandParserTest {
   }
 
 
-
-
-
-  /** ✅ Test 21: Parsing Recurring Event With More Than 24 Hours */
   @Test
   public void testParseRecurringEventExceeds24Hours() {
     String command = "create event \"Long Meeting\" from 2025-06-01T09:00 to 2025-06-02T10:00 repeats MTWRF until 2025-06-30T23:59";
@@ -282,7 +264,6 @@ public class CommandParserTest {
     }
   }
 
-  /** ✅ Test 22: Parsing Edit Event With Invalid Property */
   @Test
   public void testParseEditEventInvalidProperty() throws IllegalArgumentException{
     String command = "edit event invalidprop \"Meeting\" from 2025-06-01T09:00 to 2025-06-01T10:00 with \"New Value\"";
@@ -290,7 +271,6 @@ public class CommandParserTest {
       assertFalse(false);
   }
 
-  /** ✅ Test 23: Parsing Edit Events Without Required Keywords */
   @Test
   public void testParseEditEventsMissingKeywords() {
     String command = "edit events location";
@@ -703,8 +683,6 @@ public class CommandParserTest {
 
   @Test
   public void testParseEditEventsCommandRecurring() {
-    // This command should result in a tokens list of size 5:
-    // [ "edit", "events", "repeatuntil", "\"Team Sync\"", "\"2025-12-31T00:00\"" ]
     String command = "edit events repeatuntil \"Team Sync\" \"2025-12-31T00:00\"";
     Command parsedCommand = parser.parse(command);
     assertTrue(parsedCommand instanceof EditRecurringEventCommand);
@@ -716,7 +694,6 @@ public class CommandParserTest {
 
   @Test
   public void testParseEditEventsCommandNonRecurring() {
-    // For a non-recurring property, e.g., "description"
     String command = "edit events description \"Meeting\" \"Updated Description\"";
     Command parsedCommand = parser.parse(command);
     assertTrue(parsedCommand instanceof EditEventCommand);

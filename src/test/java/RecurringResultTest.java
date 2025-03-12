@@ -4,6 +4,9 @@ import java.lang.reflect.Field;
 import java.time.LocalDateTime;
 import static org.junit.Assert.*;
 
+/**
+ * JUnit tests for the RecurringResult class.
+ */
 public class RecurringResultTest {
 
   @Test

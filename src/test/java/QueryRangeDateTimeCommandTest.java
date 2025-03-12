@@ -7,6 +7,9 @@ import calendarapp.model.commands.QueryRangeDateTimeCommand;
 
 import static org.junit.Assert.*;
 
+/**
+ * JUnit tests for the QueryRangeDateTimeCommand class.
+ */
 public class QueryRangeDateTimeCommandTest {
 
   @Test

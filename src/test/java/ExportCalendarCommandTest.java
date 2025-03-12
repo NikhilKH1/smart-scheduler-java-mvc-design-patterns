@@ -6,6 +6,9 @@ import calendarapp.model.commands.ExportCalendarCommand;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
+/**
+ * JUnit tests for the ExportCalendarCommand class.
+ */
 public class ExportCalendarCommandTest {
 
   @Test

@@ -7,6 +7,9 @@ import calendarapp.model.commands.QueryByDateCommand;
 
 import static org.junit.Assert.*;
 
+/**
+ * JUnit tests for the QueryByDateCommand class.
+ */
 public class QueryByDateCommandTest {
 
   @Test

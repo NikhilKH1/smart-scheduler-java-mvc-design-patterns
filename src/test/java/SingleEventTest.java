@@ -1,5 +1,3 @@
-
-
 import org.junit.Test;
 import java.time.LocalDateTime;
 
@@ -7,6 +5,9 @@ import calendarapp.model.event.SingleEvent;
 
 import static org.junit.Assert.*;
 
+/**
+ * JUnit tests for the SingleEvent class.
+ */
 public class SingleEventTest {
 
   @Test
@@ -23,7 +24,7 @@ public class SingleEventTest {
     assertEquals("Room 101", event.getLocation());
     assertTrue(event.isPublic());
     assertFalse(event.isAllDay());
-    assertNull(event.getSeriesId()); // Since this is a non-recurring event
+    assertNull(event.getSeriesId());
   }
 
   @Test

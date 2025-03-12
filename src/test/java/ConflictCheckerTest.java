@@ -6,6 +6,9 @@ import org.junit.Test;
 import java.time.LocalDateTime;
 import static org.junit.Assert.*;
 
+/**
+ * JUnit tests for the ConflictChecker class.
+ */
 public class ConflictCheckerTest {
 
   @Test

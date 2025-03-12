@@ -6,6 +6,9 @@ import calendarapp.model.commands.EditEventCommand;
 
 import static org.junit.Assert.*;
 
+/**
+ * JUnit tests for the EditEventCommand class.
+ */
 public class EditEventCommandTest {
 
   @Test
