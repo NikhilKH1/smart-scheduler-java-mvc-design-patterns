@@ -14,7 +14,10 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.io.*;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 public class CalendarAppTest {
 
@@ -47,7 +50,6 @@ public class CalendarAppTest {
     );
   }
 
-  /** ✅ Test 3: Simulates headless mode with a valid file */
   @Test
   public void testRunHeadlessModeProcessesFile() throws IOException {
     File tempFile = File.createTempFile("testCommands", ".txt");
@@ -128,7 +130,6 @@ public class CalendarAppTest {
 
     String output = testOutput.toString();
 
-    // Verify interaction prompts and outputs
     assertTrue(output.contains("Enter commands (type 'exit' to quit):"));
     assertTrue(output.contains("> "));
     assertTrue(output.contains("----- All Events -----"));
