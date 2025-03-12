@@ -4,5 +4,6 @@ package calendarapp.model.commands;
  * Marker interface for commands.
  */
 public interface Command {
-  // Optionally, you can add an execute() method signature here.
+  // This is a marker interface with no methods.
 }
+
