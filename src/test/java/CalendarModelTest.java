@@ -36,11 +36,11 @@ public class CalendarModelTest {
   public void testEventConflictDetection() {
     LocalDateTime start1 = LocalDateTime.of(2025, 6, 1, 9, 0);
     LocalDateTime end1 = LocalDateTime.of(2025, 6, 1, 10, 0);
-    LocalDateTime start2 = LocalDateTime.of(2025, 6, 1, 9, 30); // Overlaps with first event
+    LocalDateTime start2 = LocalDateTime.of(2025, 6, 1, 9, 30);
     LocalDateTime end2 = LocalDateTime.of(2025, 6, 1, 10, 30);
 
-    model.addEvent(new SingleEvent("Meeting A", start1, end1, "", "", true, false, null), false);
-    boolean added = model.addEvent(new SingleEvent("Meeting B", start2, end2, "", "", true, false, null), false);
+    model.addEvent(new SingleEvent("Meeting A", start1, end1, "", "", true, false, null), true);
+    boolean added = model.addEvent(new SingleEvent("Meeting B", start2, end2, "", "", true, false, null), true);
 
     assertFalse("Overlapping event should not be added", added);
   }
@@ -121,4 +121,33 @@ public class CalendarModelTest {
     CalendarEvent updatedEvent = model.getEvents().get(0);
     assertEquals("Description should be updated", "Updated Tech Talk", updatedEvent.getDescription());
   }
+
+  @Test
+  public void testAddConflictingEventWithoutAutoDecline() {
+    LocalDateTime start1 = LocalDateTime.of(2025, 3, 8, 10, 0);
+    LocalDateTime end1 = LocalDateTime.of(2025, 3, 8, 11, 0);
+    LocalDateTime start2 = LocalDateTime.of(2025, 3, 8, 10, 0);
+    LocalDateTime end2 = LocalDateTime.of(2025, 3, 8, 11, 0);
+
+    model.addEvent(new SingleEvent("Team Meeting", start1, end1, "", "", true, false, null), false);
+    boolean added = model.addEvent(new SingleEvent("Darshan", start2, end2, "Darshan is a shade", "CKM", true, false, null), false);
+
+    assertTrue("Conflicting event should be added when autoDecline is false", added);
+    assertEquals("Both events should exist in the calendar", 2, model.getEvents().size());
+  }
+
+  @Test
+  public void testAddConflictingEventWithAutoDecline() {
+    LocalDateTime start1 = LocalDateTime.of(2025, 3, 8, 10, 0);
+    LocalDateTime end1 = LocalDateTime.of(2025, 3, 8, 11, 0);
+    LocalDateTime start2 = LocalDateTime.of(2025, 3, 8, 10, 0);
+    LocalDateTime end2 = LocalDateTime.of(2025, 3, 8, 11, 0);
+
+    model.addEvent(new SingleEvent("Team Meeting", start1, end1, "", "", true, false, null), false);
+    boolean added = model.addEvent(new SingleEvent("Darshan", start2, end2, "Darshan is a shade", "CKM", true, false, null), true);
+
+    assertFalse("Conflicting event should not be added when autoDecline is true", added);
+    assertEquals("Only the first event should exist in the calendar", 1, model.getEvents().size());
+  }
+
 }

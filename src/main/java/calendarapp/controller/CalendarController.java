@@ -29,7 +29,6 @@ public class CalendarController implements ICalendarController {
     this.model = model;
     this.view = view;
     this.parser = parser;
-    // Initialize the mapping of command classes to handler lambdas.
     commandHandlers = new HashMap<>();
     commandHandlers.put(CreateEventCommand.class, c -> processCreateEvent((CreateEventCommand) c));
     commandHandlers.put(QueryByDateCommand.class, c -> processQueryByDate((QueryByDateCommand) c));

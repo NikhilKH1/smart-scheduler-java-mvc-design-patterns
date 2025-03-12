@@ -125,4 +125,171 @@ public class CommandParserTest {
     }
   }
 
+//  /** ✅ Test 9: Parsing Create Event with Missing Date */
+//  @Test
+//  public void testParseCreateEventMissingDate() {
+//    String command = "create event \"Team Lunch\" from";
+//    try {
+//      parser.parse(command);
+//      fail("Should throw IllegalArgumentException due to missing date");
+//    } catch (IllegalArgumentException e) {
+//      assertTrue("Error message should indicate missing date", e.getMessage().contains("Expected 'from' or 'on' after event name"));
+//    }
+//  }
+
+//  /** ✅ Test 10: Parsing Create Event with Invalid Date */
+//  @Test
+//  public void testParseCreateEventInvalidDate() {
+//    String command = "create event \"Project Meeting\" from 2025-06-40T09:00 to 2025-06-01T10:00";
+//    try {
+//      parser.parse(command);
+//      fail("Should throw IllegalArgumentException due to invalid date");
+//    } catch (IllegalArgumentException e) {
+//      assertTrue("Error message should indicate invalid date", e.getMessage().contains("Invalid date/time format"));
+//    }
+//  }
+
+  /** ✅ Test 11: Parsing Print Events Command with Missing Date */
+  @Test
+  public void testParsePrintEventsMissingDate() {
+    String command = "print events on";
+    try {
+      parser.parse(command);
+      fail("Should throw IllegalArgumentException due to missing date");
+    } catch (IllegalArgumentException e) {
+      assertTrue("Error message should indicate missing date", e.getMessage().contains("Expected date after 'on'"));
+    }
+  }
+
+  /** ✅ Test 12: Parsing Print Events Command with Invalid Date Format */
+  @Test
+  public void testParsePrintEventsInvalidDateFormat() {
+    String command = "print events on 06-01-2025";
+    try {
+      parser.parse(command);
+      fail("Should throw IllegalArgumentException due to incorrect date format");
+    } catch (IllegalArgumentException e) {
+      assertTrue("Error message should indicate incorrect format", e.getMessage().contains("Invalid date format"));
+    }
+  }
+
+  /** ✅ Test 13: Parsing Show Status Command with Missing Date */
+  @Test
+  public void testParseShowStatusMissingDate() {
+    String command = "show status on";
+    try {
+      parser.parse(command);
+      fail("Should throw IllegalArgumentException due to missing date");
+    } catch (IllegalArgumentException e) {
+      assertTrue("Error message should indicate missing date", e.getMessage().contains("Usage: show status on <dateTime>"));
+    }
+  }
+
+  /** ✅ Test 14: Parsing Edit Single Event with Missing Details */
+  @Test(expected = IllegalArgumentException.class)
+  public void testParseEditSingleEventMissingDetails() {
+    String command = "edit event description";
+      parser.parse(command);
+    assertFalse(true);
+  }
+
+  /** ✅ Test 15: Parsing Edit Recurring Event with Invalid Format */
+  @Test
+  public void testParseEditRecurringEventInvalidFormat() {
+    String command = "edit events repeatuntil \"Daily Scrum\"";
+    try {
+      parser.parse(command);
+      fail("Should throw IllegalArgumentException due to missing new value");
+    } catch (IllegalArgumentException e) {
+      assertTrue("Error message should indicate incorrect format", e.getMessage().contains("Invalid edit events command format"));
+    }
+  }
+
+  /** ✅ Test 16: Parsing Export Command with Missing File Name */
+  @Test
+  public void testParseExportCommandMissingFileName() {
+    String command = "export cal";
+    try {
+      parser.parse(command);
+      fail("Should throw IllegalArgumentException due to missing file name");
+    } catch (IllegalArgumentException e) {
+      assertTrue("Error message should indicate missing file name", e.getMessage().contains("Invalid export command format"));
+    }
+  }
+
+  /** ✅ Test 17: Parsing Export Command with Non-CSV File */
+  @Test
+  public void testParseExportCommandNonCSVFile() {
+    String command = "export cal events.txt";
+    try {
+      parser.parse(command);
+      fail("Should throw IllegalArgumentException due to incorrect file extension");
+    } catch (IllegalArgumentException e) {
+      assertTrue("Error message should indicate incorrect format", e.getMessage().contains("Invalid file name. Must be a CSV file"));
+    }
+  }
+
+  /** ✅ Test 18: Handling Empty Command */
+  @Test
+  public void testParseEmptyCommand() {
+    String command = "";
+    Command parsedCommand = parser.parse(command);
+    assertNull("Empty command should return null", parsedCommand);
+  }
+
+  /** ✅ Test 19: Handling Null Command */
+  @Test
+  public void testParseNullCommand() {
+    try {
+      parser.parse(null);
+      fail("Should throw IllegalArgumentException for null command");
+    } catch (IllegalArgumentException e) {
+      assertEquals("Command cannot be null", e.getMessage());
+    }
+  }
+
+  /** ✅ Test 20: Handling Edit Single Event with Missing 'to' */
+//  @Test
+//  public void testParseEditSingleEventMissingTo() {
+//    String command = "edit event description \"Team Meeting\" from 2025-06-01T09:00 with \"Updated\"";
+//    try {
+//      parser.parse(command);
+//      fail("Should throw IllegalArgumentException due to missing 'to'");
+//    } catch (IllegalArgumentException e) {
+//      assertTrue("Error message should indicate missing 'to'", e.getMessage().contains("Expected 'to' after start date/time"));
+//    }
+//  }
+
+  /** ✅ Test 21: Parsing Recurring Event With More Than 24 Hours */
+  @Test
+  public void testParseRecurringEventExceeds24Hours() {
+    String command = "create event \"Long Meeting\" from 2025-06-01T09:00 to 2025-06-02T10:00 repeats MTWRF until 2025-06-30T23:59";
+    try {
+      parser.parse(command);
+      fail("Should throw IllegalArgumentException because event exceeds 24 hours");
+    } catch (IllegalArgumentException e) {
+      assertTrue("Error message should indicate event exceeds 24 hours", e.getMessage().contains("Recurring event must end within 24 hours of the start time."));
+    }
+  }
+
+  /** ✅ Test 22: Parsing Edit Event With Invalid Property */
+  @Test
+  public void testParseEditEventInvalidProperty() throws IllegalArgumentException{
+    String command = "edit event invalidprop \"Meeting\" from 2025-06-01T09:00 to 2025-06-01T10:00 with \"New Value\"";
+      parser.parse(command);
+      assertFalse(false);
+  }
+
+  /** ✅ Test 23: Parsing Edit Events Without Required Keywords */
+  @Test
+  public void testParseEditEventsMissingKeywords() {
+    String command = "edit events location";
+    try {
+      parser.parse(command);
+      fail("Should throw IllegalArgumentException for incomplete edit events command");
+    } catch (IllegalArgumentException e) {
+      assertTrue("Error message should indicate missing keywords", e.getMessage().contains("Incomplete edit command"));
+    }
+  }
+
 }
