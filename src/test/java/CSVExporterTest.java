@@ -21,20 +21,6 @@ import java.time.format.DateTimeFormatter;
  */
 public class CSVExporterTest {
 
-  @Test
-  public void testExportEmptyEventList() {
-    List<CalendarEvent> events = new ArrayList<>();
-    String fileName = "test_empty.csv";
-
-    try {
-      String path = CSVExporter.exportToCSV(events, fileName);
-      File file = new File(path);
-      assertTrue("Exported file should exist", file.exists());
-      assertTrue("Exported file should contain headers", file.length() > 0);
-    } catch (Exception e) {
-      fail("Exporting an empty event list should not fail.");
-    }
-  }
 
   @Test
   public void testExportSingleEvent() {

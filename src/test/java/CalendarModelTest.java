@@ -457,6 +457,49 @@ public class CalendarModelTest {
   }
 
 
+  @Test
+  public void testEditSingleEventDescription() {
+    controller.processCommand("create event \"Meeting\" from 2025-06-01T10:00 to 2025-06-01T11:00");
+
+    boolean result = controller.processCommand(
+            "edit event description \"Meeting\" from 2025-06-01T10:00 to 2025-06-01T11:00 with \"Updated description\""
+    );
+
+    assertTrue(result);
+    assertEquals("Event(s) edited successfully", view.getLastMessage());
+
+    CalendarEvent updatedEvent = model.getEvents().get(0);
+    assertEquals("Updated description", updatedEvent.getDescription());
+  }
+
+  @Test
+  public void testEditSingleEventLocation() {
+    controller.processCommand("create event \"Meeting\" from 2025-06-01T10:00 to 2025-06-01T11:00 location \"Room 101\"");
+
+    boolean result = controller.processCommand(
+            "edit event location \"Meeting\" from 2025-06-01T10:00 to 2025-06-01T11:00 with \"Updated Room\""
+    );
+
+    assertTrue(result);
+    assertEquals("Event(s) edited successfully", view.getLastMessage());
+
+    CalendarEvent updatedEvent = model.getEvents().get(0);
+    assertEquals("Updated Room", updatedEvent.getLocation());
+  }
+
+
+  @Test
+  public void testEditNonExistingSingleEvent() {
+    boolean result = controller.processCommand(
+            "edit event description \"NonExistentEvent\" from 2025-06-01T10:00 to 2025-06-01T11:00 with \"New Description\""
+    );
+
+    assertFalse(result);
+    assertEquals("Failed to edit event(s)", view.getLastMessage());
+  }
+
+
+
   private static class TestCalendarView implements ICalendarView {
     private final List<String> messages = new ArrayList<>();
 

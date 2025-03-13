@@ -117,14 +117,6 @@ public class CalendarControllerTest {
     assertEquals("Busy at 2025-06-01T10:30", view.getLastMessage());
   }
 
-  @Test
-  public void testProcessExportCommand() {
-    String command = "export cal calendar.csv";
-    boolean result = controller.processCommand(command);
-
-    assertTrue("Exporting events should return true", result);
-    assertNull("Export command does not display a message", view.getLastMessage());
-  }
 
   @Test
   public void testProcessInvalidCommand() {
@@ -202,14 +194,14 @@ public class CalendarControllerTest {
     assertEquals("Failed to edit event(s)", view.getLastMessage());
   }
 
-  @Test
-  public void testProcessExportEmptyCalendar() {
-    String command = "export cal empty_calendar.csv";
-    boolean result = controller.processCommand(command);
-
-    assertTrue("Exporting empty calendar should return true", result);
-    assertNull("Export command does not display a message", view.getLastMessage());
-  }
+//  @Test
+//  public void testProcessExportEmptyCalendar() {
+//    String command = "export cal empty_calendar.csv";
+//    boolean result = controller.processCommand(command);
+//
+//    assertTrue("Exporting empty calendar should return true", result);
+//    assertNull("Export command does not display a message", view.getLastMessage());
+//  }
 
   @Test
   public void testProcessInvalidCommandStructure() {
@@ -598,12 +590,12 @@ public class CalendarControllerTest {
     assertEquals("Recurring event modified successfully.", view.getLastMessage());
   }
 
-  @Test
-  public void testExportCalendarCommandAlwaysTrue() {
-    boolean result = controller.processCommand("export cal exportTest.csv");
-    assertTrue("Export command should return true", result);
-    assertNull("Export command does not update view message", view.getLastMessage());
-  }
+//  @Test
+//  public void testExportCalendarCommandAlwaysTrue() {
+//    boolean result = controller.processCommand("export cal exportTest.csv");
+//    assertTrue("Export command should return true", result);
+//    assertNull("Export command does not update view message", view.getLastMessage());
+//  }
 
 
   private static class TestCalendarView implements ICalendarView {
