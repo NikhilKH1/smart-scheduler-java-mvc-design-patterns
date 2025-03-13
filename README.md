@@ -42,7 +42,12 @@ create event --autoDecline \<eventName> from \<dateStringTtimeString> to \<dateS
 ##### To edit event:
 edit event \<property> \<eventName> from \<dateStringTtimeString> to \<dateStringTtimeString> with \<NewPropertyValue>
 
-#### To query the calendar:
+##### To edit recurring events:
+edit events \<property> \<eventName> from \<dateStringTtimeString> with \<NewPropertyValue>
+
+edit events \<property> \<eventName> \<NewPropertyValue>
+
+##### To query the calendar:
 print events on \<dateString>
 
 print events from \<dateStringTtimeString> to \<dateStringTtimeString>
@@ -68,17 +73,15 @@ Specify details such as start and end date/time, description, location, public/p
 #### Event Querying:
 Query events on a specific date.
 Query events within a given date and time range.
-Check if the calendar is busy at a specific time.
+Check if busy at a specific time.
 #### Event Editing:
-Edit a single event occurrence.
-Edit events from a specific date/time onward.
-Edit all occurrences of an event.
-Edit recurring events.
+Edit the properties like event name, description, location, startdatetime and enddatetime for single event.
+Edit the additional properties like repeatuntil, repeatingdays, repeattimes for recurring event.
 #### Exporting:
 Export calendar events to a CSV file compatible with Google Calendar.
 
 ## Team Contributions
-The project was implemented collaboratively by both contributors. The contributions were as follows:
+The project was implemented collaboratively by both contributors. The contributions are as follows:
 
 #### Nikhil:
 Focused on single and recurring events, the command parser, implementing conflict checking, the calendar model, and the view.
@@ -86,7 +89,7 @@ Focused on single and recurring events, the command parser, implementing conflic
 #### Nisha:
 Handled editing events, querying events, managing the controller, working on commands, and utilities.
 
-Both contributors jointly worked on writing the test cases.
+Both jointly worked on writing the test cases.
 
 
 ## Concepts covered in the project:
