@@ -73,8 +73,6 @@ public class CalendarController implements ICalendarController {
             processExportCommand((ExportCalendarCommand) command));
   }
 
-
-
   /**
    * Processes a command provided as a string input. The command is parsed using the command parser,
    * and the appropriate command handler is executed.

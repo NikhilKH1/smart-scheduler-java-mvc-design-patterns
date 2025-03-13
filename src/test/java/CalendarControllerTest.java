@@ -17,7 +17,6 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -70,7 +69,8 @@ public class CalendarControllerTest {
 
     LocalDateTime start = LocalDateTime.of(2025, 6, 1, 9, 0);
     LocalDateTime end = LocalDateTime.of(2025, 6, 1, 10, 0);
-    model.addEvent(new SingleEvent("Meeting", start, end, "", "", true, false, null), false);
+    model.addEvent(new SingleEvent("Meeting", start, end, "", "",
+            true, false, null), false);
 
     assertFalse("Model should contain at least one event",
             model.getEventsOnDate(LocalDate.of(2025, 6, 1)).isEmpty());
@@ -193,15 +193,6 @@ public class CalendarControllerTest {
     assertFalse("Editing a non-existent event should return false", result);
     assertEquals("Failed to edit event(s)", view.getLastMessage());
   }
-
-//  @Test
-//  public void testProcessExportEmptyCalendar() {
-//    String command = "export cal empty_calendar.csv";
-//    boolean result = controller.processCommand(command);
-//
-//    assertTrue("Exporting empty calendar should return true", result);
-//    assertNull("Export command does not display a message", view.getLastMessage());
-//  }
 
   @Test
   public void testProcessInvalidCommandStructure() {
@@ -589,14 +580,6 @@ public class CalendarControllerTest {
     assertTrue("Editing recurring event should return true", result);
     assertEquals("Recurring event modified successfully.", view.getLastMessage());
   }
-
-//  @Test
-//  public void testExportCalendarCommandAlwaysTrue() {
-//    boolean result = controller.processCommand("export cal exportTest.csv");
-//    assertTrue("Export command should return true", result);
-//    assertNull("Export command does not update view message", view.getLastMessage());
-//  }
-
 
   private static class TestCalendarView implements ICalendarView {
     private final List<String> messages = new ArrayList<>();

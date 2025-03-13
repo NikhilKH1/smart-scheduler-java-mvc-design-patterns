@@ -33,13 +33,15 @@ public class RecurringResultTest {
     setField(result, "isRecurring", true);
     setField(result, "weekdays", "MTWRF");
     setField(result, "repeatCount", 10);
-    setField(result, "repeatUntil", LocalDateTime.of(2025, 8, 15, 12, 0));
+    setField(result, "repeatUntil", LocalDateTime.of(2025, 8, 15,
+            12, 0));
     setField(result, "index", 7);
 
     assertTrue(result.isRecurring());
     assertEquals("MTWRF", result.getWeekdays());
     assertEquals(10, result.getRepeatCount());
-    assertEquals(LocalDateTime.of(2025, 8, 15, 12, 0), result.getRepeatUntil());
+    assertEquals(LocalDateTime.of(2025, 8, 15, 12, 0),
+            result.getRepeatUntil());
     assertEquals(7, result.getIndex());
   }
 

@@ -1,5 +1,3 @@
-
-
 import org.junit.Test;
 
 import calendarapp.model.commands.EditRecurringEventCommand;

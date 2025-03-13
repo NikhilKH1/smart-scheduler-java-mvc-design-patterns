@@ -1,5 +1,4 @@
 
-
 import calendarapp.CalendarApp;
 import calendarapp.controller.CalendarController;
 import calendarapp.model.CalendarModel;
@@ -70,7 +69,8 @@ public class CalendarAppTest {
     CalendarApp.main(new String[]{"--mode", "headless", tempFile.getAbsolutePath()});
 
     String output = outputStream.toString();
-    assertTrue("Output should contain event creation", output.contains("----- All Events -----"));
+    assertTrue("Output should contain event creation",
+            output.contains("----- All Events -----"));
     assertTrue("Output should contain 'Meeting'", output.contains("Meeting"));
 
     tempFile.delete();

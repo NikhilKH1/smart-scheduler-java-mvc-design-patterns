@@ -19,7 +19,8 @@ public class CSVExporter {
   /**
    * Exports the provided calendar events to a CSV file.
    * The CSV file will contain:
-   * - Subject, Start Date, Start Time, End Date, End Time, All Day Event, Description, Location, Private
+   * - Subject, Start Date, Start Time, End Date, End Time, All Day Event, Description, Location,
+   * Private
    *
    * @param events   the list of calendar events to export
    * @param filePath the desired file path for the CSV file

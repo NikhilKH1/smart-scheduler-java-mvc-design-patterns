@@ -24,8 +24,8 @@ public class RecurringEventTest {
     LocalDateTime end = LocalDateTime.of(2025, 6, 1, 10, 0);
 
     RecurringEvent event = new RecurringEvent("Daily Standup", start, end, "MTWRF",
-            5, null, "Scrum meeting", "Office", true,
-            false);
+            5, null, "Scrum meeting", "Office",
+            true, false);
 
     assertEquals("Daily Standup", event.getSubject());
     assertEquals(start, event.getStartDateTime());
@@ -43,10 +43,12 @@ public class RecurringEventTest {
   public void testRecurringEventWithEndDate() {
     LocalDateTime start = LocalDateTime.of(2025, 6, 1, 9, 0);
     LocalDateTime end = LocalDateTime.of(2025, 6, 1, 10, 0);
-    LocalDateTime repeatUntil = LocalDateTime.of(2025, 6, 10, 0, 0);
+    LocalDateTime repeatUntil = LocalDateTime.of(2025, 6, 10,
+            0, 0);
 
     RecurringEvent event = new RecurringEvent("Yoga Class", start, end, "MWF",
-            0, repeatUntil, "Morning exercise", "Gym", false, false);
+            0, repeatUntil, "Morning exercise", "Gym", false,
+            false);
 
     assertEquals("MWF", event.getWeekdays());
     assertEquals(repeatUntil, event.getRepeatUntil());

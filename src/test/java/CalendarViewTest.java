@@ -1,5 +1,4 @@
 import calendarapp.model.event.CalendarEvent;
-import calendarapp.model.event.SingleEvent;
 import calendarapp.view.CalendarView;
 
 import org.junit.After;
@@ -8,7 +7,6 @@ import org.junit.Test;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 

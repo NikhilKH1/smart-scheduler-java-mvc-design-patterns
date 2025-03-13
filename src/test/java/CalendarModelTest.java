@@ -58,7 +58,8 @@ public class CalendarModelTest {
     LocalDateTime start2 = LocalDateTime.of(2025, 6, 1, 9, 30);
     LocalDateTime end2 = LocalDateTime.of(2025, 6, 1, 10, 30);
 
-    model.addEvent(new SingleEvent("Meeting A", start1, end1, "", "", true, false, null), true);
+    model.addEvent(new SingleEvent("Meeting A", start1, end1, "", "",
+            true, false, null), true);
     boolean added = model.addEvent(new SingleEvent("Meeting B", start2, end2, "",
             "", true, false, null), true);
 
@@ -72,7 +73,8 @@ public class CalendarModelTest {
     String weekdays = "MTWRF";
 
     RecurringEvent recurringEvent = new RecurringEvent(
-            "Daily Standup", start, end, weekdays, 5, null, "Daily meeting", "Office", true, false
+            "Daily Standup", start, end, weekdays, 5, null,
+            "Daily meeting", "Office", true, false
     );
 
     boolean added = model.addRecurringEvent(recurringEvent, false);
@@ -86,11 +88,13 @@ public class CalendarModelTest {
     String weekdays = "MTW";
 
     RecurringEvent recurringEvent = new RecurringEvent(
-            "Weekly Meeting", start, end, weekdays, 3, null, "Discussion", "Room 101", true, false
+            "Weekly Meeting", start, end, weekdays, 3, null,
+            "Discussion", "Room 101", true, false
     );
 
     List<SingleEvent> occurrences = recurringEvent.generateOccurrences("123-series");
-    assertEquals("Recurring event should generate exactly 3 occurrences", 3, occurrences.size());
+    assertEquals("Recurring event should generate exactly 3 occurrences", 3,
+            occurrences.size());
   }
 
 
@@ -98,9 +102,11 @@ public class CalendarModelTest {
   public void testGetEventsOnDate() {
     LocalDateTime start = LocalDateTime.of(2025, 6, 1, 9, 0);
     LocalDateTime end = LocalDateTime.of(2025, 6, 1, 10, 0);
-    model.addEvent(new SingleEvent("Meeting", start, end, "", "", true, false, null), false);
+    model.addEvent(new SingleEvent("Meeting", start, end, "", "",
+            true, false, null), false);
 
-    List<CalendarEvent> events = model.getEventsOnDate(LocalDate.of(2025, 6, 1));
+    List<CalendarEvent> events = model.getEventsOnDate(LocalDate.of(2025,
+            6, 1));
     assertEquals("Should return 1 event on this date", 1, events.size());
   }
 
@@ -108,7 +114,8 @@ public class CalendarModelTest {
   public void testGetEventsBetween() {
     LocalDateTime start = LocalDateTime.of(2025, 6, 1, 9, 0);
     LocalDateTime end = LocalDateTime.of(2025, 6, 1, 10, 0);
-    model.addEvent(new SingleEvent("Workshop", start, end, "", "", true, false, null), false);
+    model.addEvent(new SingleEvent("Workshop", start, end, "", "",
+            true, false, null), false);
 
     List<CalendarEvent> events = model.getEventsBetween(
             LocalDateTime.of(2025, 6, 1, 8, 0),
@@ -122,12 +129,15 @@ public class CalendarModelTest {
   public void testIsBusyAt() {
     LocalDateTime start = LocalDateTime.of(2025, 6, 1, 9, 0);
     LocalDateTime end = LocalDateTime.of(2025, 6, 1, 10, 0);
-    model.addEvent(new SingleEvent("Interview", start, end, "", "", true, false, null), false);
+    model.addEvent(new SingleEvent("Interview", start, end, "", "",
+            true, false, null), false);
 
     assertTrue("Should be busy at 9:30 AM",
-            model.isBusyAt(LocalDateTime.of(2025, 6, 1, 9, 30)));
+            model.isBusyAt(LocalDateTime.of(2025, 6, 1,
+                    9, 30)));
     assertFalse("Should not be busy at 8:30 AM",
-            model.isBusyAt(LocalDateTime.of(2025, 6, 1, 8, 30)));
+            model.isBusyAt(LocalDateTime.of(2025, 6, 1,
+                    8, 30)));
   }
 
   @Test
@@ -154,12 +164,15 @@ public class CalendarModelTest {
     LocalDateTime start2 = LocalDateTime.of(2025, 3, 8, 10, 0);
     LocalDateTime end2 = LocalDateTime.of(2025, 3, 8, 11, 0);
 
-    model.addEvent(new SingleEvent("Team Meeting", start1, end1, "", "", true, false, null), false);
+    model.addEvent(new SingleEvent("Team Meeting", start1, end1, "",
+            "", true, false, null), false);
     boolean added = model.addEvent(new SingleEvent("Darshan", start2, end2,
-            "Darshan", "CKM", true, false, null), false);
+            "Darshan", "CKM", true, false, null),
+            false);
 
     assertTrue("Conflicting event should be added when autoDecline is false", added);
-    assertEquals("Both events should exist in the calendar", 2, model.getEvents().size());
+    assertEquals("Both events should exist in the calendar", 2,
+            model.getEvents().size());
   }
 
   @Test
@@ -169,12 +182,15 @@ public class CalendarModelTest {
     LocalDateTime start2 = LocalDateTime.of(2025, 3, 8, 10, 0);
     LocalDateTime end2 = LocalDateTime.of(2025, 3, 8, 11, 0);
 
-    model.addEvent(new SingleEvent("Team Meeting", start1, end1, "", "", true, false, null), false);
+    model.addEvent(new SingleEvent("Team Meeting", start1, end1, "",
+            "", true, false, null), false);
     boolean added = model.addEvent(new SingleEvent("Darshan", start2, end2,
-            "Darshan", "CKM", true, false, null), true);
+            "Darshan", "CKM", true, false, null),
+            true);
 
     assertFalse("Conflicting event should not be added when autoDecline is true", added);
-    assertEquals("Only the first event should exist in the calendar", 1, model.getEvents().size());
+    assertEquals("Only the first event should exist in the calendar", 1,
+            model.getEvents().size());
   }
 
   @Test
@@ -209,8 +225,8 @@ public class CalendarModelTest {
             + "to 2025-06-01T10:30 repeats MTWRF for 3 times";
     boolean result = controller.processCommand(recurringCommand);
 
-    assertTrue("Recurring event should be added despite conflict when autoDecline is false",
-            result);
+    assertTrue("Recurring event should be added despite conflict when autoDecline is false"
+            , result);
     assertTrue(view.getLastMessage().contains("Event created successfully"));
   }
 
@@ -223,7 +239,8 @@ public class CalendarModelTest {
 
     boolean result = controller.processCommand(command2);
     assertFalse("Duplicate event should not be allowed", result);
-    assertEquals("Duplicate event: subject, start and end are identical.", view.getLastMessage());
+    assertEquals("Duplicate event: subject, start and end are identical.",
+            view.getLastMessage());
   }
 
 
@@ -253,7 +270,8 @@ public class CalendarModelTest {
     RecurringEvent event = new RecurringEvent("Yoga",
             LocalDateTime.of(2025, 6, 1, 7, 0),
             LocalDateTime.of(2025, 6, 1, 8, 0),
-            "MWF", 5, null, "Morning Yoga", "Studio", true, false);
+            "MWF", 5, null, "Morning Yoga",
+            "Studio", true, false);
 
     model.addRecurringEvent(event, false);
     model.editRecurringEvent("Yoga", "repeattimes", "0");
@@ -263,7 +281,9 @@ public class CalendarModelTest {
   public void testEditRecurringEventWithUnsupportedProperty() {
     RecurringEvent event = new RecurringEvent("Yoga",
             LocalDateTime.of(2025, 6, 1, 8, 0),
-            LocalDateTime.of(2025, 6, 1, 9, 0), "MTW", 5, null, "", "", true, false);
+            LocalDateTime.of(2025, 6, 1, 9, 0),
+            "MTW", 5, null, "", "",
+            true, false);
 
     model.addRecurringEvent(event, false);
     model.editRecurringEvent("Yoga", "invalidproperty", "value");
@@ -271,7 +291,8 @@ public class CalendarModelTest {
 
   @Test(expected = IllegalArgumentException.class)
   public void testEditRecurringEventNotFound() {
-    model.editRecurringEvent("NonExistentEvent", "description", "Updated Description");
+    model.editRecurringEvent("NonExistentEvent", "description",
+            "Updated Description");
   }
 
   @Test
@@ -279,10 +300,12 @@ public class CalendarModelTest {
     RecurringEvent event = new RecurringEvent("Yoga",
             LocalDateTime.of(2025, 6, 1, 7, 0),
             LocalDateTime.of(2025, 6, 1, 8, 0),
-            "MWF", 5, null, "Morning session", "Gym", true, false);
+            "MWF", 5, null, "Morning session",
+            "Gym", true, false);
 
     model.addRecurringEvent(event, false);
-    boolean edited = model.editRecurringEvent("Yoga", "description", "Evening session");
+    boolean edited = model.editRecurringEvent("Yoga", "description",
+            "Evening session");
 
     assertTrue("Recurring event description should be updated", edited);
     List<CalendarEvent> events = model.getEvents();
@@ -295,11 +318,14 @@ public class CalendarModelTest {
     RecurringEvent event = new RecurringEvent("Pilates",
             LocalDateTime.of(2025, 6, 1, 7, 0),
             LocalDateTime.of(2025, 6, 1, 8, 0),
-            "TR", 0, LocalDateTime.of(2025, 6, 30, 7, 0), "Pilates session", "Studio", true, false);
+            "TR", 0, LocalDateTime.of(2025, 6, 30,
+            7, 0), "Pilates session", "Studio", true,
+            false);
 
     model.addRecurringEvent(event, false);
 
-    boolean edited = model.editRecurringEvent("Pilates", "repeatuntil", "2025-07-01T07:00");
+    boolean edited = model.editRecurringEvent("Pilates", "repeatuntil",
+            "2025-07-01T07:00");
     assertTrue("Recurring event repeatUntil should be updated", edited);
   }
 
@@ -308,11 +334,13 @@ public class CalendarModelTest {
     RecurringEvent event = new RecurringEvent("Dance Class",
             LocalDateTime.of(2025, 6, 1, 18, 0),
             LocalDateTime.of(2025, 6, 1, 19, 0),
-            "MT", 4, null, "Evening class", "Dance Studio", true, false);
+            "MT", 4, null, "Evening class",
+            "Dance Studio", true, false);
 
     model.addRecurringEvent(event, false);
 
-    boolean edited = model.editRecurringEvent("Dance Class", "repeatingdays", "WRF");
+    boolean edited = model.editRecurringEvent("Dance Class",
+            "repeatingdays", "WRF");
     assertTrue("Recurring event weekdays should be updated", edited);
   }
 
@@ -321,11 +349,13 @@ public class CalendarModelTest {
     RecurringEvent event = new RecurringEvent("Training",
             LocalDateTime.of(2025, 6, 2, 15, 0),
             LocalDateTime.of(2025, 6, 1, 16, 0),
-            "WRF", 3, null, "Training sessions", "Room 101", true, false);
+            "WRF", 3, null, "Training sessions",
+            "Room 101", true, false);
 
     model.addRecurringEvent(event, false);
 
-    boolean edited = model.editRecurringEvent("Training", "location", "Room 202");
+    boolean edited = model.editRecurringEvent("Training", "location",
+            "Room 202");
     assertTrue("Recurring event location should be updated", edited);
   }
 
@@ -334,11 +364,13 @@ public class CalendarModelTest {
     RecurringEvent event = new RecurringEvent("Sprint Planning",
             LocalDateTime.of(2025, 6, 1, 10, 0),
             LocalDateTime.of(2025, 6, 1, 11, 0),
-            "MTWRF", 5, null, "Daily Planning", "Office", true, false);
+            "MTWRF", 5, null, "Daily Planning",
+            "Office", true, false);
 
     model.addRecurringEvent(event, false);
 
-    model.editRecurringEvent("Sprint Planning", "description", "Updated Daily Planning");
+    model.editRecurringEvent("Sprint Planning", "description",
+            "Updated Daily Planning");
 
     List<CalendarEvent> events = model.getEvents();
 
@@ -363,7 +395,8 @@ public class CalendarModelTest {
             + "from 2025-06-01T09:00 to 2025-06-01T10:00");
 
     assertFalse("Duplicate event should not be allowed", result);
-    assertEquals("Duplicate event: subject, start and end are identical.", view.getLastMessage());
+    assertEquals("Duplicate event: subject, start and end are identical.",
+            view.getLastMessage());
   }
 
 
@@ -411,7 +444,8 @@ public class CalendarModelTest {
   public void testEditRecurringEventRepeatTimes() {
     controller.processCommand("create event \"Scrum\" "
             + "from 2025-06-01T09:00 to 2025-06-01T09:30 repeats MTWRF for 5 times");
-    boolean edited = model.editRecurringEvent("Scrum", "repeattimes", "3");
+    boolean edited = model.editRecurringEvent("Scrum", "repeattimes",
+            "3");
     assertTrue(edited);
     assertEquals(3, model.getEvents().size());
   }
@@ -429,8 +463,10 @@ public class CalendarModelTest {
   public void testCheckBusySlot() {
     controller.processCommand("create event \"Interview\" "
             + "from 2025-06-01T09:00 to 2025-06-01T10:00");
-    assertTrue(model.isBusyAt(LocalDateTime.of(2025, 6, 1, 9, 30)));
-    assertFalse(model.isBusyAt(LocalDateTime.of(2025, 6, 1, 8, 0)));
+    assertTrue(model.isBusyAt(LocalDateTime.of(2025, 6, 1,
+            9, 30)));
+    assertFalse(model.isBusyAt(LocalDateTime.of(2025, 6, 1,
+            8, 0)));
   }
 
   @Test
@@ -459,10 +495,12 @@ public class CalendarModelTest {
 
   @Test
   public void testEditSingleEventDescription() {
-    controller.processCommand("create event \"Meeting\" from 2025-06-01T10:00 to 2025-06-01T11:00");
+    controller.processCommand("create event \"Meeting\" from 2025-06-01T10:00"
+            + " to 2025-06-01T11:00");
 
     boolean result = controller.processCommand(
-            "edit event description \"Meeting\" from 2025-06-01T10:00 to 2025-06-01T11:00 with \"Updated description\""
+            "edit event description \"Meeting\" from 2025-06-01T10:00 to "
+                    + "2025-06-01T11:00 with \"Updated description\""
     );
 
     assertTrue(result);
@@ -474,10 +512,12 @@ public class CalendarModelTest {
 
   @Test
   public void testEditSingleEventLocation() {
-    controller.processCommand("create event \"Meeting\" from 2025-06-01T10:00 to 2025-06-01T11:00 location \"Room 101\"");
+    controller.processCommand("create event \"Meeting\" from 2025-06-01T10:00 to "
+            + "2025-06-01T11:00 location \"Room 101\"");
 
     boolean result = controller.processCommand(
-            "edit event location \"Meeting\" from 2025-06-01T10:00 to 2025-06-01T11:00 with \"Updated Room\""
+            "edit event location \"Meeting\" from 2025-06-01T10:00 to"
+                    + " 2025-06-01T11:00 with \"Updated Room\""
     );
 
     assertTrue(result);
@@ -491,7 +531,8 @@ public class CalendarModelTest {
   @Test
   public void testEditNonExistingSingleEvent() {
     boolean result = controller.processCommand(
-            "edit event description \"NonExistentEvent\" from 2025-06-01T10:00 to 2025-06-01T11:00 with \"New Description\""
+            "edit event description \"NonExistentEvent\" from 2025-06-01T10:00 to"
+                    + " 2025-06-01T11:00 with \"New Description\""
     );
 
     assertFalse(result);
