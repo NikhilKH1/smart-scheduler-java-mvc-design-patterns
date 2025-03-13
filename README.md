@@ -78,17 +78,16 @@ Edit recurring events.
 Export calendar events to a CSV file compatible with Google Calendar.
 
 ## Team Contributions
-
-#### Nisha:
-Contributed to the core model, controller, and event processing logic.
-Implemented the MVC architecture and command dispatch system.
-Focused on abstraction, error handling, and overall application design.
+The project was implemented collaboratively by both contributors. The contributions were as follows:
 
 #### Nikhil:
-Worked on the view layer and command parsing logic.
-Developed utility classes (e.g., CSV exporting and helper functions).
-Contributed to the design and implementation of recurring event handling.
-Key Concepts and Design Patterns
+Focused on single and recurring events, the command parser, implementing conflict checking, the calendar model, and the view.
+
+#### Nisha:
+Handled editing events, querying events, managing the controller, working on commands, and utilities.
+
+Both contributors jointly worked on writing the test cases.
+
 
 ## Concepts covered in the project:
 
