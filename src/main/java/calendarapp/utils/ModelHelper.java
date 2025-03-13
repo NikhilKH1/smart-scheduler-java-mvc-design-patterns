@@ -30,7 +30,8 @@ public class ModelHelper {
     LocalDateTime newStart = oldEvent.getStartDateTime();
     LocalDateTime newEnd = oldEvent.getEndDateTime();
     boolean newIsPublic = oldEvent.isPublic();
-    switch (property.toLowerCase()) {
+
+    switch (property.toLowerCase().trim()) {
       case "name":
         newSubject = newValue;
         break;
