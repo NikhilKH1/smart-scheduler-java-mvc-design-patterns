@@ -65,7 +65,8 @@ public class CalendarViewTest {
     List<CalendarEvent> events = new ArrayList<>();
     LocalDateTime start = LocalDateTime.of(2025, 6, 1, 9, 0);
     LocalDateTime end = LocalDateTime.of(2025, 6, 1, 10, 0);
-    CalendarEvent event = new SingleEvent("Test Event", start, end, "Description", "Location", true, false, null);
+    CalendarEvent event = new SingleEvent("Test Event", start, end,
+            "Description", "Location", true, false, null);
     events.add(event);
     calendarView.displayEvents(events);
     assertEquals(event.toString() + "\n", outContent.toString());

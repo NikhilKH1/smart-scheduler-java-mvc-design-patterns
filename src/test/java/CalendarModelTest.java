@@ -242,7 +242,8 @@ public class CalendarModelTest {
 
     assertFalse("Edit should fail due to conflict", result);
     assertEquals("Parsing Error: Incomplete edit event command. Expected format: "
-                    + "edit event <property> <eventName> from <start> to <end> with <NewPropertyValue>",
+                    + "edit event <property> <eventName> from <start> to <end> with "
+                    + "<NewPropertyValue>",
             view.getLastMessage());
   }
 

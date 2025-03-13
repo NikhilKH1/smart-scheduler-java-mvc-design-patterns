@@ -41,7 +41,8 @@ public class CSVExporterTest {
     List<CalendarEvent> events = new ArrayList<>();
     LocalDateTime start = LocalDateTime.of(2025, 6, 1, 9, 0);
     LocalDateTime end = LocalDateTime.of(2025, 6, 1, 10, 0);
-    events.add(new SingleEvent("Meeting", start, end, "Discussion", "Office", true, false, null));
+    events.add(new SingleEvent("Meeting", start, end, "Discussion",
+            "Office", true, false, null));
 
     String fileName = "test_single_event.csv";
 
@@ -63,8 +64,10 @@ public class CSVExporterTest {
     LocalDateTime start2 = LocalDateTime.of(2025, 6, 2, 11, 0);
     LocalDateTime end2 = LocalDateTime.of(2025, 6, 2, 12, 0);
 
-    events.add(new SingleEvent("Meeting", start1, end1, "Discussion", "Office", true, false, null));
-    events.add(new SingleEvent("Call", start2, end2, "Client Call", "Remote", false, false, null));
+    events.add(new SingleEvent("Meeting", start1, end1, "Discussion",
+            "Office", true, false, null));
+    events.add(new SingleEvent("Call", start2, end2, "Client Call",
+            "Remote", false, false, null));
 
     String fileName = "test_multiple_events.csv";
 
@@ -86,7 +89,8 @@ public class CSVExporterTest {
     String subject = "Meeting, \"Special\" \nSession";
     String description = "Discuss, review \"Q1 Report\"";
     String location = "Office, Room \"101\"";
-    events.add(new SingleEvent(subject, start, end, description, location, true, false, null));
+    events.add(new SingleEvent(subject, start, end, description, location, true,
+            false, null));
 
     String fileName = "test_special_chars.csv";
     try {
@@ -110,14 +114,16 @@ public class CSVExporterTest {
     List<CalendarEvent> events = new ArrayList<>();
     LocalDateTime start = LocalDateTime.of(2025, 6, 1, 9, 0);
     LocalDateTime end = LocalDateTime.of(2025, 6, 1, 10, 0);
-    events.add(new SingleEvent("Test Event", start, end, null, null, true, false, null));
+    events.add(new SingleEvent("Test Event", start, end, null, null,
+            true, false, null));
     String fileName = "test_null_fields.csv";
     try {
       String path = CSVExporter.exportToCSV(events, fileName);
       File file = new File(path);
       assertTrue("Exported file should exist", file.exists());
       String content = new String(Files.readAllBytes(file.toPath()));
-      assertTrue("Output should show empty fields for null values", content.contains("Test Event,"));
+      assertTrue("Output should show empty fields for null values",
+              content.contains("Test Event,"));
     } catch (Exception e) {
       fail("Exporting event with null fields should not fail: " + e.getMessage());
     }
@@ -127,7 +133,8 @@ public class CSVExporterTest {
   public void testExportEventWithNullEndDateTime() {
     List<CalendarEvent> events = new ArrayList<>();
     LocalDateTime start = LocalDateTime.of(2025, 6, 1, 9, 0);
-    events.add(new SingleEvent("No End Event", start, null, "No End", "Office", true, false, null));
+    events.add(new SingleEvent("No End Event", start, null, "No End",
+            "Office", true, false, null));
     String fileName = "test_null_end.csv";
     try {
       String path = CSVExporter.exportToCSV(events, fileName);
@@ -139,7 +146,9 @@ public class CSVExporterTest {
       String[] lines = content.split("\n");
       String[] fields = lines[1].split(",");
       assertEquals("Start Date should match", expectedStartDate, fields[1]);
-      assertEquals("Start Time should be formatted (non-empty) when not an all-day event", "09:00", fields[2]);
+      assertEquals("Start Time should be formatted (non-empty) when"
+                      + " not an all-day event", "09:00",
+              fields[2]);
       assertEquals("End Date should match Start Date", expectedStartDate, fields[3]);
       assertEquals("End Time should be empty", "", fields[4]);
       assertEquals("All Day flag should be TRUE", "TRUE", fields[5]);
@@ -152,8 +161,10 @@ public class CSVExporterTest {
   public void testExportAllDayEvent() {
     List<CalendarEvent> events = new ArrayList<>();
     LocalDateTime start = LocalDateTime.of(2025, 6, 2, 0, 0);
-    LocalDateTime end = LocalDateTime.of(2025, 6, 2, 23, 59, 59);
-    events.add(new SingleEvent("All Day Event", start, end, "All Day Meeting", "Conference Room", true, true, null));
+    LocalDateTime end = LocalDateTime.of(2025, 6, 2, 23, 59,
+            59);
+    events.add(new SingleEvent("All Day Event", start, end, "All Day Meeting",
+            "Conference Room", true, true, null));
     String fileName = "test_all_day.csv";
     try {
       String path = CSVExporter.exportToCSV(events, fileName);
@@ -164,7 +175,8 @@ public class CSVExporterTest {
       String[] fields = lines[1].split(",");
       assertEquals("For all-day event, startTime should be empty", "", fields[2]);
       assertEquals("For all-day event, endTime should be empty", "", fields[4]);
-      assertEquals("For all-day event, all-day flag should be TRUE", "TRUE", fields[5]);
+      assertEquals("For all-day event, all-day flag should be TRUE", "TRUE",
+              fields[5]);
     } catch (Exception e) {
       fail("Exporting all-day event should not fail: " + e.getMessage());
     }
@@ -175,7 +187,8 @@ public class CSVExporterTest {
     List<CalendarEvent> events = new ArrayList<>();
     LocalDateTime start = LocalDateTime.of(2025, 6, 3, 14, 0);
     LocalDateTime end = LocalDateTime.of(2025, 6, 3, 15, 0);
-    events.add(new SingleEvent("Private Event", start, end, "Confidential", "Home Office", false, false, null));
+    events.add(new SingleEvent("Private Event", start, end, "Confidential",
+            "Home Office", false, false, null));
     String fileName = "test_private_event.csv";
     try {
       String path = CSVExporter.exportToCSV(events, fileName);
@@ -184,7 +197,8 @@ public class CSVExporterTest {
       String content = new String(Files.readAllBytes(file.toPath()));
       String[] lines = content.split("\n");
       String[] fields = lines[1].split(",");
-      assertEquals("Private flag should be TRUE for private event", "TRUE", fields[8]);
+      assertEquals("Private flag should be TRUE for private event", "TRUE",
+              fields[8]);
     } catch (Exception e) {
       fail("Exporting private event should not fail: " + e.getMessage());
     }

@@ -13,7 +13,8 @@ public class EditRecurringEventCommandTest {
 
   @Test
   public void testEditRecurringEventCommandProperties() {
-    EditRecurringEventCommand cmd = new EditRecurringEventCommand("repeatuntil", "Daily Standup", "2025-12-31T00:00");
+    EditRecurringEventCommand cmd = new EditRecurringEventCommand("repeatuntil",
+            "Daily Standup", "2025-12-31T00:00");
 
     assertEquals("repeatuntil", cmd.getProperty());
     assertEquals("Daily Standup", cmd.getEventName());

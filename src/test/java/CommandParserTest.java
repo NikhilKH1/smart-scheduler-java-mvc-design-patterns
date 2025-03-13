@@ -527,7 +527,8 @@ public class CommandParserTest {
       fail("Expected IllegalArgumentException for missing 'with' keyword");
     } catch (IllegalArgumentException e) {
       assertEquals("Incomplete edit event command. Expected format:"
-                      + " edit event <property> <eventName> from <start> to <end> with <NewPropertyValue>",
+                      + " edit event <property> <eventName> from <start> to <end> with "
+                      + "<NewPropertyValue>",
               e.getMessage());
     }
   }
