@@ -1,12 +1,11 @@
-create event "Team Meeting" from 2025-03-08T10:00 to 2025-03-08T11:00 description "Initial meeting" location "Old Room"
-edit event description "Team Meeting" from 2025-03-08T10:00 to 2025-03-08T11:00 with "Update!!"
-edit event location "Team Meeting" from 2025-03-08T10:00 to 2025-03-08T11:00 with "New Room!!"
-create event "Team Meeting" from 2025-03-08T10:00 to 2025-03-08T11:00
-create event "Team Meeting" from 2025-03-08T10:00 to 2025-03-08T11:00 description "New" location "Old Room"
-edit events description "Team Meeting" from 2025-03-08T10:00 with "Heyyoo!!"
-create event "Team Meeting" from 2025-03-08T10:00 to 2025-03-08T11:00 repeats MTW for 3 times description "Initial meeting" location "Old Room"
+create event "Meeting" from 2025-03-08T10:00 to 2025-03-08T11:00 description "Initial meeting" location "Old Room"
+edit event description "Meeting" from 2025-03-08T10:00 to 2025-03-08T11:00 with "Update!!"
+edit event location "Meeting" from 2025-03-08T10:00 to 2025-03-08T11:00 with "New Room!!"
+create event "Cultural Event" from 2025-03-11T10:00 to 2025-03-11T11:00
+edit events description "Cultural Event" from 2025-03-11T10:00 with "Congratulations!!"
+create event "Team Meeting" from 2025-03-10T11:00 to 2025-03-10T12:00 repeats MTW for 3 times description "Initial meeting" location "Old Room"
 edit events description "Team Meeting" "Updated description for all"
 print events on 2025-03-08
-print events from 2025-03-08T10:00 to 2025-03-08T11:00
+print events from 2025-03-08T10:00 to 2025-03-10T11:00
 show status on 2025-03-08T10:00
 exit

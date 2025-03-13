@@ -1,0 +1,17 @@
+create event "Nisha" from 2025-03-09T10:00 to 2025-03-09T11:00
+create event "All Day event" from 2025-03-09T13:00
+create event "Event with Description and Location" from 2025-03-10T11:00 to 2025-03-10T12:00 description "Initial meeting" location "Old Room"
+create event --autodecline "Nikhil's Birthday" from 2025-03-11T10:00 to 2025-03-11T12:00
+create event "Class" from 2025-03-10T15:00 to 2025-03-10T16:30 repeats TR for 2 times description "Recurring Event" location "Snell"
+edit event location "Event with Description and Location" from 2025-03-10T11:00 to 2025-03-10T12:00 with "New Room!!"
+edit events description "Class" from 2025-03-11T15:00 with "New Recurring Event"
+edit events location "Class" "Snell Room 108"
+print events on 2025-03-09
+print events from 2025-03-09T10:00 to 2025-03-10T11:00
+show status on 2025-03-11T15:00
+create event "Study Session" from 2025-03-09T19:00 to 2025-03-09T20:00 description "DBMS" location "Shillman Hall"
+create event "DBMS Class" from 2025-03-10T17:00 to 2025-03-10T18:00 repeats MWF for 3 times description "Recurring Event Creation" location "NEU"
+create event "Billiards Time" from 2025-03-14T21:00 to 2025-03-14T22:00 location "Curry Center"
+create event "Squash Game" from 2025-03-12T12:00 to 2025-03-12T13:00 location "Squash Busters"
+export cal NikhilNisha.csv
+exit

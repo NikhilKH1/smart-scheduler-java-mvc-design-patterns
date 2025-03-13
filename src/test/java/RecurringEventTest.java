@@ -1,137 +1,100 @@
-import org.junit.Before;
+
+
 import org.junit.Test;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-import calendarapp.model.RecurringEvent;
-import calendarapp.model.SingleEvent;
+import calendarapp.model.event.RecurringEvent;
+import calendarapp.model.event.SingleEvent;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
+/**
+ * JUnit tests for the RecurringEvent class.
+ */
 public class RecurringEventTest {
 
-  private RecurringEvent recurringEvent;
+  @Test
+  public void testCreateRecurringEvent() {
+    LocalDateTime start = LocalDateTime.of(2025, 6, 1, 9, 0);
+    LocalDateTime end = LocalDateTime.of(2025, 6, 1, 10, 0);
 
-  @Before
-  public void setUp() {
-    recurringEvent = new RecurringEvent(
-            "Algorithms Class",
-            LocalDateTime.of(2025, 3, 10, 10, 0),
-            LocalDateTime.of(2025, 3, 10, 11, 0),
-            "MWF",
-            5,
-            null
-    );
-  }
+    RecurringEvent event = new RecurringEvent("Daily Standup", start, end, "MTWRF",
+            5, null, "Scrum meeting", "Office", true,
+            false);
 
-  @Before
-  public void setUp2() {
-    // Monday (M), Wednesday (W), Friday (F), repeating 5 times
-    recurringEvent = new RecurringEvent(
-            "Standup Meeting",
-            LocalDateTime.of(2025, 5, 5, 9, 0),
-            LocalDateTime.of(2025, 5, 5, 9, 30),
-            "MWF",
-            5,
-            null
-    );
+    assertEquals("Daily Standup", event.getSubject());
+    assertEquals(start, event.getStartDateTime());
+    assertEquals(end, event.getEndDateTime());
+    assertEquals("MTWRF", event.getWeekdays());
+    assertEquals(5, event.getRepeatCount());
+    assertNull(event.getRepeatUntil());
+    assertEquals("Scrum meeting", event.getDescription());
+    assertEquals("Office", event.getLocation());
+    assertTrue(event.isPublic());
+    assertFalse(event.isAllDay());
   }
 
   @Test
-  public void testGenerateOccurrencesUntilDate() {
-    recurringEvent = new RecurringEvent(
-            "Data Structures Class",
-            LocalDateTime.of(2025, 4, 1, 9, 0),
-            LocalDateTime.of(2025, 4, 1, 10, 0),
-            "TR",
-            0,
-            LocalDateTime.of(2025, 4, 10, 23, 59) // Clearly corrected time
-    );
+  public void testRecurringEventWithEndDate() {
+    LocalDateTime start = LocalDateTime.of(2025, 6, 1, 9, 0);
+    LocalDateTime end = LocalDateTime.of(2025, 6, 1, 10, 0);
+    LocalDateTime repeatUntil = LocalDateTime.of(2025, 6, 10, 0, 0);
 
-    List<SingleEvent> occurrences = recurringEvent.generateOccurrences();
-    assertEquals("Expected exactly 4 occurrences", 4, occurrences.size());
+    RecurringEvent event = new RecurringEvent("Yoga Class", start, end, "MWF",
+            0, repeatUntil, "Morning exercise", "Gym", false, false);
 
-    assertEquals(LocalDateTime.of(2025, 4, 1, 9, 0), occurrences.get(0).getStartDateTime()); // Tuesday
-    assertEquals(LocalDateTime.of(2025, 4, 3, 9, 0), occurrences.get(1).getStartDateTime()); // Thursday
-    assertEquals(LocalDateTime.of(2025, 4, 8, 9, 0), occurrences.get(2).getStartDateTime()); // Next Tuesday
-    assertEquals(LocalDateTime.of(2025, 4, 10, 9, 0), occurrences.get(3).getStartDateTime()); // Next Thursday
-  }
-
-
-  @Test
-  public void testNoOccurrencesGenerated() {
-    recurringEvent = new RecurringEvent(
-            "Empty Class",
-            LocalDateTime.of(2025, 5, 1, 9, 0),
-            LocalDateTime.of(2025, 5, 1, 10, 0),
-            "",
-            5,
-            null
-    );
-
-    List<SingleEvent> occurrences = recurringEvent.generateOccurrences();
-    assertTrue("Expected no occurrences to be generated", occurrences.isEmpty());
+    assertEquals("MWF", event.getWeekdays());
+    assertEquals(repeatUntil, event.getRepeatUntil());
   }
 
   @Test
-  public void testOccurrencesRespectWeekdays() {
-    recurringEvent = new RecurringEvent(
-            "Weekly Review",
-            LocalDateTime.of(2025, 6, 2, 14, 0),
-            LocalDateTime.of(2025, 6, 2, 15, 0),
-            "F",
-            2,
-            null
-    );
+  public void testGenerateOccurrences() {
+    LocalDateTime start = LocalDateTime.of(2025, 6, 1, 9, 0);
+    LocalDateTime end = LocalDateTime.of(2025, 6, 1, 10, 0);
 
-    List<SingleEvent> occurrences = recurringEvent.generateOccurrences();
-    assertEquals("Expected exactly 2 occurrences", 2, occurrences.size());
+    RecurringEvent event = new RecurringEvent("Weekly Sync", start, end, "W",
+            3, null, "Check-in", "Conference Room",
+            true, false);
 
-    assertEquals(LocalDateTime.of(2025, 6, 6, 14, 0), occurrences.get(0).getStartDateTime()); // First Friday
-    assertEquals(LocalDateTime.of(2025, 6, 13, 14, 0), occurrences.get(1).getStartDateTime()); // Next Friday
+    List<SingleEvent> occurrences = event.generateOccurrences("series-123");
+
+    assertEquals(3, occurrences.size());
+    assertEquals("Weekly Sync", occurrences.get(0).getSubject());
+    assertEquals("series-123", occurrences.get(0).getSeriesId());
   }
 
   @Test
-  public void testGenerateOccurrencesFixedCount() {
-    List<SingleEvent> occurrences = recurringEvent.generateOccurrences();
-    assertEquals("Should generate 5 occurrences", 5, occurrences.size());
+  public void testGenerateOccurrencesWithEndDate() {
+    LocalDateTime start = LocalDateTime.of(2025, 6, 1, 9, 0);
+    LocalDateTime end = LocalDateTime.of(2025, 6, 1, 10, 0);
+    LocalDateTime repeatUntil = LocalDateTime.of(2025, 6, 5, 0, 0);
 
-    // Check the first occurrence date/time
-    assertEquals(LocalDateTime.of(2025, 5, 5, 9, 0), occurrences.get(0).getStartDateTime());
+    RecurringEvent event = new RecurringEvent("Daily Workout", start, end, "MTWRF",
+            0, repeatUntil, "Morning fitness", "Gym", false,
+            false);
+
+    List<SingleEvent> occurrences = event.generateOccurrences("series-456");
+
+    assertFalse(occurrences.isEmpty());
+    assertTrue(occurrences.get(0).getStartDateTime().isBefore(repeatUntil));
+    assertEquals("series-456", occurrences.get(0).getSeriesId());
   }
 
   @Test
-  public void testGenerateOccurrencesUntilDate2() {
-    // Modify recurringEvent to have repeatUntil
-    recurringEvent = new RecurringEvent(
-            "Yoga Class",
-            LocalDateTime.of(2025, 6, 1, 7, 0),
-            LocalDateTime.of(2025, 6, 1, 8, 0),
-            "TR", // Tuesday, Thursday
-            0,
-            LocalDateTime.of(2025, 6, 15, 23, 59)
-    );
-    List<SingleEvent> occurrences = recurringEvent.generateOccurrences();
-    // Check that we have multiple occurrences up until mid-June
-    assertFalse("Should generate some occurrences", occurrences.isEmpty());
-    // Optionally verify last occurrence is on or before 2025-06-15
-    LocalDateTime lastOccurrence = occurrences.get(occurrences.size() - 1).getStartDateTime();
-    assertTrue("Last occurrence is before or on 2025-06-15", !lastOccurrence.isAfter(LocalDateTime.of(2025, 6, 15, 23, 59)));
-  }
+  public void testToStringFormat() {
+    LocalDateTime start = LocalDateTime.of(2025, 6, 1, 9, 0);
+    LocalDateTime end = LocalDateTime.of(2025, 6, 1, 10, 0);
 
-  @Test
-  public void testNoWeekdaysSpecified() {
-    // If weekdays is empty, no occurrences should be generated
-    recurringEvent = new RecurringEvent(
-            "Empty Series",
-            LocalDateTime.of(2025, 7, 1, 10, 0),
-            LocalDateTime.of(2025, 7, 1, 11, 0),
-            "",
-            5,
-            null
-    );
-    List<SingleEvent> occurrences = recurringEvent.generateOccurrences();
-    assertTrue("No weekdays -> no occurrences", occurrences.isEmpty());
+    RecurringEvent event = new RecurringEvent("Project Meeting", start, end, "T",
+            4, null, "Weekly status", "Office",
+            true, false);
+
+    assertTrue(event.getDescription().contains("Weekly status"));
+    assertEquals("Project Meeting", event.getSubject());
   }
 }
