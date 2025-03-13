@@ -27,7 +27,8 @@ public class ConflictCheckerTest {
     SingleEvent event2 = new SingleEvent("Event 2", start2, end2, "", "",
             true, false, null);
 
-    assertTrue("These events should conflict", ConflictChecker.hasConflict(event1, event2));
+    assertTrue("These events should conflict",
+            ConflictChecker.hasConflict(event1, event2));
   }
 
   @Test
