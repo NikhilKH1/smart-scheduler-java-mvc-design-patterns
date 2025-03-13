@@ -21,7 +21,7 @@ public class CalendarApp {
    * headless mode.
    *
    * @param args command-line arguments; use "--mode interactive" for interactive mode or
-   *             "--mode headless <commands-file>" for headless mode
+   *             "--mode headless commandsfile" for headless mode
    */
   public static void main(String[] args) {
     CalendarModel model = new CalendarModel();
@@ -52,8 +52,8 @@ public class CalendarApp {
    * @param model      the CalendarModel holding event data
    * @param view       the CalendarView used to display events and messages
    */
-  private static void runInteractiveMode(CalendarController controller,
-                                         CalendarModel model, CalendarView view) {
+  public static void runInteractiveMode(CalendarController controller,
+                                        CalendarModel model, CalendarView view) {
     Scanner scanner = new Scanner(System.in);
     System.out.println("Enter commands (type 'exit' to quit):");
     while (true) {
@@ -82,13 +82,15 @@ public class CalendarApp {
    * @param view       the CalendarView used to display events and messages
    * @param fileName   the name of the file containing commands
    */
-  private static void runHeadlessMode(CalendarController controller,
-                                      CalendarModel model, CalendarView view, String fileName) {
+  public static void runHeadlessMode(CalendarController controller,
+                                     CalendarModel model, CalendarView view, String fileName) {
     try (BufferedReader reader = new BufferedReader(new FileReader(fileName))) {
       String command;
       while ((command = reader.readLine()) != null) {
         String trimmed = command.trim();
-        if (trimmed.isEmpty()) continue;
+        if (trimmed.isEmpty()) {
+          continue;
+        }
 
         if (trimmed.equalsIgnoreCase("exit")) {
           System.out.println("Exit command encountered. Terminating headless mode.");

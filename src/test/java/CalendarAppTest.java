@@ -9,26 +9,30 @@ import calendarapp.view.ICalendarView;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.PrintStream;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
-import java.io.*;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+/**
+ * Junit test for CalendarApp class.
+ */
 public class CalendarAppTest {
 
-  private CalendarModel model;
+
   private TestCalendarView view;
   private CalendarController controller;
 
   @Before
   public void setUp() {
+    CalendarModel model;
     model = new CalendarModel();
     view = new TestCalendarView();
     controller = new CalendarController(model, view);
@@ -109,11 +113,6 @@ public class CalendarAppTest {
     assertEquals("ERROR: Command is null", view.getLastMessage());
   }
 
-  @Test
-  public void testApplicationExit() {
-    assertTrue("Application should exit gracefully", true);
-  }
-
 
   private static class TestCalendarView implements ICalendarView {
     private String lastMessage = "";
@@ -140,3 +139,4 @@ public class CalendarAppTest {
     }
   }
 }
+

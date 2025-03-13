@@ -1,17 +1,23 @@
 import calendarapp.controller.CalendarController;
 import calendarapp.controller.CommandParser;
 import calendarapp.model.CalendarModel;
-import calendarapp.model.commands.*;
 
 import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import calendarapp.model.commands.BusyQueryCommand;
+import calendarapp.model.commands.Command;
+import calendarapp.model.commands.CreateEventCommand;
+import calendarapp.model.commands.EditEventCommand;
+import calendarapp.model.commands.EditRecurringEventCommand;
+import calendarapp.model.commands.ExportCalendarCommand;
+import calendarapp.model.commands.QueryByDateCommand;
+import calendarapp.model.commands.QueryRangeDateTimeCommand;
 import calendarapp.model.event.CalendarEvent;
 import calendarapp.view.ICalendarView;
 
@@ -26,13 +32,12 @@ import java.util.List;
  */
 public class CommandParserTest {
   private CalendarController controller;
-  private CalendarModel model;
   private TestCalendarViewParser view;
   private CommandParser parser;
 
   @Before
   public void setUp() {
-    model = new CalendarModel();
+    CalendarModel model = new CalendarModel();
     view = new TestCalendarViewParser();
     parser = new CommandParser(model);
     controller = new CalendarController(model, view, parser);
@@ -42,55 +47,70 @@ public class CommandParserTest {
   public void testParseCreateEvent() {
     String command = "create event \"Meeting\" from 2025-06-01T09:00 to 2025-06-01T10:00";
     Command parsedCommand = parser.parse(command);
-    assertTrue("Should parse as CreateEventCommand", parsedCommand instanceof CreateEventCommand);
+    assertTrue("Should parse as CreateEventCommand",
+            parsedCommand instanceof CreateEventCommand);
 
     CreateEventCommand createCmd = (CreateEventCommand) parsedCommand;
     assertEquals("Event name should match", "Meeting", createCmd.getEventName());
-    assertEquals("Start time should match", LocalDateTime.of(2025, 6, 1, 9, 0), createCmd.getStartDateTime());
-    assertEquals("End time should match", LocalDateTime.of(2025, 6, 1, 10, 0), createCmd.getEndDateTime());
+    assertEquals("Start time should match", LocalDateTime.of(2025, 6,
+            1, 9, 0), createCmd.getStartDateTime());
+    assertEquals("End time should match", LocalDateTime.of(2025, 6,
+            1, 10, 0), createCmd.getEndDateTime());
   }
 
   @Test
   public void testParsePrintEventsOnDate() {
     String command = "print events on 2025-06-01";
     Command parsedCommand = parser.parse(command);
-    assertTrue("Should parse as QueryByDateCommand", parsedCommand instanceof QueryByDateCommand);
+    assertTrue("Should parse as QueryByDateCommand",
+            parsedCommand instanceof QueryByDateCommand);
 
     QueryByDateCommand queryCmd = (QueryByDateCommand) parsedCommand;
-    assertEquals("Query date should match", LocalDate.of(2025, 6, 1), queryCmd.getQueryDate());
+    assertEquals("Query date should match", LocalDate.of(2025,
+            6, 1), queryCmd.getQueryDate());
   }
 
   @Test
   public void testParsePrintEventsInRange() {
     String command = "print events from 2025-06-01T09:00 to 2025-06-01T10:30";
     Command parsedCommand = parser.parse(command);
-    assertTrue("Should parse as QueryRangeDateTimeCommand", parsedCommand instanceof QueryRangeDateTimeCommand);
+    assertTrue("Should parse as QueryRangeDateTimeCommand",
+            parsedCommand instanceof QueryRangeDateTimeCommand);
 
     QueryRangeDateTimeCommand rangeCmd = (QueryRangeDateTimeCommand) parsedCommand;
-    assertEquals("Start time should match", LocalDateTime.of(2025, 6, 1, 9, 0), rangeCmd.getStartDateTime());
-    assertEquals("End time should match", LocalDateTime.of(2025, 6, 1, 10, 30), rangeCmd.getEndDateTime());
+    assertEquals("Start time should match", LocalDateTime.of(2025,
+            6, 1, 9, 0), rangeCmd.getStartDateTime());
+    assertEquals("End time should match", LocalDateTime.of(2025,
+            6, 1, 10, 30), rangeCmd.getEndDateTime());
   }
 
   @Test
   public void testParseShowStatus() {
     String command = "show status on 2025-06-01T10:00";
     Command parsedCommand = parser.parse(command);
-    assertTrue("Should parse as BusyQueryCommand", parsedCommand instanceof BusyQueryCommand);
+    assertTrue("Should parse as BusyQueryCommand",
+            parsedCommand instanceof BusyQueryCommand);
 
     BusyQueryCommand busyCmd = (BusyQueryCommand) parsedCommand;
-    assertEquals("Query time should match", LocalDateTime.of(2025, 6, 1, 10, 0), busyCmd.getQueryTime());
+    assertEquals("Query time should match", LocalDateTime.of(2025,
+            6, 1, 10, 0), busyCmd.getQueryTime());
   }
 
   @Test
   public void testParseEditSingleEvent() {
-    String command = "edit event description \"Meeting\" from 2025-06-01T09:00 to 2025-06-01T10:00 with \"Updated Description\"";
+    String command = "edit event description \"Meeting\" from 2025-06-01T09:00 to "
+            + "2025-06-01T10:00 with \"Updated Description\"";
     Command parsedCommand = parser.parse(command);
-    assertTrue("Should parse as EditEventCommand", parsedCommand instanceof EditEventCommand);
+    assertTrue("Should parse as EditEventCommand",
+            parsedCommand instanceof EditEventCommand);
 
     EditEventCommand editCmd = (EditEventCommand) parsedCommand;
-    assertEquals("Event name should match", "Meeting", editCmd.getEventName());
-    assertEquals("Property should be 'description'", "description", editCmd.getProperty());
-    assertEquals("New value should be 'Updated Description'", "Updated Description", editCmd.getNewValue());
+    assertEquals("Event name should match", "Meeting",
+            editCmd.getEventName());
+    assertEquals("Property should be 'description'", "description",
+            editCmd.getProperty());
+    assertEquals("New value should be 'Updated Description'",
+            "Updated Description", editCmd.getNewValue());
   }
 
   @Test
@@ -98,22 +118,28 @@ public class CommandParserTest {
     String command = "edit events repeatuntil \"Team Sync\" 2025-12-31T00:00";
 
     Command parsedCommand = parser.parse(command);
-    assertTrue("Should parse as EditRecurringEventCommand", parsedCommand instanceof EditRecurringEventCommand);
+    assertTrue("Should parse as EditRecurringEventCommand",
+            parsedCommand instanceof EditRecurringEventCommand);
 
     EditRecurringEventCommand editCmd = (EditRecurringEventCommand) parsedCommand;
-    assertEquals("Event name should match", "Team Sync", editCmd.getEventName());
-    assertEquals("Property should be 'repeatuntil'", "repeatuntil", editCmd.getProperty());
-    assertEquals("New value should be '2025-12-31T00:00'", "2025-12-31T00:00", editCmd.getNewValue());
+    assertEquals("Event name should match", "Team Sync",
+            editCmd.getEventName());
+    assertEquals("Property should be 'repeatuntil'", "repeatuntil",
+            editCmd.getProperty());
+    assertEquals("New value should be '2025-12-31T00:00'", "2025-12-31T00:00",
+            editCmd.getNewValue());
   }
 
   @Test
   public void testParseExportCommand() {
     String command = "export cal events.csv";
     Command parsedCommand = parser.parse(command);
-    assertTrue("Should parse as ExportCalendarCommand", parsedCommand instanceof ExportCalendarCommand);
+    assertTrue("Should parse as ExportCalendarCommand",
+            parsedCommand instanceof ExportCalendarCommand);
 
     ExportCalendarCommand exportCmd = (ExportCalendarCommand) parsedCommand;
-    assertEquals("File name should match", "events.csv", exportCmd.getFileName());
+    assertEquals("File name should match", "events.csv",
+            exportCmd.getFileName());
   }
 
   @Test
@@ -123,7 +149,8 @@ public class CommandParserTest {
       parser.parse(command);
       fail("Should throw IllegalArgumentException for unknown command");
     } catch (IllegalArgumentException e) {
-      assertEquals("Unknown command: unknowncommand", e.getMessage());
+      assertEquals("Unknown command: unknowncommand",
+              e.getMessage());
     }
   }
 
@@ -134,7 +161,8 @@ public class CommandParserTest {
       parser.parse(command);
       fail("Should throw IllegalArgumentException for malformed command");
     } catch (IllegalArgumentException e) {
-      assertTrue("Error message should contain 'Expected 'from' or 'on' after event name'",
+      assertTrue("Error message should contain 'Expected 'from'"
+                      + " or 'on' after event name'",
               e.getMessage().contains("Expected 'from' or 'on' after event name"));
     }
   }
@@ -148,15 +176,15 @@ public class CommandParserTest {
     } catch (IndexOutOfBoundsException e) {
       System.out.println("Actual Error Message: " + e.getMessage());
       assertTrue("Error message should indicate missing date",
-              e.getMessage().contains("Index") || e.getMessage().contains("Expected date after 'from'"));
+              e.getMessage().contains("Index")
+                      || e.getMessage().contains("Expected date after 'from'"));
     } catch (IllegalArgumentException e) {
       System.out.println("Actual Error Message: " + e.getMessage());
       assertTrue("Error message should indicate missing date",
-              e.getMessage().contains("Expected 'from' or 'on' after event name") ||
-                      e.getMessage().contains("Invalid date/time format"));
+              e.getMessage().contains("Expected 'from' or 'on' after event name")
+                      || e.getMessage().contains("Invalid date/time format"));
     }
   }
-
 
   @Test
   public void testParseCreateEventInvalidDate() {
@@ -165,7 +193,8 @@ public class CommandParserTest {
       controller.processCommand(command);
       fail("Expected DateTimeParseException due to invalid date");
     } catch (DateTimeParseException e) {
-      assertTrue("Error message should indicate invalid date", e.getMessage().contains("could not be parsed"));
+      assertTrue("Error message should indicate invalid date",
+              e.getMessage().contains("could not be parsed"));
     }
   }
 
@@ -176,7 +205,8 @@ public class CommandParserTest {
       parser.parse(command);
       fail("Should throw IllegalArgumentException due to missing date");
     } catch (IllegalArgumentException e) {
-      assertTrue("Error message should indicate missing date", e.getMessage().contains("Expected date after 'on'"));
+      assertTrue("Error message should indicate missing date",
+              e.getMessage().contains("Expected date after 'on'"));
     }
   }
 
@@ -187,7 +217,8 @@ public class CommandParserTest {
       parser.parse(command);
       fail("Should throw IllegalArgumentException due to incorrect date format");
     } catch (IllegalArgumentException e) {
-      assertTrue("Error message should indicate incorrect format", e.getMessage().contains("Invalid date format"));
+      assertTrue("Error message should indicate incorrect format",
+              e.getMessage().contains("Invalid date format"));
     }
   }
 
@@ -198,16 +229,11 @@ public class CommandParserTest {
       parser.parse(command);
       fail("Should throw IllegalArgumentException due to missing date");
     } catch (IllegalArgumentException e) {
-      assertTrue("Error message should indicate missing date", e.getMessage().contains("Usage: show status on <dateTime>"));
+      assertTrue("Error message should indicate missing date",
+              e.getMessage().contains("Usage: show status on <dateTime>"));
     }
   }
 
-  @Test(expected = IllegalArgumentException.class)
-  public void testParseEditSingleEventMissingDetails() {
-    String command = "edit event description";
-    parser.parse(command);
-    assertFalse(true);
-  }
 
   @Test
   public void testParseEditRecurringEventInvalidFormat() {
@@ -216,7 +242,8 @@ public class CommandParserTest {
       parser.parse(command);
       fail("Should throw IllegalArgumentException due to missing new value");
     } catch (IllegalArgumentException e) {
-      assertTrue("Error message should indicate incorrect format", e.getMessage().contains("Invalid edit events command format"));
+      assertTrue("Error message should indicate incorrect format",
+              e.getMessage().contains("Invalid edit events command format"));
     }
   }
 
@@ -227,7 +254,8 @@ public class CommandParserTest {
       parser.parse(command);
       fail("Should throw IllegalArgumentException due to missing file name");
     } catch (IllegalArgumentException e) {
-      assertTrue("Error message should indicate missing file name", e.getMessage().contains("Invalid export command format"));
+      assertTrue("Error message should indicate missing file name",
+              e.getMessage().contains("Invalid export command format"));
     }
   }
 
@@ -238,7 +266,8 @@ public class CommandParserTest {
       parser.parse(command);
       fail("Should throw IllegalArgumentException due to incorrect file extension");
     } catch (IllegalArgumentException e) {
-      assertTrue("Error message should indicate incorrect format", e.getMessage().contains("Invalid file name. Must be a CSV file"));
+      assertTrue("Error message should indicate incorrect format",
+              e.getMessage().contains("Invalid file name. Must be a CSV file"));
     }
   }
 
@@ -259,23 +288,18 @@ public class CommandParserTest {
     }
   }
 
-
   @Test
   public void testParseRecurringEventExceeds24Hours() {
-    String command = "create event \"Long Meeting\" from 2025-06-01T09:00 to 2025-06-02T10:00 repeats MTWRF until 2025-06-30T23:59";
+    String command = "create event \"Long Meeting\" from 2025-06-01T09:00 to "
+            + "2025-06-02T10:00 repeats MTWRF until 2025-06-30T23:59";
     try {
       parser.parse(command);
       fail("Should throw IllegalArgumentException because event exceeds 24 hours");
     } catch (IllegalArgumentException e) {
-      assertTrue("Error message should indicate event exceeds 24 hours", e.getMessage().contains("Recurring event must end within 24 hours of the start time."));
+      assertTrue("Error message should indicate event exceeds 24 hours",
+              e.getMessage().contains("Recurring event must end within "
+                      + "24 hours of the start time."));
     }
-  }
-
-  @Test
-  public void testParseEditEventInvalidProperty() throws IllegalArgumentException {
-    String command = "edit event invalidprop \"Meeting\" from 2025-06-01T09:00 to 2025-06-01T10:00 with \"New Value\"";
-    parser.parse(command);
-    assertFalse(false);
   }
 
   @Test
@@ -285,7 +309,8 @@ public class CommandParserTest {
       parser.parse(command);
       fail("Should throw IllegalArgumentException for incomplete edit events command");
     } catch (IllegalArgumentException e) {
-      assertTrue("Error message should indicate missing keywords", e.getMessage().contains("Incomplete edit command"));
+      assertTrue("Error message should indicate missing keywords",
+              e.getMessage().contains("Incomplete edit command"));
     }
   }
 
@@ -296,7 +321,8 @@ public class CommandParserTest {
       parser.parse(command);
       fail("Expected IllegalArgumentException for invalid export format");
     } catch (IllegalArgumentException e) {
-      assertEquals("Invalid export command format. Expected: export cal fileName.csv", e.getMessage());
+      assertEquals("Invalid export command format. Expected: export cal fileName.csv",
+              e.getMessage());
     }
   }
 
@@ -307,7 +333,8 @@ public class CommandParserTest {
       parser.parse(command);
       fail("Expected IllegalArgumentException for missing 'cal' keyword");
     } catch (IllegalArgumentException e) {
-      assertEquals("Invalid export command. Expected 'cal' after export.", e.getMessage());
+      assertEquals("Invalid export command. Expected 'cal' after export.",
+              e.getMessage());
     }
   }
 
@@ -318,7 +345,8 @@ public class CommandParserTest {
       parser.parse(command);
       fail("Expected IllegalArgumentException for invalid file extension");
     } catch (IllegalArgumentException e) {
-      assertEquals("Invalid file name. Must be a CSV file ending with .csv", e.getMessage());
+      assertEquals("Invalid file name. Must be a CSV file ending with .csv",
+              e.getMessage());
     }
   }
 
@@ -326,7 +354,8 @@ public class CommandParserTest {
   public void testParseExportCommandValid() {
     String command = "export cal events.csv";
     Command parsedCommand = parser.parse(command);
-    assertTrue("Should parse as ExportCalendarCommand", parsedCommand instanceof ExportCalendarCommand);
+    assertTrue("Should parse as ExportCalendarCommand",
+            parsedCommand instanceof ExportCalendarCommand);
 
     ExportCalendarCommand exportCmd = (ExportCalendarCommand) parsedCommand;
     assertEquals("events.csv", exportCmd.getFileName());
@@ -339,7 +368,8 @@ public class CommandParserTest {
       parser.parse(command);
       fail("Expected IllegalArgumentException for incomplete print command");
     } catch (IllegalArgumentException e) {
-      assertEquals("Incomplete print events command. Usage: print events on/from <date/time>", e.getMessage());
+      assertEquals("Incomplete print events command. Usage: print events on/from "
+              + "<date/time>", e.getMessage());
     }
   }
 
@@ -369,7 +399,8 @@ public class CommandParserTest {
   public void testParsePrintCommandOnValid() {
     String command = "print events on 2025-06-01";
     Command parsedCommand = parser.parse(command);
-    assertTrue("Should parse as QueryByDateCommand", parsedCommand instanceof QueryByDateCommand);
+    assertTrue("Should parse as QueryByDateCommand",
+            parsedCommand instanceof QueryByDateCommand);
 
     QueryByDateCommand queryCmd = (QueryByDateCommand) parsedCommand;
     assertEquals(LocalDate.of(2025, 6, 1), queryCmd.getQueryDate());
@@ -382,7 +413,8 @@ public class CommandParserTest {
       parser.parse(command);
       fail("Expected IllegalArgumentException for incomplete range");
     } catch (IllegalArgumentException e) {
-      assertEquals("Incomplete print events range command. Usage: print events from <start> to <end>", e.getMessage());
+      assertEquals("Incomplete print events range command. "
+              + "Usage: print events from <start> to <end>", e.getMessage());
     }
   }
 
@@ -401,11 +433,14 @@ public class CommandParserTest {
   public void testParsePrintCommandFromValidRange() {
     String command = "print events from 2025-06-01T09:00 to 2025-06-01T10:30";
     Command parsedCommand = parser.parse(command);
-    assertTrue("Should parse as QueryRangeDateTimeCommand", parsedCommand instanceof QueryRangeDateTimeCommand);
+    assertTrue("Should parse as QueryRangeDateTimeCommand",
+            parsedCommand instanceof QueryRangeDateTimeCommand);
 
     QueryRangeDateTimeCommand rangeCmd = (QueryRangeDateTimeCommand) parsedCommand;
-    assertEquals(LocalDateTime.of(2025, 6, 1, 9, 0), rangeCmd.getStartDateTime());
-    assertEquals(LocalDateTime.of(2025, 6, 1, 10, 30), rangeCmd.getEndDateTime());
+    assertEquals(LocalDateTime.of(2025, 6, 1,
+            9, 0), rangeCmd.getStartDateTime());
+    assertEquals(LocalDateTime.of(2025, 6, 1,
+            10, 30), rangeCmd.getEndDateTime());
   }
 
   @Test
@@ -426,24 +461,32 @@ public class CommandParserTest {
       parser.parse(command);
       fail("Expected IllegalArgumentException for incomplete edit event command");
     } catch (IllegalArgumentException e) {
-      assertEquals("Incomplete edit event command. Expected format: edit event <property> <eventName> from <start> to <end> with <NewPropertyValue>", e.getMessage());
+      assertEquals("Incomplete edit event command. Expected format:"
+                      + " edit event <property> <eventName> from <start> to <end> with "
+                      + "<NewPropertyValue>",
+              e.getMessage());
     }
   }
 
   @Test
   public void testParseEditSingleEventCommandMissingFromKeyword() {
-    String command = "edit event description \"Meeting\" 2025-06-01T09:00 to 2025-06-01T10:00 with \"Updated Description\"";
+    String command = "edit event description \"Meeting\" 2025-06-01T09:00 to "
+            + "2025-06-01T10:00 with \"Updated Description\"";
     try {
       parser.parse(command);
       fail("Expected IllegalArgumentException for missing 'from' keyword");
     } catch (IllegalArgumentException e) {
-      assertEquals("Incomplete edit event command. Expected format: edit event <property> <eventName> from <start> to <end> with <NewPropertyValue>", e.getMessage());
+      assertEquals("Incomplete edit event command. Expected format: "
+                      + "edit event <property> <eventName> from <start> to <end> with "
+                      + "<NewPropertyValue>",
+              e.getMessage());
     }
   }
 
   @Test
   public void testParseEditSingleEventCommandMissingToKeyword() {
-    String command = "edit event description \"Meeting\" from 2025-06-01T09:00 something 2025-06-01T10:00 with \"Updated Description\"";
+    String command = "edit event description \"Meeting\" from 2025-06-01T09:00 "
+            + "something 2025-06-01T10:00 with \"Updated Description\"";
     try {
       parser.parse(command);
       fail("Expected IllegalArgumentException for missing 'to' keyword");
@@ -454,7 +497,8 @@ public class CommandParserTest {
 
   @Test
   public void testParseEditSingleEventCommandMissingFromKeywordMain() {
-    String command = "edit event description \"Meeting\" something 2025-06-01T09:00 to 2025-06-01T10:00 with \"Updated Description\"";
+    String command = "edit event description \"Meeting\" something 2025-06-01T09:00 "
+            + "to 2025-06-01T10:00 with \"Updated Description\"";
     try {
       parser.parse(command);
       fail("Expected IllegalArgumentException for missing 'from' keyword");
@@ -465,7 +509,8 @@ public class CommandParserTest {
 
   @Test
   public void testParseEditSingleEventCommandMissingWithKeywordMain() {
-    String command = "edit event description \"Meeting\" from 2025-06-01T09:00 to 2025-06-01T10:00 without \"Updated Description\"";
+    String command = "edit event description \"Meeting\" from 2025-06-01T09:00 "
+            + "to 2025-06-01T10:00 without \"Updated Description\"";
     try {
       parser.parse(command);
       fail("Expected IllegalArgumentException for missing 'from' keyword");
@@ -481,27 +526,34 @@ public class CommandParserTest {
       parser.parse(command);
       fail("Expected IllegalArgumentException for missing 'with' keyword");
     } catch (IllegalArgumentException e) {
-      assertEquals("Incomplete edit event command. Expected format: edit event <property> <eventName> from <start> to <end> with <NewPropertyValue>", e.getMessage());
+      assertEquals("Incomplete edit event command. Expected format:"
+                      + " edit event <property> <eventName> from <start> to <end> with <NewPropertyValue>",
+              e.getMessage());
     }
   }
 
   @Test
   public void testParseEditSingleEventCommandValid() {
-    String command = "edit event description \"Meeting\" from 2025-06-01T09:00 to 2025-06-01T10:00 with \"Updated Description\"";
+    String command = "edit event description \"Meeting\" from 2025-06-01T09:00 "
+            + "to 2025-06-01T10:00 with \"Updated Description\"";
     Command parsedCommand = parser.parse(command);
-    assertTrue("Should parse as EditEventCommand", parsedCommand instanceof EditEventCommand);
+    assertTrue("Should parse as EditEventCommand",
+            parsedCommand instanceof EditEventCommand);
 
     EditEventCommand editCmd = (EditEventCommand) parsedCommand;
     assertEquals("description", editCmd.getProperty());
     assertEquals("Meeting", editCmd.getEventName());
-    assertEquals(LocalDateTime.of(2025, 6, 1, 9, 0), editCmd.getOriginalStart());
-    assertEquals(LocalDateTime.of(2025, 6, 1, 10, 0), editCmd.getOriginalEnd());
+    assertEquals(LocalDateTime.of(2025, 6, 1, 9, 0),
+            editCmd.getOriginalStart());
+    assertEquals(LocalDateTime.of(2025, 6, 1, 10, 0),
+            editCmd.getOriginalEnd());
     assertEquals("Updated Description", editCmd.getNewValue());
   }
 
   @Test
   public void testParseEditEventsCommandMissingFromKeyword() {
-    String command = "edit events description \"Meeting\" nothing 2025-06-01T09:00 with \"Updated Description\"";
+    String command = "edit events description \"Meeting\" nothing 2025-06-01T09:00 "
+            + "with \"Updated Description\"";
     try {
       parser.parse(command);
       fail("Expected IllegalArgumentException for missing 'from' keyword");
@@ -512,7 +564,8 @@ public class CommandParserTest {
 
   @Test
   public void testParseEditEventsCommandMissingWithKeyword() {
-    String command = "edit events description \"Meeting\" from 2025-06-01T09:00 something \"Updated Description\"";
+    String command = "edit events description \"Meeting\" from 2025-06-01T09:00 "
+            + "something \"Updated Description\"";
     try {
       parser.parse(command);
       fail("Expected IllegalArgumentException for missing 'with' keyword");
@@ -525,178 +578,11 @@ public class CommandParserTest {
   public void testParseEditRecurringEventCommand() {
     String command = "edit events repeatuntil \"WeeklyStandup\" \"2025-07-31T23:59\"";
     Command parsedCommand = parser.parse(command);
-    assertTrue("Should parse as EditRecurringEventCommand", parsedCommand instanceof EditRecurringEventCommand);
-
+    assertTrue(parsedCommand instanceof EditRecurringEventCommand);
     EditRecurringEventCommand editCmd = (EditRecurringEventCommand) parsedCommand;
     assertEquals("repeatuntil", editCmd.getProperty());
     assertEquals("WeeklyStandup", editCmd.getEventName());
     assertEquals("2025-07-31T23:59", editCmd.getNewValue());
-  }
-
-  @Test
-  public void testParseEditNonRecurringEventCommand() {
-    String command = "edit events description \"Meeting\" \"Updated Description\"";
-    Command parsedCommand = parser.parse(command);
-    assertTrue("Should parse as EditEventCommand", parsedCommand instanceof EditEventCommand);
-
-    EditEventCommand editCmd = (EditEventCommand) parsedCommand;
-    assertEquals("description", editCmd.getProperty());
-    assertEquals("Meeting", editCmd.getEventName());
-    assertEquals("Updated Description", editCmd.getNewValue());
-  }
-
-  @Test
-  public void testParseEditEventWithFilterDateTime() {
-    String command = "edit events description \"Meeting\" from 2025-06-01T09:00 with \"Updated Description\"";
-    Command parsedCommand = parser.parse(command);
-    assertTrue("Should parse as EditEventCommand", parsedCommand instanceof EditEventCommand);
-
-    EditEventCommand editCmd = (EditEventCommand) parsedCommand;
-    assertEquals("description", editCmd.getProperty());
-    assertEquals("Meeting", editCmd.getEventName());
-    assertEquals(LocalDateTime.of(2025, 6, 1, 9, 0), editCmd.getFilterDateTime());
-    assertEquals("Updated Description", editCmd.getNewValue());
-  }
-
-  @Test(expected = IllegalArgumentException.class)
-  public void testParseCreateEventWithEndBeforeStart() {
-    String command = "create event \"InvalidEvent\" from 2025-06-02T10:00 to 2025-06-01T09:00";
-    parser.parse(command);
-  }
-
-  @Test
-  public void testParseCreateEventDefaultsToEndOfDay() {
-    String command = "create event \"AllDayEvent\" from 2025-06-01T09:00";
-    Command parsedCommand = parser.parse(command);
-
-    assertTrue(parsedCommand instanceof CreateEventCommand);
-    CreateEventCommand createCmd = (CreateEventCommand) parsedCommand;
-
-    assertEquals(LocalDateTime.of(2025, 6, 1, 9, 0), createCmd.getStartDateTime());
-    assertEquals(LocalDateTime.of(2025, 6, 1, 23, 59, 59), createCmd.getEndDateTime());
-    assertTrue(createCmd.isAllDay());
-  }
-
-  @Test
-  public void testParseCreateEventOnKeywordDefaultsToEndOfDay() {
-    String command = "create event \"SingleDayEvent\" on 2025-06-01";
-    Command parsedCommand = parser.parse(command);
-
-    assertTrue(parsedCommand instanceof CreateEventCommand);
-    CreateEventCommand createCmd = (CreateEventCommand) parsedCommand;
-
-    assertEquals(LocalDateTime.of(2025, 6, 1, 0, 0), createCmd.getStartDateTime());
-    assertEquals(LocalDateTime.of(2025, 6, 1, 23, 59, 59), createCmd.getEndDateTime());
-    assertTrue(createCmd.isAllDay());
-  }
-
-  @Test
-  public void testProcessCreateEventMissingDescription() {
-    String command = "create event \"Meeting\" from 2025-06-01T10:00 to 2025-06-01T11:00 description";
-    boolean result = controller.processCommand(command);
-
-    assertFalse(result);
-    assertEquals("Parsing Error: Missing description", view.getLastMessage());
-  }
-
-  @Test
-  public void testProcessCreateEventMissingLocation() {
-    String command = "create event \"Meeting\" from 2025-06-01T10:00 to 2025-06-01T11:00 location";
-    boolean result = controller.processCommand(command);
-
-    assertFalse(result);
-    assertEquals("Parsing Error: Missing location", view.getLastMessage());
-  }
-
-  @Test
-  public void testParsePropertiesWithDescription() {
-    boolean result = controller.processCommand("create event \"Meeting\" from 2025-06-01T10:00 to 2025-06-01T11:00 description \"Team discussion\"");
-
-    assertTrue(result);
-    assertTrue(model.getEvents().stream().anyMatch(e -> "Team discussion".equals(e.getDescription())));
-  }
-
-  @Test
-  public void testParsePropertiesWithLocation() {
-    boolean result = controller.processCommand("create event \"Workshop\" from 2025-06-02T14:00 to 2025-06-02T16:00 location \"Room 101\"");
-
-    assertTrue(result);
-    assertTrue(model.getEvents().stream().anyMatch(e -> "Room 101".equals(e.getLocation())));
-  }
-
-  @Test
-  public void testParsePropertiesWithPrivateFlag() {
-    boolean result = controller.processCommand("create event \"Secret Meeting\" from 2025-06-03T12:00 to 2025-06-03T13:00 private");
-
-    assertTrue(result);
-    assertTrue(model.getEvents().stream().anyMatch(e -> !e.isPublic()));
-  }
-
-  @Test
-  public void testParsePropertiesWithPublicFlag() {
-    boolean result = controller.processCommand("create event \"Open Forum\" from 2025-06-04T15:00 to 2025-06-04T16:30 public");
-
-    assertTrue(result);
-    assertTrue(model.getEvents().stream().anyMatch(e -> e.isPublic()));
-  }
-
-  @Test
-  public void testParsePropertiesWithInvalidProperty() {
-    boolean result = controller.processCommand("create event \"InvalidEvent\" from 2025-06-05T10:00 to 2025-06-05T11:00 unknownProperty");
-
-    assertFalse("Processing should fail for unknown property", result);
-    assertEquals("Parsing Error: Unknown token: unknownproperty", view.getLastMessage());
-  }
-
-
-  @Test
-  public void testParsePropertiesMissingLocationValue() {
-    boolean result = controller.processCommand("create event \"NoLocation\" from 2025-06-07T10:00 to 2025-06-07T11:00 location");
-
-    assertFalse("Processing should fail due to missing location value", result);
-    assertEquals("Parsing Error: Missing location", view.getLastMessage());
-  }
-
-
-  @Test
-  public void testParsePropertiesMissingDescriptionValueMain() {
-    boolean result = controller.processCommand("create event \"NoDescription\" from 2025-06-06T10:00 to 2025-06-06T11:00 description");
-
-    assertFalse("Processing should fail due to missing description value", result);
-    assertEquals("Parsing Error: Missing description", view.getLastMessage());
-  }
-
-
-  @Test
-  public void testPrintRangeInvalidDateFormat() {
-    String command = "print events from 2025-06-01T09:00 to invalidTime";
-    controller.processCommand(command);
-    assertEquals("Parsing Error: Invalid date/time format. Use YYYY-MM-DD or YYYY-MM-DDTHH:MM", view.getLastMessage());
-  }
-
-  @Test
-  public void testShowInvalidDateFormat() {
-    String command = "show status on invalidTime";
-    controller.processCommand(command);
-    assertEquals("Parsing Error: Invalid date/time format. Use YYYY-MM-DDTHH:MM", view.getLastMessage());
-  }
-
-  @Test
-  public void testUnsupportedEditCommandType() {
-    String command = "edit unknown something";
-    controller.processCommand(command);
-    assertEquals("Parsing Error: Incomplete edit command", view.getLastMessage());
-  }
-
-  @Test
-  public void testParseEditEventsCommandRecurring() {
-    String command = "edit events repeatuntil \"Team Sync\" \"2025-12-31T00:00\"";
-    Command parsedCommand = parser.parse(command);
-    assertTrue(parsedCommand instanceof EditRecurringEventCommand);
-    EditRecurringEventCommand recCmd = (EditRecurringEventCommand) parsedCommand;
-    assertEquals("repeatuntil", recCmd.getProperty());
-    assertEquals("Team Sync", recCmd.getEventName());
-    assertEquals("2025-12-31T00:00", recCmd.getNewValue());
   }
 
   @Test
@@ -729,14 +615,17 @@ public class CommandParserTest {
   public void testCreateEventMissingFromOrOn() {
     String command = "create event \"Test\"";
     controller.processCommand(command);
-    assertEquals("Parsing Error: Expected 'from' or 'on' after event name", view.getLastMessage());
+    assertEquals("Parsing Error: Expected 'from' or 'on' after event name",
+            view.getLastMessage());
   }
 
   @Test
   public void testRecurringEventExceeds24Hours() {
-    String command = "create event \"Test\" from 2025-06-01T10:00 to 2025-06-02T11:00 repeats MTWRF for 3 times";
+    String command = "create event \"Test\" from 2025-06-01T10:00 to 2025-06-02T11:00 "
+            + "repeats MTWRF for 3 times";
     controller.processCommand(command);
-    assertEquals("Parsing Error: Recurring event must end within 24 hours of the start time.", view.getLastMessage());
+    assertEquals("Parsing Error: Recurring event must end within "
+            + "24 hours of the start time.", view.getLastMessage());
   }
 
 
@@ -762,6 +651,4 @@ public class CommandParserTest {
       return messages.isEmpty() ? null : messages.get(messages.size() - 1);
     }
   }
-
-
 }

@@ -1,13 +1,18 @@
 package calendarapp.controller;
 
 import calendarapp.model.CalendarModel;
-import calendarapp.model.commands.*;
-import calendarapp.model.event.CalendarEvent;
+import calendarapp.model.commands.BusyQueryCommand;
+import calendarapp.model.commands.Command;
+import calendarapp.model.commands.EditEventCommand;
+import calendarapp.model.commands.EditRecurringEventCommand;
+import calendarapp.model.commands.ExportCalendarCommand;
+import calendarapp.model.commands.QueryByDateCommand;
+import calendarapp.model.commands.QueryRangeDateTimeCommand;
 import calendarapp.model.commands.CreateEventCommand;
+import calendarapp.model.event.CalendarEvent;
 import calendarapp.model.event.RecurringEvent;
 import calendarapp.model.event.SingleEvent;
 import calendarapp.view.ICalendarView;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -50,21 +55,23 @@ public class CalendarController implements ICalendarController {
     this.view = view;
     this.parser = parser;
     commandHandlers = new HashMap<>();
-    commandHandlers.put(CreateEventCommand.class,
-            command -> processCreateEvent((CreateEventCommand) command));
-    commandHandlers.put(QueryByDateCommand.class,
-            command -> processQueryByDate((QueryByDateCommand) command));
-    commandHandlers.put(QueryRangeDateTimeCommand.class,
-            command -> processQueryRange((QueryRangeDateTimeCommand) command));
-    commandHandlers.put(BusyQueryCommand.class,
-            command -> processBusyQuery((BusyQueryCommand) command));
-    commandHandlers.put(EditEventCommand.class,
-            command -> processEditEvent((EditEventCommand) command));
-    commandHandlers.put(EditRecurringEventCommand.class,
-            command -> processEditRecurringEvent((EditRecurringEventCommand) command));
-    commandHandlers.put(ExportCalendarCommand.class,
-            command -> processExportCommand((ExportCalendarCommand) command));
+    commandHandlers.put(CreateEventCommand.class, command ->
+            processCreateEvent((CreateEventCommand) command));
+    commandHandlers.put(QueryByDateCommand.class, command ->
+            processQueryByDate((QueryByDateCommand) command));
+    commandHandlers.put(QueryRangeDateTimeCommand.class, command ->
+            processQueryRange((QueryRangeDateTimeCommand) command));
+    commandHandlers.put(BusyQueryCommand.class, command ->
+            processBusyQuery((BusyQueryCommand) command));
+    commandHandlers.put(EditEventCommand.class, command ->
+            processEditEvent((EditEventCommand) command));
+    commandHandlers.put(EditRecurringEventCommand.class, command ->
+            processEditRecurringEvent((EditRecurringEventCommand) command));
+    commandHandlers.put(ExportCalendarCommand.class, command ->
+            processExportCommand((ExportCalendarCommand) command));
   }
+
+
 
   /**
    * Processes a command provided as a string input. The command is parsed using the command parser,
@@ -225,6 +232,8 @@ public class CalendarController implements ICalendarController {
       case ALL:
         success = model.editEventsAll(editCmd.getProperty(),
                 editCmd.getEventName(), editCmd.getNewValue());
+        break;
+      default:
         break;
     }
     if (success) {

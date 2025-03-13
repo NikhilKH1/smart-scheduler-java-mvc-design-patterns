@@ -113,8 +113,8 @@ public class CalendarModel implements ICalendarModel {
     for (CalendarEvent event : events) {
       LocalDate start = event.getStartDateTime().toLocalDate();
       LocalDate end = event.getEndDateTime().toLocalDate();
-      if ((start.equals(date) || start.isBefore(date)) &&
-              (end.equals(date) || end.isAfter(date))) {
+      if ((start.equals(date) || start.isBefore(date))
+              && (end.equals(date) || end.isAfter(date))) {
         result.add(event);
       }
     }
@@ -210,14 +210,16 @@ public class CalendarModel implements ICalendarModel {
                                  String newValue) {
     List<CalendarEvent> matching = new ArrayList<>();
     for (CalendarEvent event : events) {
-      if (event instanceof SingleEvent &&
-              event.getSubject().equals(eventName) &&
-              event.getStartDateTime().equals(originalStart) &&
-              event.getEndDateTime().equals(originalEnd)) {
+      if (event instanceof SingleEvent
+              && event.getSubject().equals(eventName)
+              && event.getStartDateTime().equals(originalStart)
+              && event.getEndDateTime().equals(originalEnd)) {
         matching.add(event);
       }
     }
-    if (matching.isEmpty()) return false;
+    if (matching.isEmpty()) {
+      return false;
+    }
     events.removeAll(matching);
     List<CalendarEvent> updated = new ArrayList<>();
     for (CalendarEvent old : matching) {
@@ -243,14 +245,16 @@ public class CalendarModel implements ICalendarModel {
                                 LocalDateTime fromDateTime, String newValue) {
     List<CalendarEvent> matching = new ArrayList<>();
     for (CalendarEvent event : events) {
-      if (event.getSubject().equals(eventName) &&
-              (!event.getStartDateTime().isBefore(fromDateTime))) {
+      if (event.getSubject().equals(eventName)
+              && (!event.getStartDateTime().isBefore(fromDateTime))) {
         if (event instanceof SingleEvent) {
           matching.add(event);
         }
       }
     }
-    if (matching.isEmpty()) return false;
+    if (matching.isEmpty()) {
+      return false;
+    }
     events.removeAll(matching);
     List<CalendarEvent> updated = new ArrayList<>();
     for (CalendarEvent old : matching) {
@@ -273,9 +277,9 @@ public class CalendarModel implements ICalendarModel {
    * @return true if events are updated successfully; false if no matching events are found
    */
   public boolean editEventsAll(String property, String eventName, String newValue) {
-    if (property.equalsIgnoreCase("repeattimes") ||
-            property.equalsIgnoreCase("repeatuntil") ||
-            property.equalsIgnoreCase("repeatingdays")) {
+    if (property.equalsIgnoreCase("repeattimes")
+            || property.equalsIgnoreCase("repeatuntil")
+            || property.equalsIgnoreCase("repeatingdays")) {
       return editRecurringEvent(eventName, property, newValue);
     }
     List<CalendarEvent> matching = new ArrayList<>();
@@ -286,7 +290,9 @@ public class CalendarModel implements ICalendarModel {
         }
       }
     }
-    if (matching.isEmpty()) return false;
+    if (matching.isEmpty()) {
+      return false;
+    }
     events.removeAll(matching);
     List<CalendarEvent> updated = new ArrayList<>();
     for (CalendarEvent old : matching) {
@@ -362,9 +368,9 @@ public class CalendarModel implements ICalendarModel {
         throw new IllegalArgumentException("Unsupported recurring property: " + property);
     }
 
-    events.removeIf(e -> e instanceof SingleEvent &&
-            ((SingleEvent) e).getSeriesId() != null &&
-            ((SingleEvent) e).getSubject().equals(eventName));
+    events.removeIf(e -> e instanceof SingleEvent
+            && ((SingleEvent) e).getSeriesId() != null
+            && ((SingleEvent) e).getSubject().equals(eventName));
 
     String newSeriesId = UUID.randomUUID().toString();
     List<SingleEvent> newOccurrences = recurringEvent.generateOccurrences(newSeriesId);

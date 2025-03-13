@@ -1,7 +1,13 @@
 package calendarapp.controller;
 
 import calendarapp.model.CalendarModel;
-import calendarapp.model.commands.*;
+import calendarapp.model.commands.BusyQueryCommand;
+import calendarapp.model.commands.Command;
+import calendarapp.model.commands.EditEventCommand;
+import calendarapp.model.commands.EditRecurringEventCommand;
+import calendarapp.model.commands.ExportCalendarCommand;
+import calendarapp.model.commands.QueryByDateCommand;
+import calendarapp.model.commands.QueryRangeDateTimeCommand;
 import calendarapp.model.commands.CreateEventCommand;
 
 import java.time.LocalDate;
@@ -71,14 +77,17 @@ public class CommandParser {
    * @throws IllegalArgumentException if the command format is invalid
    */
   private Command parseExportCommand(List<String> tokens) {
-    if (tokens.size() != 3)
+    if (tokens.size() != 3) {
       throw new IllegalArgumentException("Invalid export command format. "
               + "Expected: export cal fileName.csv");
-    if (!"cal".equalsIgnoreCase(tokens.get(1)))
+    }
+    if (!"cal".equalsIgnoreCase(tokens.get(1))) {
       throw new IllegalArgumentException("Invalid export command. Expected 'cal' after export.");
+    }
     String fileName = tokens.get(2);
-    if (!fileName.toLowerCase().endsWith(".csv"))
+    if (!fileName.toLowerCase().endsWith(".csv")) {
       throw new IllegalArgumentException("Invalid file name. Must be a CSV file ending with .csv");
+    }
     return new ExportCalendarCommand(model, fileName);
   }
 
@@ -90,24 +99,28 @@ public class CommandParser {
    * @throws IllegalArgumentException if the command format is incomplete or invalid
    */
   private Command parsePrintCommand(List<String> tokens) {
-    if (tokens.size() < 3)
+    if (tokens.size() < 3) {
       throw new IllegalArgumentException("Incomplete print events command."
               + " Usage: print events on/from <date/time>");
+    }
 
     String secondToken = tokens.get(1).toLowerCase();
-    if (!"events".equals(secondToken))
+    if (!"events".equals(secondToken)) {
       throw new IllegalArgumentException("Expected 'events' after print");
+    }
 
     String thirdToken = tokens.get(2).toLowerCase();
     switch (thirdToken) {
       case "on":
-        if (tokens.size() < 4)
+        if (tokens.size() < 4) {
           throw new IllegalArgumentException("Expected date after 'on'");
+        }
         return parsePrintOnCommand(tokens);
       case "from":
-        if (tokens.size() < 6)
+        if (tokens.size() < 6) {
           throw new IllegalArgumentException("Incomplete print events range command."
                   + " Usage: print events from <start> to <end>");
+        }
         return parsePrintRangeCommand(tokens);
       default:
         throw new IllegalArgumentException("Expected 'on' or 'from' after 'print events'");
@@ -140,8 +153,9 @@ public class CommandParser {
   private Command parsePrintRangeCommand(List<String> tokens) {
     try {
       LocalDateTime start = parseDateTime(tokens.get(3));
-      if (!"to".equalsIgnoreCase(tokens.get(4)))
+      if (!"to".equalsIgnoreCase(tokens.get(4))) {
         throw new IllegalArgumentException("Expected 'to' after start date/time");
+      }
       LocalDateTime end = parseDateTime(tokens.get(5));
       return new QueryRangeDateTimeCommand(start, end);
     } catch (DateTimeParseException e) {
@@ -158,9 +172,10 @@ public class CommandParser {
    * @throws IllegalArgumentException if the command format is invalid
    */
   private Command parseShowCommand(List<String> tokens) {
-    if (tokens.size() < 4 || !tokens.get(1).equalsIgnoreCase("status") ||
-            !tokens.get(2).equalsIgnoreCase("on"))
+    if (tokens.size() < 4 || !tokens.get(1).equalsIgnoreCase("status")
+            || !tokens.get(2).equalsIgnoreCase("on")) {
       throw new IllegalArgumentException("Usage: show status on <dateTime>");
+    }
     try {
       LocalDateTime queryTime = LocalDateTime.parse(tokens.get(3));
       return new BusyQueryCommand(queryTime);
@@ -177,8 +192,9 @@ public class CommandParser {
    * @throws IllegalArgumentException if the command type is unsupported or incomplete
    */
   private Command parseEditCommand(List<String> tokens) {
-    if (tokens.size() < 4)
+    if (tokens.size() < 4) {
       throw new IllegalArgumentException("Incomplete edit command");
+    }
 
     String type = tokens.get(1).toLowerCase();
     switch (type) {
@@ -201,24 +217,26 @@ public class CommandParser {
   private Command parseEditEventsCommand(List<String> tokens) {
     String property = tokens.get(2).toLowerCase();
     String eventName = stripQuotes(tokens.get(3));
-    boolean isRecurringProperty = property.equals("repeattimes") ||
-            property.equals("repeatuntil") ||
-            property.equals("repeatingdays");
+    boolean isRecurringProperty = property.equals("repeattimes")
+            || property.equals("repeatuntil")
+            || property.equals("repeatingdays");
 
     if (tokens.size() == 5) {
       String newValue = stripQuotes(tokens.get(4));
-      return isRecurringProperty ?
-              new EditRecurringEventCommand(property, eventName, newValue) :
+      return isRecurringProperty
+              ? new EditRecurringEventCommand(property, eventName, newValue) :
               new EditEventCommand(property, eventName, newValue);
     } else if (tokens.size() == 8) {
-      if (!"from".equalsIgnoreCase(tokens.get(4)))
+      if (!"from".equalsIgnoreCase(tokens.get(4))) {
         throw new IllegalArgumentException("Expected 'from' after event name");
+      }
       LocalDateTime filterDateTime = parseDateTime(tokens.get(5));
-      if (!"with".equalsIgnoreCase(tokens.get(6)))
+      if (!"with".equalsIgnoreCase(tokens.get(6))) {
         throw new IllegalArgumentException("Expected 'with' after date/time");
+      }
       String newValue = stripQuotes(tokens.get(7));
-      return isRecurringProperty ?
-              new EditRecurringEventCommand(property, eventName, newValue) :
+      return isRecurringProperty
+              ? new EditRecurringEventCommand(property, eventName, newValue) :
               new EditEventCommand(property, eventName, filterDateTime, newValue);
     } else {
       throw new IllegalArgumentException("Invalid edit events command format");
@@ -233,19 +251,23 @@ public class CommandParser {
    * @throws IllegalArgumentException if the command format is incomplete
    */
   private Command parseEditSingleEventCommand(List<String> tokens) {
-    if (tokens.size() < 10)
+    if (tokens.size() < 10) {
       throw new IllegalArgumentException("Incomplete edit event command. Expected format:"
               + " edit event <property> <eventName> from <start> to <end> with <NewPropertyValue>");
+    }
     String property = tokens.get(2).toLowerCase();
     String eventName = stripQuotes(tokens.get(3));
-    if (!"from".equalsIgnoreCase(tokens.get(4)))
+    if (!"from".equalsIgnoreCase(tokens.get(4))) {
       throw new IllegalArgumentException("Expected 'from' after event name");
+    }
     LocalDateTime start = parseDateTime(tokens.get(5));
-    if (!"to".equalsIgnoreCase(tokens.get(6)))
+    if (!"to".equalsIgnoreCase(tokens.get(6))) {
       throw new IllegalArgumentException("Expected 'to' after start date/time");
+    }
     LocalDateTime end = parseDateTime(tokens.get(7));
-    if (!"with".equalsIgnoreCase(tokens.get(8)))
+    if (!"with".equalsIgnoreCase(tokens.get(8))) {
       throw new IllegalArgumentException("Expected 'with' after end date/time");
+    }
     String newValue = stripQuotes(tokens.get(9));
     return new EditEventCommand(property, eventName, start, end, newValue);
   }
@@ -259,8 +281,9 @@ public class CommandParser {
    */
   private Command parseCreateEvent(List<String> tokens) {
     int index = 1;
-    if (index >= tokens.size() || !tokens.get(index).equalsIgnoreCase("event"))
+    if (index >= tokens.size() || !tokens.get(index).equalsIgnoreCase("event")) {
       throw new IllegalArgumentException("Expected 'event' after create");
+    }
     index++;
 
     boolean autoDecline = false;
@@ -268,11 +291,13 @@ public class CommandParser {
       autoDecline = true;
       index++;
     }
-    if (index >= tokens.size())
+    if (index >= tokens.size()) {
       throw new IllegalArgumentException("Missing event name");
+    }
     String eventName = stripQuotes(tokens.get(index++));
-    if (index >= tokens.size())
+    if (index >= tokens.size()) {
       throw new IllegalArgumentException("Expected 'from' or 'on' after event name");
+    }
 
     EventTimingResult timing = parseEventTiming(tokens, index);
     index = timing.index;
@@ -307,8 +332,7 @@ public class CommandParser {
    *
    * @param tokens the list of tokens
    * @param index  the current index in the token list
-   * @return an EventTimingResult containing the start time, end time, all-day flag,
-   * and updated index
+   * @return an EventTimingResult containing the start time, end time, all-day flag, and index
    * @throws IllegalArgumentException if the timing format is invalid
    */
   private EventTimingResult parseEventTiming(List<String> tokens, int index) {
@@ -321,8 +345,9 @@ public class CommandParser {
         if (index < tokens.size() && "to".equalsIgnoreCase(tokens.get(index))) {
           index++;
           result.end = parseDateTime(tokens.get(index++));
-          if (result.end.isBefore(result.start))
+          if (result.end.isBefore(result.start)) {
             throw new IllegalArgumentException("End date must be after start date");
+          }
           result.isAllDay = false;
         } else {
           result.end = result.start.toLocalDate().atTime(23, 59, 59);
@@ -356,16 +381,19 @@ public class CommandParser {
     if (index < tokens.size() && tokens.get(index).equalsIgnoreCase("repeats")) {
       result.isRecurring = true;
       index++;
-      if (index >= tokens.size())
+      if (index >= tokens.size()) {
         throw new IllegalArgumentException("Missing weekdays after 'repeats'");
+      }
       result.weekdays = tokens.get(index++).toUpperCase();
       if (index < tokens.size() && tokens.get(index).equalsIgnoreCase("for")) {
         index++;
         result.repeatCount = Integer.parseInt(tokens.get(index++));
-        if (result.repeatCount <= 0)
+        if (result.repeatCount <= 0) {
           throw new IllegalArgumentException("Repeat count must be a positive number");
-        if (index >= tokens.size() || !tokens.get(index++).equalsIgnoreCase("times"))
+        }
+        if (index >= tokens.size() || !tokens.get(index++).equalsIgnoreCase("times")) {
           throw new IllegalArgumentException("Expected 'times' after repeat count");
+        }
       } else if (index < tokens.size() && tokens.get(index).equalsIgnoreCase("until")) {
         index++;
         result.repeatUntil = parseDateTime(tokens.get(index++));
@@ -392,13 +420,15 @@ public class CommandParser {
       String token = tokens.get(index++).toLowerCase();
       switch (token) {
         case "description":
-          if (index >= tokens.size())
+          if (index >= tokens.size()) {
             throw new IllegalArgumentException("Missing description");
+          }
           result.description = stripQuotes(tokens.get(index++));
           break;
         case "location":
-          if (index >= tokens.size())
+          if (index >= tokens.size()) {
             throw new IllegalArgumentException("Missing location");
+          }
           result.location = stripQuotes(tokens.get(index++));
           break;
         case "private":
