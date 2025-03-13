@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 /**
  * This abstract class provides a common implementation for calendar events.
  * It holds properties such as subject, start and end date/time, description, location,
- * and flags for public and all-day events. It also provides a standard string representation.
+ * and flags for public and all-day events.
  */
 public abstract class AbstractCalendarEvent implements CalendarEvent {
   protected String subject;
@@ -51,6 +51,7 @@ public abstract class AbstractCalendarEvent implements CalendarEvent {
    *
    * @return the event description
    */
+  @Override
   public String getDescription() {
     return description;
   }
@@ -60,6 +61,7 @@ public abstract class AbstractCalendarEvent implements CalendarEvent {
    *
    * @return the event location
    */
+  @Override
   public String getLocation() {
     return location;
   }
@@ -69,6 +71,7 @@ public abstract class AbstractCalendarEvent implements CalendarEvent {
    *
    * @return true if the event is public; false otherwise
    */
+  @Override
   public boolean isPublic() {
     return isPublic;
   }
@@ -78,40 +81,19 @@ public abstract class AbstractCalendarEvent implements CalendarEvent {
    *
    * @return true if the event lasts all day; false otherwise
    */
+  @Override
   public boolean isAllDay() {
     return isAllDay;
   }
 
   /**
-   * Returns a string representation of the event including subject, date/time, description,
-   * location, public status, and all-day flag.
+   * Returns a basic string representation of the event (used for debugging/logging).
+   * The full display logic is handled separately in CalendarView.
    *
-   * @return a string representing the event
+   * @return a string representation of the event
    */
   @Override
   public String toString() {
-    StringBuilder sb = new StringBuilder();
-    sb.append("- ").append(subject)
-            .append(": ").append(startDateTime)
-            .append(" to ").append(endDateTime);
-
-    if (description != null && !description.isEmpty()) {
-      sb.append(" | Description: ").append(description);
-    }
-    if (location != null && !location.isEmpty()) {
-      sb.append(" | Location: ").append(location);
-    }
-
-    if (isPublic) {
-      sb.append(" | Public");
-    } else {
-      sb.append(" | Private");
-    }
-
-    if (isAllDay) {
-      sb.append(" | All Day Event");
-    }
-
-    return sb.toString();
+    return subject + " (" + startDateTime + " - " + endDateTime + ")";
   }
 }
