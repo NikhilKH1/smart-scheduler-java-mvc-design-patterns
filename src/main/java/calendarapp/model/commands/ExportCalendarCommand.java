@@ -1,48 +1,51 @@
 package calendarapp.model.commands;
 
 import calendarapp.model.CalendarModel;
+import calendarapp.model.event.CalendarEvent;
 import calendarapp.utils.CSVExporter;
 
 import java.io.IOException;
+import java.util.List;
 
 /**
  * Command to export calendar events to a CSV file.
- * This command utilizes CSVExporter to write all calendar events from the model into a CSV file.
  */
 public class ExportCalendarCommand implements Command {
-
   private final CalendarModel model;
   private final String fileName;
 
   /**
-   * Constructs an ExportCalendarCommand with the specified calendar model and file name.
+   * Constructs an ExportCalendarCommand.
    *
-   * @param model    the calendar model containing events to export
-   * @param fileName the desired file name for the CSV export
+   * @param model    the calendar model from which events are exported
+   * @param fileName the name of the output CSV file
    */
   public ExportCalendarCommand(CalendarModel model, String fileName) {
+    if (model == null || fileName == null || fileName.trim().isEmpty()) {
+      throw new IllegalArgumentException("Model and file name must not be null or empty.");
+    }
     this.model = model;
     this.fileName = fileName;
   }
 
   /**
-   * Executes the export command by writing calendar events to a CSV file.
-   * A success message with the absolute file path is printed upon successful export.
-   * If an error occurs, an error message is printed.
+   * Executes the export operation.
+   *
+   * @return the path of the exported CSV file
+   * @throws IOException if an error occurs during file writing
    */
-  public void execute() {
-    try {
-      String absolutePath = CSVExporter.exportToCSV(model.getEvents(), fileName);
-      System.out.println("Calendar exported successfully to: " + absolutePath);
-    } catch (IOException e) {
-      System.err.println("Error exporting calendar: " + e.getMessage());
+  public String execute() throws IOException {
+    List<CalendarEvent> events = model.getEvents();
+    if (events.isEmpty()) {
+      throw new IOException("No events available for export.");
     }
+    return CSVExporter.exportToCSV(events, fileName);
   }
 
   /**
-   * Returns the file name used for the CSV export.
+   * Gets the file name for the export.
    *
-   * @return the CSV file name
+   * @return the file name of the exported CSV
    */
   public String getFileName() {
     return fileName;

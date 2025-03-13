@@ -13,6 +13,8 @@ import calendarapp.model.event.CalendarEvent;
 import calendarapp.model.event.RecurringEvent;
 import calendarapp.model.event.SingleEvent;
 import calendarapp.view.ICalendarView;
+
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -268,7 +270,14 @@ public class CalendarController implements ICalendarController {
    * @return true after executing the export command
    */
   private boolean processExportCommand(ExportCalendarCommand exportCmd) {
-    exportCmd.execute();
-    return true;
+    try {
+      String filePath = exportCmd.execute();
+      view.displayMessage("Calendar exported successfully to: " + filePath);
+      return true;
+    } catch (IOException e) {
+      view.displayError("Error exporting calendar: " + e.getMessage());
+      return false;
+    }
   }
+
 }
