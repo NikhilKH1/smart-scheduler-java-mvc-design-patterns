@@ -82,6 +82,20 @@ public class CalendarControllerTest {
   }
 
   @Test
+  public void testProcessCreateEventWithoutConflict() {
+    String command1 =
+            "create event \"Meeting A\" from 2025-06-01T10:00 to 2025-06-01T11:00";
+    String command2 =
+            "create event \"Meeting B\" from 2025-06-01T10:30 to 2025-06-01T11:30";
+
+    controller.processCommand(command1);
+    boolean result = controller.processCommand(command2);
+
+    System.out.println(view.getLastMessage());
+    assertEquals("Event created successfully", view.getLastMessage());
+  }
+
+  @Test
   public void testProcessQueryEmptyDate() {
     String command = "print events on 2025-07-01";
     boolean result = controller.processCommand(command);
