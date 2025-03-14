@@ -570,6 +570,48 @@ public class CalendarControllerTest {
     assertEquals("Busy at 2025-06-01T10:30", view.getLastMessage());
   }
 
+  @Test
+  public void testCreateSingleEvent() {
+    controller.processCommand("create event \"Nisha\" from 2025-03-09T10:00 "
+            + "to 2025-03-09T11:00");
+    assertEquals("Event created successfully", view.getLastMessage());
+  }
+
+  @Test
+  public void testEditEventName() {
+    controller.processCommand("create event \"Nisha\" from 2025-03-09T10:00 "
+            + "to 2025-03-09T11:00");
+    controller.processCommand("edit event name \"Nisha\" from 2025-03-09T10:00 to "
+            + "2025-03-09T11:00 with \"Edited Name\"");
+    assertEquals("Event(s) edited successfully", view.getLastMessage());
+  }
+
+  @Test
+  public void testEditEventStartEndDateTime() {
+    controller.processCommand("create event \"Edited Name\" from 2025-03-09T10:00 "
+            + "to 2025-03-09T11:00");
+    controller.processCommand("edit event startdatetime \"Edited Name\" "
+            + "from 2025-03-09T10:00 to 2025-03-09T11:00 with 2025-03-08T10:00");
+    assertEquals("Event(s) edited successfully", view.getLastMessage());
+
+    controller.processCommand("edit event enddatetime \"Edited Name\" from "
+            + "2025-03-08T10:00 to 2025-03-09T11:00 with 2025-03-08T11:00");
+    assertEquals("Event(s) edited successfully", view.getLastMessage());
+  }
+
+  @Test
+  public void testEditEventDescriptionAndLocation() {
+    controller.processCommand("create event \"RecurringTest\" "
+            + "from 2025-06-01T10:00 to 2025-06-01T11:00 repeats MTWRF until 2025-06-30T23:59");
+    controller.processCommand("edit event description \"Edited Name\" from "
+            + "2025-03-08T10:00 to 2025-03-08T11:00 with \"Adding Description\"");
+    assertEquals("Failed to edit event(s)", view.getLastMessage());
+
+    controller.processCommand("edit event location \"Edited Name\" from "
+            + "2025-03-08T10:00 to 2025-03-08T11:00 with \"New Location\"");
+    assertEquals("Failed to edit event(s)", view.getLastMessage());
+  }
+
 
   @Test
   public void testEditRecurringEventCommandAlwaysTrue() {
