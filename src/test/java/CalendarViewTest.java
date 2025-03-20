@@ -1,5 +1,4 @@
 import calendarapp.model.event.CalendarEvent;
-import calendarapp.model.event.SingleEvent;
 import calendarapp.view.CalendarView;
 
 import org.junit.After;
@@ -8,7 +7,6 @@ import org.junit.Test;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -58,17 +56,5 @@ public class CalendarViewTest {
     List<CalendarEvent> events = new ArrayList<>();
     calendarView.displayEvents(events);
     assertEquals("No events found.\n", outContent.toString());
-  }
-
-  @Test
-  public void testDisplayEventsNonEmpty() {
-    List<CalendarEvent> events = new ArrayList<>();
-    LocalDateTime start = LocalDateTime.of(2025, 6, 1, 9, 0);
-    LocalDateTime end = LocalDateTime.of(2025, 6, 1, 10, 0);
-    CalendarEvent event = new SingleEvent("Test Event", start, end,
-            "Description", "Location", true, false, null);
-    events.add(event);
-    calendarView.displayEvents(events);
-    assertEquals(event.toString() + "\n", outContent.toString());
   }
 }

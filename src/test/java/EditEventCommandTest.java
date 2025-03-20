@@ -1,5 +1,3 @@
-
-
 import org.junit.Test;
 
 import calendarapp.model.commands.EditEventCommand;
@@ -14,7 +12,8 @@ public class EditEventCommandTest {
 
   @Test
   public void testEditEventCommandProperties() {
-    EditEventCommand cmd = new EditEventCommand("location", "Team Meeting", "New Room");
+    EditEventCommand cmd = new EditEventCommand("location", "Team Meeting",
+            "New Room");
 
     assertEquals("location", cmd.getProperty());
     assertEquals("Team Meeting", cmd.getEventName());

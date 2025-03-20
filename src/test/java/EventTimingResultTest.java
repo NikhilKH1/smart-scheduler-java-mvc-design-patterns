@@ -29,8 +29,10 @@ public class EventTimingResultTest {
   public void testSetAndGetFieldsUsingReflection() throws Exception {
     EventTimingResult result = new EventTimingResult();
 
-    LocalDateTime startTime = LocalDateTime.of(2025, 6, 10, 9, 0);
-    LocalDateTime endTime = LocalDateTime.of(2025, 6, 10, 17, 0);
+    LocalDateTime startTime = LocalDateTime.of(2025, 6, 10, 9,
+            0);
+    LocalDateTime endTime = LocalDateTime.of(2025, 6, 10, 17,
+            0);
 
     setField(result, "start", startTime);
     setField(result, "end", endTime);

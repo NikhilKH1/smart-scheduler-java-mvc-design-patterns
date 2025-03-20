@@ -3,7 +3,6 @@ package calendarapp.model;
 import calendarapp.model.event.CalendarEvent;
 import calendarapp.model.event.SingleEvent;
 import calendarapp.model.event.RecurringEvent;
-import calendarapp.model.ConflictChecker;
 import calendarapp.utils.ModelHelper;
 
 import java.time.LocalDate;

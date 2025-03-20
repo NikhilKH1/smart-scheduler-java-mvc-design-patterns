@@ -1,0 +1,29 @@
+create event "Nisha" from 2025-03-09T10:00 to 2025-03-09T11:00
+edit event name "Nisha" from 2025-03-09T10:00 to 2025-03-09T11:00 with "Edited Name"
+edit event startdatetime "Edited Name" from 2025-03-09T10:00 to 2025-03-09T11:00 with 2025-03-08T10:00
+edit event enddatetime "Edited Name" from 2025-03-08T10:00 to 2025-03-09T11:00 with 2025-03-08T11:00
+edit event description "Edited Name" from 2025-03-08T10:00 to 2025-03-08T11:00 with "Adding Description"
+edit event location "Edited Name" from 2025-03-08T10:00 to 2025-03-08T11:00 with "New Location"
+create event "Class" from 2025-03-10T15:00 to 2025-03-10T16:30 repeats TR for 2 times description "Recurring Event" location "Snell"
+edit events description "Class" from 2025-03-11T15:00 with "New Recurring Event"
+edit events location "Class" "Snell Room 108"
+edit events name "Class" from 2025-03-11T15:00 with "PDP Class"
+create event "Conference" on 2025-03-10T10:00 repeats MTW until 2025-03-20T10:00
+edit events repeatuntil "Conference" 2025-03-13T10:00
+edit events repeatingdays "Conference" MW
+create event "Meeting" on 2025-03-10T14:00 repeats MTW for 3 times
+edit events repeattimes "Meeting" 5
+create event "All Day event" from 2025-03-09T13:00
+create event --autodecline "Nikhil's Birthday" from 2025-03-11T10:00 to 2025-03-11T12:00
+create event "Event with Description and Location" from 2025-03-10T11:00 to 2025-03-10T12:00 description "Initial meeting" location "Old Room"
+edit event location "Event with Description and Location" from 2025-03-10T11:00 to 2025-03-10T12:00 with "New Room!!"
+create event "Study Session" from 2025-03-09T19:00 to 2025-03-09T20:00 description "DBMS" location "Shillman Hall"
+create event "DBMS Class" from 2025-03-10T17:00 to 2025-03-10T18:00 repeats MWF for 3 times description "Recurring Event Creation" location "NEU"
+edit event name "DBMS Class" from 2025-03-10T17:00 to 2025-03-10T18:00 with "DBMS Class Section 1"
+create event "Billiards Time" from 2025-03-14T21:00 to 2025-03-14T22:00 location "Curry Center"
+create event "Squash Game" from 2025-03-12T12:00 to 2025-03-12T13:00 location "Squash Busters"
+print events on 2025-03-09
+print events from 2025-03-09T10:00 to 2025-03-10T11:00
+show status on 2025-03-11T15:00
+export cal NikhilNisha.csv
+exit

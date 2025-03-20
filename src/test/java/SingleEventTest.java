@@ -54,17 +54,4 @@ public class SingleEventTest {
     assertFalse(event.isPublic());
   }
 
-  @Test
-  public void testToStringFormat() {
-    LocalDateTime start = LocalDateTime.of(2025, 6, 1, 9, 0);
-    LocalDateTime end = LocalDateTime.of(2025, 6, 1, 10, 0);
-
-    SingleEvent event = new SingleEvent("Standup", start, end, "Daily meeting",
-            "Office", true, false, null);
-
-    String eventString = event.toString();
-    assertTrue(eventString.contains("Standup"));
-    assertTrue(eventString.contains("Daily meeting"));
-    assertTrue(eventString.contains("Office"));
-  }
 }

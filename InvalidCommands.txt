@@ -1,0 +1,11 @@
+create event "Nisha's Event" from 2025-03-08T10:00 to 2025-03-08T11:00 description "Initial meeting" location "Old Room"
+edit event description "Nisha's Event" from 2025-03-08T10:00 to 2025-03-08T11:00 with "Update!!"
+edit event location "Nisha's Event" from 2025-03-08T10:00 to 2025-03-08T11:00 with "New Room!!"
+create event "House Warming" from 2025-03-11T10:00 to 2025-03-11T11:00
+edit events description "House Warming" from 2025-03-11T10:00 with "Congratulations!!"
+created event "Team Meeting" from 2025-03-10T11:00 to 2025-03-10T12:00 repeats MTW for 3 times description "Initial meeting" location "Old Room"
+edit events description "Team Meeting" "Updated description for all"
+print events on 2025-03-08h
+print events from 2025-03-08T10:00 to 2025-03-10T11:00
+show statu on 2025-03-08T10:00
+exit

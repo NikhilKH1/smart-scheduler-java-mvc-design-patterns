@@ -125,5 +125,4 @@ public class CalendarApp {
       System.exit(1);
     }
   }
-
 }

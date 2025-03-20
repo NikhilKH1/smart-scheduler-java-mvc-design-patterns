@@ -22,9 +22,41 @@ public class CalendarView implements ICalendarView {
       System.out.println("No events found.");
       return;
     }
+
     for (CalendarEvent event : events) {
-      System.out.println(event.toString());
+      System.out.println(formatEventDetails(event));
     }
+  }
+
+  /**
+   * Formats an event's details for display.
+   *
+   * @param event the event to format
+   * @return a formatted string representing the event
+   */
+  private String formatEventDetails(CalendarEvent event) {
+    StringBuilder sb = new StringBuilder();
+
+    sb.append("- ").append(event.getSubject())
+            .append(": ").append(event.getStartDateTime())
+            .append(" to ").append(event.getEndDateTime());
+
+    if (event.getDescription() != null && !event.getDescription().isEmpty()) {
+      sb.append(" | Description: ").append(event.getDescription());
+    }
+    if (event.getLocation() != null && !event.getLocation().isEmpty()) {
+      sb.append(" | Location: ").append(event.getLocation());
+    }
+
+    if (event.isPublic()) {
+      sb.append(" | Public");
+    }
+
+    if (event.isAllDay()) {
+      sb.append(" | All Day Event");
+    }
+
+    return sb.toString();
   }
 
   /**

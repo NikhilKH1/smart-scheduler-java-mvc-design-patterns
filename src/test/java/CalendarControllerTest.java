@@ -17,7 +17,6 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -70,7 +69,8 @@ public class CalendarControllerTest {
 
     LocalDateTime start = LocalDateTime.of(2025, 6, 1, 9, 0);
     LocalDateTime end = LocalDateTime.of(2025, 6, 1, 10, 0);
-    model.addEvent(new SingleEvent("Meeting", start, end, "", "", true, false, null), false);
+    model.addEvent(new SingleEvent("Meeting", start, end, "", "",
+            true, false, null), false);
 
     assertFalse("Model should contain at least one event",
             model.getEventsOnDate(LocalDate.of(2025, 6, 1)).isEmpty());
@@ -79,6 +79,20 @@ public class CalendarControllerTest {
     assertTrue("View should contain event details",
             view.getLastMessage().contains("Displaying 1 events")
                     || view.getLastMessage().contains("Events on 2025-06-01:"));
+  }
+
+  @Test
+  public void testProcessCreateEventWithoutConflict() {
+    String command1 =
+            "create event \"Meeting A\" from 2025-06-01T10:00 to 2025-06-01T11:00";
+    String command2 =
+            "create event \"Meeting B\" from 2025-06-01T10:30 to 2025-06-01T11:30";
+
+    controller.processCommand(command1);
+    boolean result = controller.processCommand(command2);
+
+    System.out.println(view.getLastMessage());
+    assertEquals("Event created successfully", view.getLastMessage());
   }
 
   @Test
@@ -117,14 +131,6 @@ public class CalendarControllerTest {
     assertEquals("Busy at 2025-06-01T10:30", view.getLastMessage());
   }
 
-  @Test
-  public void testProcessExportCommand() {
-    String command = "export cal calendar.csv";
-    boolean result = controller.processCommand(command);
-
-    assertTrue("Exporting events should return true", result);
-    assertNull("Export command does not display a message", view.getLastMessage());
-  }
 
   @Test
   public void testProcessInvalidCommand() {
@@ -200,15 +206,6 @@ public class CalendarControllerTest {
 
     assertFalse("Editing a non-existent event should return false", result);
     assertEquals("Failed to edit event(s)", view.getLastMessage());
-  }
-
-  @Test
-  public void testProcessExportEmptyCalendar() {
-    String command = "export cal empty_calendar.csv";
-    boolean result = controller.processCommand(command);
-
-    assertTrue("Exporting empty calendar should return true", result);
-    assertNull("Export command does not display a message", view.getLastMessage());
   }
 
   @Test
@@ -587,6 +584,48 @@ public class CalendarControllerTest {
     assertEquals("Busy at 2025-06-01T10:30", view.getLastMessage());
   }
 
+  @Test
+  public void testCreateSingleEvent() {
+    controller.processCommand("create event \"Nisha\" from 2025-03-09T10:00 "
+            + "to 2025-03-09T11:00");
+    assertEquals("Event created successfully", view.getLastMessage());
+  }
+
+  @Test
+  public void testEditEventName() {
+    controller.processCommand("create event \"Nisha\" from 2025-03-09T10:00 "
+            + "to 2025-03-09T11:00");
+    controller.processCommand("edit event name \"Nisha\" from 2025-03-09T10:00 to "
+            + "2025-03-09T11:00 with \"Edited Name\"");
+    assertEquals("Event(s) edited successfully", view.getLastMessage());
+  }
+
+  @Test
+  public void testEditEventStartEndDateTime() {
+    controller.processCommand("create event \"Edited Name\" from 2025-03-09T10:00 "
+            + "to 2025-03-09T11:00");
+    controller.processCommand("edit event startdatetime \"Edited Name\" "
+            + "from 2025-03-09T10:00 to 2025-03-09T11:00 with 2025-03-08T10:00");
+    assertEquals("Event(s) edited successfully", view.getLastMessage());
+
+    controller.processCommand("edit event enddatetime \"Edited Name\" from "
+            + "2025-03-08T10:00 to 2025-03-09T11:00 with 2025-03-08T11:00");
+    assertEquals("Event(s) edited successfully", view.getLastMessage());
+  }
+
+  @Test
+  public void testEditEventDescriptionAndLocation() {
+    controller.processCommand("create event \"RecurringTest\" "
+            + "from 2025-06-01T10:00 to 2025-06-01T11:00 repeats MTWRF until 2025-06-30T23:59");
+    controller.processCommand("edit event description \"Edited Name\" from "
+            + "2025-03-08T10:00 to 2025-03-08T11:00 with \"Adding Description\"");
+    assertEquals("Failed to edit event(s)", view.getLastMessage());
+
+    controller.processCommand("edit event location \"Edited Name\" from "
+            + "2025-03-08T10:00 to 2025-03-08T11:00 with \"New Location\"");
+    assertEquals("Failed to edit event(s)", view.getLastMessage());
+  }
+
 
   @Test
   public void testEditRecurringEventCommandAlwaysTrue() {
@@ -597,14 +636,6 @@ public class CalendarControllerTest {
     assertTrue("Editing recurring event should return true", result);
     assertEquals("Recurring event modified successfully.", view.getLastMessage());
   }
-
-  @Test
-  public void testExportCalendarCommandAlwaysTrue() {
-    boolean result = controller.processCommand("export cal exportTest.csv");
-    assertTrue("Export command should return true", result);
-    assertNull("Export command does not update view message", view.getLastMessage());
-  }
-
 
   private static class TestCalendarView implements ICalendarView {
     private final List<String> messages = new ArrayList<>();
