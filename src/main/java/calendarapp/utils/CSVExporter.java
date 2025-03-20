@@ -28,11 +28,15 @@ public class CSVExporter {
    * @throws IOException if an error occurs during file writing
    */
   public static String exportToCSV(List<CalendarEvent> events, String filePath) throws IOException {
-    if (events == null || events.isEmpty()) {
-      throw new IOException("No events available for export.");
-    }
     if (filePath == null || filePath.trim().isEmpty()) {
       throw new IllegalArgumentException("File path must not be null or empty.");
+    }
+    if (!filePath.toLowerCase().endsWith(".csv")) {
+      throw new IllegalArgumentException("Invalid file extension. File must end with .csv");
+    }
+
+    if (events == null || events.isEmpty()) {
+      throw new IOException("No events available for export.");
     }
 
     File file = new File(filePath);

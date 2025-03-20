@@ -104,11 +104,6 @@ public class CalendarApp {
             System.err.println("Error executing command: '" + trimmed + "'. Command failed.");
             System.exit(1);
           }
-//          if (!trimmed.toLowerCase().startsWith("print")) {
-//            System.out.println("----- All Events -----");
-//            view.displayEvents(model.getEvents());
-//            System.out.println("----------------------");
-//          }
         } catch (Exception e) {
           System.err.println("Error executing command: '" + trimmed + "'");
           System.err.println("Reason: " + e.getMessage());

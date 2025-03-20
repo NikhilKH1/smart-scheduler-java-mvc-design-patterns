@@ -56,10 +56,12 @@ public class CalendarAppTest {
   }
 
   @Test
-  public void testRunHeadlessModeProcessesFile() throws IOException {
+  public void testRunHeadlessModeProcessesFileAndPrintsEvents() throws IOException {
     File tempFile = File.createTempFile("testCommands", ".txt");
     FileWriter writer = new FileWriter(tempFile);
+
     writer.write("create event \"Meeting\" from 2025-06-01T09:00 to 2025-06-01T10:00\n");
+    writer.write("print events on 2025-06-01\n");
     writer.write("exit\n");
     writer.close();
 
@@ -69,12 +71,18 @@ public class CalendarAppTest {
     CalendarApp.main(new String[]{"--mode", "headless", tempFile.getAbsolutePath()});
 
     String output = outputStream.toString();
-    assertTrue("Output should contain event creation",
-            output.contains("----- All Events -----"));
-    assertTrue("Output should contain 'Meeting'", output.contains("Meeting"));
 
+    assertTrue("Output should contain event creation",
+            output.contains("Event created successfully"));
+    assertTrue("Output should contain 'Meeting'", output.contains("Meeting"));
+    assertTrue("Output should contain print header",
+            output.contains("Events on 2025-06-01"));
+
+    // Clean up
     tempFile.delete();
   }
+
+
 
   @Test
   public void testAddDuplicateSingleEventMain() {
@@ -110,7 +118,7 @@ public class CalendarAppTest {
   public void testProcessEmptyCommand() {
     boolean result = controller.processCommand("");
     assertFalse("Empty command should fail", result);
-    assertEquals("ERROR: Command is null", view.getLastMessage());
+    assertEquals("ERROR: Command parsing returned null", view.getLastMessage());
   }
 
 

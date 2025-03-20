@@ -1,10 +1,6 @@
-import calendarapp.controller.CalendarController;
-import calendarapp.controller.CommandParser;
-import calendarapp.model.CalendarModel;
 import calendarapp.model.event.CalendarEvent;
 import calendarapp.model.event.SingleEvent;
 import calendarapp.utils.CSVExporter;
-import calendarapp.view.ICalendarView;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -16,7 +12,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 public class CSVExporterTest {
 
@@ -63,7 +59,8 @@ public class CSVExporterTest {
   public void testExportEventWithNullFields() throws Exception {
     List<CalendarEvent> events = new ArrayList<>();
     LocalDateTime start = LocalDateTime.of(2025, 6, 1, 9, 0);
-    events.add(new SingleEvent("EventWithNull", start, null, null, null, true, false, null));
+    events.add(new SingleEvent("EventWithNull", start, null, null,
+            null, true, false, null));
 
     String fileName = "test/res/test_null_fields.csv";
     CSVExporter.exportToCSV(events, fileName);
@@ -78,7 +75,8 @@ public class CSVExporterTest {
   public void testExportEventAllDay() throws Exception {
     List<CalendarEvent> events = new ArrayList<>();
     LocalDateTime start = LocalDateTime.of(2025, 6, 2, 0, 0);
-    LocalDateTime end = LocalDateTime.of(2025, 6, 2, 23, 59, 59);
+    LocalDateTime end = LocalDateTime.of(2025, 6, 2, 23, 59,
+            59);
     events.add(new SingleEvent("All Day Event", start, end, "All day event",
             "Home", true, true, null));
 
@@ -117,8 +115,9 @@ public class CSVExporterTest {
             "loc", true, false, null));
 
     CSVExporter.exportToCSV(events, "test/res/invalidFile.txt");
-    fail("Expected exception due to invalid file extension");
   }
+
+
 
   @Test(expected = IllegalArgumentException.class)
   public void testExportWithInvalidFilename() throws Exception {

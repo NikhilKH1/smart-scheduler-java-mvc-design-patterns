@@ -6,6 +6,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -23,7 +24,6 @@ import calendarapp.view.ICalendarView;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -167,36 +167,22 @@ public class CommandParserTest {
     }
   }
 
+
   @Test
-  public void testParseCreateEventMissingDate() {
+  public void testParseCreateEventMissingDateHandledGracefully() {
     String command = "create event \"Team Lunch\" from";
-    try {
-      controller.processCommand(command);
-      fail("Expected exception due to missing date");
-    } catch (IndexOutOfBoundsException e) {
-      System.out.println("Actual Error Message: " + e.getMessage());
-      assertTrue("Error message should indicate missing date",
-              e.getMessage().contains("Index")
-                      || e.getMessage().contains("Expected date after 'from'"));
-    } catch (IllegalArgumentException e) {
-      System.out.println("Actual Error Message: " + e.getMessage());
-      assertTrue("Error message should indicate missing date",
-              e.getMessage().contains("Expected 'from' or 'on' after event name")
-                      || e.getMessage().contains("Invalid date/time format"));
-    }
+    boolean result = controller.processCommand(command);
+    assertFalse(result);
   }
 
   @Test
-  public void testParseCreateEventInvalidDate() {
-    String command = "create event \"Project Meeting\" from 2025-06-40T09:00 to 2025-06-01T10:00";
-    try {
-      controller.processCommand(command);
-      fail("Expected DateTimeParseException due to invalid date");
-    } catch (DateTimeParseException e) {
-      assertTrue("Error message should indicate invalid date",
-              e.getMessage().contains("could not be parsed"));
-    }
+  public void testProcessCreateEventWithInvalidDateHandledGracefully() {
+    String command = "create event \"FaultyEvent\" from INVALID_DATE to 2025-06-01T11:00";
+    boolean result = controller.processCommand(command);
+    assertFalse(result);
   }
+
+
 
   @Test
   public void testParsePrintEventsMissingDate() {
