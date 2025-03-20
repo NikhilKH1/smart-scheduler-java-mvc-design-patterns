@@ -1,4 +1,7 @@
-package calendarapp.model.commands;
+package calendarapp.controller.commands;
+
+import calendarapp.model.CalendarModel;
+import calendarapp.view.ICalendarView;
 
 /**
  * Command to edit properties of a recurring event.
@@ -9,6 +12,25 @@ public class EditRecurringEventCommand implements Command {
   private final String property;
   private final String eventName;
   private final String newValue;
+
+  /**
+   * Processes an edit recurring event command. It updates the recurring event properties.
+   *
+   * @param model the calendar model used for checking conflicts
+   * @param view  the calendar view for displaying messages
+   * @return true after executing the query
+   */
+  @Override
+  public boolean execute(CalendarModel model, ICalendarView view) {
+    boolean success = model.editRecurringEvent(eventName, property, newValue);
+    if (success) {
+      view.displayMessage("Recurring event modified successfully.");
+    } else {
+      view.displayError("Failed to modify recurring event.");
+    }
+    return success;
+  }
+
 
   /**
    * Constructs an EditRecurringEventCommand with the specified recurring property update.

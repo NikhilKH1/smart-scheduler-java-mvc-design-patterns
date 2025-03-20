@@ -1,7 +1,7 @@
 
 
 import calendarapp.model.CalendarModel;
-import calendarapp.model.commands.ExportCalendarCommand;
+import calendarapp.controller.commands.ExportCalendarCommand;
 
 import org.junit.Test;
 

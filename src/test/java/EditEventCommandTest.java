@@ -1,6 +1,6 @@
 import org.junit.Test;
 
-import calendarapp.model.commands.EditEventCommand;
+import calendarapp.controller.commands.EditEventCommand;
 
 import static org.junit.Assert.assertEquals;
 

@@ -1,7 +1,7 @@
 import calendarapp.controller.CalendarController;
 import calendarapp.controller.CommandParser;
 import calendarapp.model.CalendarModel;
-import calendarapp.model.commands.Command;
+import calendarapp.controller.commands.Command;
 import calendarapp.model.event.CalendarEvent;
 import calendarapp.model.event.SingleEvent;
 import calendarapp.view.ICalendarView;

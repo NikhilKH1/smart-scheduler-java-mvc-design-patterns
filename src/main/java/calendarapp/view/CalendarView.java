@@ -22,7 +22,6 @@ public class CalendarView implements ICalendarView {
       System.out.println("No events found.");
       return;
     }
-
     for (CalendarEvent event : events) {
       System.out.println(formatEventDetails(event));
     }

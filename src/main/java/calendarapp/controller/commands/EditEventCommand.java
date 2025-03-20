@@ -1,6 +1,9 @@
-package calendarapp.model.commands;
+package calendarapp.controller.commands;
 
 import java.time.LocalDateTime;
+
+import calendarapp.model.CalendarModel;
+import calendarapp.view.ICalendarView;
 
 /**
  * Command to edit an existing calendar event.
@@ -79,6 +82,37 @@ public class EditEventCommand implements Command {
     this.originalStart = null;
     this.originalEnd = null;
     this.filterDateTime = null;
+  }
+
+  /**
+   * Processes an edit event command. Depending on the mode specified (SINGLE, FROM, or ALL),
+   * it attempts to edit a single event, events from a specific date-time, or all events matching
+   * the event name.
+   *
+   * @param model the calendar model used for checking conflicts
+   * @param view the calendar view for displaying messages
+   * @return true if the event(s) were edited successfully; false otherwise
+   */
+  @Override
+  public boolean execute(CalendarModel model, ICalendarView view) {
+    boolean success = false;
+    switch (mode) {
+      case SINGLE:
+        success = model.editSingleEvent(property, eventName, originalStart, originalEnd, newValue);
+        break;
+      case FROM:
+        success = model.editEventsFrom(property, eventName, filterDateTime, newValue);
+        break;
+      case ALL:
+        success = model.editEventsAll(property, eventName, newValue);
+        break;
+    }
+    if (success) {
+      view.displayMessage("Event(s) edited successfully");
+    } else {
+      view.displayError("Failed to edit event(s)");
+    }
+    return success;
   }
 
   /**

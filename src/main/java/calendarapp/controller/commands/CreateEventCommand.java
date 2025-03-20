@@ -1,6 +1,11 @@
-package calendarapp.model.commands;
+package calendarapp.controller.commands;
 
 import java.time.LocalDateTime;
+
+import calendarapp.model.CalendarModel;
+import calendarapp.model.event.RecurringEvent;
+import calendarapp.model.event.SingleEvent;
+import calendarapp.view.ICalendarView;
 
 /**
  * Command to create a new calendar event.
@@ -163,4 +168,39 @@ public class CreateEventCommand implements Command {
   public LocalDateTime getRepeatUntil() {
     return repeatUntil;
   }
+
+  /**
+   * Processes the create event command. Depending on whether the event is recurring, it creates
+   * either a recurring event or a single event and attempts to add it to the calendar model.
+   *
+   * @param model the calendar model used for checking conflicts
+   * @param view the calendar view for displaying messages
+   * @return true if the event was created successfully; false otherwise
+   */
+  @Override
+  public boolean execute(CalendarModel model, ICalendarView view) {
+    try {
+      boolean success;
+      if (isRecurring) {
+        RecurringEvent recurringEvent = new RecurringEvent(eventName, startDateTime,
+                endDateTime, weekdays, repeatCount, repeatUntil, description, location, isPublic, isAllDay);
+        success = model.addRecurringEvent(recurringEvent, autoDecline);
+      } else {
+        SingleEvent event = new SingleEvent(eventName, startDateTime, endDateTime,
+                description, location, isPublic, isAllDay, null);
+        success = model.addEvent(event, autoDecline);
+      }
+      if (success) {
+        view.displayMessage("Event created successfully");
+      } else {
+        view.displayError("Event creation failed due to conflict");
+      }
+      return success;
+    } catch (IllegalArgumentException ex) {
+      view.displayError(ex.getMessage());
+      return false;
+    }
+  }
+
+
 }

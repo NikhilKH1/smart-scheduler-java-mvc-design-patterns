@@ -1,8 +1,9 @@
-package calendarapp.model.commands;
+package calendarapp.controller.commands;
 
 import calendarapp.model.CalendarModel;
 import calendarapp.model.event.CalendarEvent;
 import calendarapp.utils.CSVExporter;
+import calendarapp.view.ICalendarView;
 
 import java.io.IOException;
 import java.util.List;
@@ -27,20 +28,24 @@ public class ExportCalendarCommand implements Command {
     this.model = model;
     this.fileName = fileName;
   }
-
   /**
    * Executes the export operation.
    *
    * @return the path of the exported CSV file
    * @throws IOException if an error occurs during file writing
    */
-  public String execute() throws IOException {
-    List<CalendarEvent> events = model.getEvents();
-    if (events.isEmpty()) {
-      throw new IOException("No events available for export.");
+  @Override
+  public boolean execute(CalendarModel model, ICalendarView view) {
+    try {
+      String filePath = CSVExporter.exportToCSV(model.getEvents(), fileName);
+      view.displayMessage("Calendar exported successfully to: " + filePath);
+      return true;
+    } catch (IOException e) {
+      view.displayError("Error exporting calendar: " + e.getMessage());
+      return false;
     }
-    return CSVExporter.exportToCSV(events, fileName);
   }
+
 
   /**
    * Gets the file name for the export.

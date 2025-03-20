@@ -5,7 +5,7 @@ import org.junit.Test;
 import java.time.LocalDateTime;
 
 import calendarapp.model.CalendarModel;
-import calendarapp.model.commands.CreateEventCommand;
+import calendarapp.controller.commands.CreateEventCommand;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;

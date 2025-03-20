@@ -1,14 +1,14 @@
 package calendarapp.controller;
 
 import calendarapp.model.CalendarModel;
-import calendarapp.model.commands.BusyQueryCommand;
-import calendarapp.model.commands.Command;
-import calendarapp.model.commands.EditEventCommand;
-import calendarapp.model.commands.EditRecurringEventCommand;
-import calendarapp.model.commands.ExportCalendarCommand;
-import calendarapp.model.commands.QueryByDateCommand;
-import calendarapp.model.commands.QueryRangeDateTimeCommand;
-import calendarapp.model.commands.CreateEventCommand;
+import calendarapp.controller.commands.BusyQueryCommand;
+import calendarapp.controller.commands.Command;
+import calendarapp.controller.commands.EditEventCommand;
+import calendarapp.controller.commands.EditRecurringEventCommand;
+import calendarapp.controller.commands.ExportCalendarCommand;
+import calendarapp.controller.commands.QueryByDateCommand;
+import calendarapp.controller.commands.QueryRangeDateTimeCommand;
+import calendarapp.controller.commands.CreateEventCommand;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;

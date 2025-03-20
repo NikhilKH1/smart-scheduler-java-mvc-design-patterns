@@ -4,7 +4,7 @@ import org.junit.Test;
 
 import java.time.LocalDate;
 
-import calendarapp.model.commands.QueryByDateCommand;
+import calendarapp.controller.commands.QueryByDateCommand;
 
 import static org.junit.Assert.assertEquals;
 
