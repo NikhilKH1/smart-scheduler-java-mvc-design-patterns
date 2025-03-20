@@ -6,10 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * This class represents a recurring calendar event.
- * In addition to standard event properties, it includes recurring-specific properties such as
- * the days of the week on which the event repeats, the number of repetitions,
- * and an optional end date. It can generate individual occurrences of the event as single events.
+ * Represents a recurring calendar event with specific recurring rules.
  */
 public class RecurringEvent extends AbstractCalendarEvent {
 
@@ -18,18 +15,18 @@ public class RecurringEvent extends AbstractCalendarEvent {
   private final LocalDateTime repeatUntil;
 
   /**
-   * Constructs a recurring event with the specified details.
+   * Constructs a recurring event.
    *
-   * @param subject       the subject of the event
-   * @param startDateTime the start date and time of the event
-   * @param endDateTime   the end date and time of the event
-   * @param weekdays      a string representing the days of the week on which the event repeats
-   * @param repeatCount   the number of times the event should repeat
-   * @param repeatUntil   the date and time until which the event should repeat; null if not used
-   * @param description   the event description
-   * @param location      the event location
-   * @param isPublic      true if the event is public; false otherwise
-   * @param isAllDay      true if the event lasts all day; false otherwise
+   * @param subject       the event subject
+   * @param startDateTime event start time
+   * @param endDateTime   event end time
+   * @param weekdays      days of the week on which the event repeats
+   * @param repeatCount   number of repetitions
+   * @param repeatUntil   repeat-until date
+   * @param description   event description
+   * @param location      event location
+   * @param isPublic      visibility flag
+   * @param isAllDay      flag for all-day event
    */
   public RecurringEvent(String subject, LocalDateTime startDateTime, LocalDateTime endDateTime,
                         String weekdays, int repeatCount, LocalDateTime repeatUntil,
@@ -46,40 +43,23 @@ public class RecurringEvent extends AbstractCalendarEvent {
     this.isAllDay = isAllDay;
   }
 
-  /**
-   * Returns the string representing the days of the week on which the event repeats.
-   *
-   * @return the weekdays string
-   */
   public String getWeekdays() {
     return weekdays;
   }
 
-  /**
-   * Returns the number of times the event should repeat.
-   *
-   * @return the repeat count
-   */
   public int getRepeatCount() {
     return repeatCount;
   }
 
-  /**
-   * Returns the date and time until which the event should repeat.
-   *
-   * @return the repeat-until date and time, or null if not set
-   */
   public LocalDateTime getRepeatUntil() {
     return repeatUntil;
   }
 
   /**
-   * Generates occurrences of the recurring event as a list of single events.
-   * Each occurrence is created for days that match the specified weekdays.
-   * Occurrences will be generated until the repeat count is reached or until the repeatUntil date.
+   * Generates a list of SingleEvent occurrences from the recurring rule.
    *
-   * @param seriesId a unique identifier to associate the occurrences with the recurring series
-   * @return a list of single events representing the occurrences
+   * @param seriesId Unique identifier for the series.
+   * @return List of SingleEvent occurrences.
    */
   public List<SingleEvent> generateOccurrences(String seriesId) {
     List<SingleEvent> occurrences = new ArrayList<>();
@@ -89,15 +69,15 @@ public class RecurringEvent extends AbstractCalendarEvent {
 
     LocalDateTime currentStart = startDateTime;
     LocalDateTime currentEnd = endDateTime;
-    int occurrencesCreated = 0;
+    int created = 0;
 
     while (true) {
       if (weekdays.indexOf(getDayChar(currentStart.getDayOfWeek())) >= 0) {
         occurrences.add(new SingleEvent(subject, currentStart, currentEnd, description,
                 location, isPublic, isAllDay, seriesId));
-        occurrencesCreated++;
+        created++;
 
-        if (repeatCount > 0 && occurrencesCreated >= repeatCount) {
+        if (repeatCount > 0 && created >= repeatCount) {
           break;
         }
       }
@@ -109,19 +89,9 @@ public class RecurringEvent extends AbstractCalendarEvent {
         break;
       }
     }
-
     return occurrences;
   }
 
-  /**
-   * Returns a character representing the day of the week.
-   * The mapping is: Monday = M, Tuesday = T, Wednesday = W, Thursday = R,
-   * Friday = F, Saturday = S, Sunday = U.
-   *
-   * @param dayOfWeek the day of the week
-   * @return the character representing the day
-   * @throws IllegalArgumentException if the day is unknown
-   */
   private char getDayChar(DayOfWeek dayOfWeek) {
     switch (dayOfWeek) {
       case MONDAY:
@@ -141,5 +111,47 @@ public class RecurringEvent extends AbstractCalendarEvent {
       default:
         throw new IllegalArgumentException("Unknown day: " + dayOfWeek);
     }
+  }
+
+  /**
+   * Returns a new RecurringEvent updated with the specified property.
+   *
+   * @param property The property to update.
+   * @param newValue The new value for the property.
+   * @return A new RecurringEvent instance with the updated property.
+   */
+  public RecurringEvent withUpdatedProperty(String property, String newValue) {
+    String updatedWeekdays = weekdays;
+    int updatedRepeatCount = repeatCount;
+    LocalDateTime updatedRepeatUntil = repeatUntil;
+    String updatedDescription = description;
+    String updatedLocation = location;
+
+    switch (property.toLowerCase().trim()) {
+      case "repeattimes":
+        updatedRepeatCount = Integer.parseInt(newValue);
+        if (updatedRepeatCount <= 0) {
+          throw new IllegalArgumentException("Repeat count must be a positive number.");
+        }
+        break;
+      case "repeatuntil":
+        updatedRepeatUntil = LocalDateTime.parse(newValue);
+        break;
+      case "repeatingdays":
+        updatedWeekdays = newValue.toUpperCase();
+        break;
+      case "description":
+        updatedDescription = newValue;
+        break;
+      case "location":
+        updatedLocation = newValue;
+        break;
+      default:
+        throw new IllegalArgumentException("Unsupported recurring property: " + property);
+    }
+
+    return new RecurringEvent(subject, startDateTime, endDateTime,
+            updatedWeekdays, updatedRepeatCount, updatedRepeatUntil,
+            updatedDescription, updatedLocation, isPublic, isAllDay);
   }
 }

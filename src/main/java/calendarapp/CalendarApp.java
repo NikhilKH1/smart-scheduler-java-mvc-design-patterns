@@ -63,6 +63,9 @@ public class CalendarApp {
         break;
       }
       controller.processCommand(command);
+            System.out.println("----- All Events -----");
+            view.displayEvents(model.getEvents());
+            System.out.println("----------------------");
     }
     scanner.close();
   }

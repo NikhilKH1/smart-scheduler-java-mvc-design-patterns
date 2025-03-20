@@ -1,11 +1,11 @@
 package calendarapp.model.event;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 /**
- * This class represents a single (non-recurring) calendar event.
- * A single event contains the standard event details and may include a series identifier
- * if it is part of a recurring event series.
+ * Represents a single (non-recurring) calendar event.
  */
 public class SingleEvent extends AbstractCalendarEvent {
 
@@ -44,5 +44,59 @@ public class SingleEvent extends AbstractCalendarEvent {
    */
   public String getSeriesId() {
     return seriesId;
+  }
+
+  /**
+   * Returns a new SingleEvent updated with the specified property.
+   *
+   * @param property The property to update.
+   * @param newValue The new value for the property.
+   * @return A new SingleEvent instance with the updated property.
+   * @throws IllegalArgumentException if the property is unsupported
+   */
+  public SingleEvent withUpdatedProperty(String property, String newValue) {
+    String newSubject = this.subject;
+    String newDescription = this.description;
+    String newLocation = this.location;
+    LocalDateTime newStart = this.startDateTime;
+    LocalDateTime newEnd = this.endDateTime;
+    boolean newIsPublic = this.isPublic;
+
+    switch (property.toLowerCase().trim()) {
+      case "name":
+        newSubject = newValue;
+        break;
+      case "description":
+        newDescription = newValue;
+        break;
+      case "location":
+        newLocation = newValue;
+        break;
+      case "startdatetime":
+        newStart = LocalDateTime.parse(newValue);
+        break;
+      case "enddatetime":
+        newEnd = LocalDateTime.parse(newValue);
+        break;
+      case "startdate":
+        newStart = LocalDate.parse(newValue).atTime(newStart.toLocalTime());
+        break;
+      case "enddate":
+        newEnd = LocalDate.parse(newValue).atTime(newEnd.toLocalTime());
+        break;
+      case "starttime":
+        newStart = newStart.toLocalDate().atTime(LocalTime.parse(newValue));
+        break;
+      case "endtime":
+        newEnd = newEnd.toLocalDate().atTime(LocalTime.parse(newValue));
+        break;
+      case "public":
+        newIsPublic = Boolean.parseBoolean(newValue);
+        break;
+      default:
+        throw new IllegalArgumentException("Unsupported property: " + property);
+    }
+    return new SingleEvent(newSubject, newStart, newEnd, newDescription,
+            newLocation, newIsPublic, this.isAllDay, this.seriesId);
   }
 }
