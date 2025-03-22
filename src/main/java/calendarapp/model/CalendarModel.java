@@ -3,20 +3,41 @@ package calendarapp.model;
 import calendarapp.model.event.CalendarEvent;
 import calendarapp.model.event.RecurringEvent;
 import calendarapp.model.event.SingleEvent;
+import calendarapp.model.ConflictChecker;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.*;
 
-/**
- * Optimized model representing calendar data.
- */
 public class CalendarModel implements ICalendarModel {
   private final List<CalendarEvent> events = new ArrayList<>();
   private final Map<String, RecurringEvent> recurringMap = new HashMap<>();
 
+  private String name;
+  private ZoneId timezone;
+
+  public CalendarModel(String name, ZoneId timezone) {
+    this.name = name;
+    this.timezone = timezone;
+  }
+
+
+  public String getName() {
+    return name;
+  }
+  public void setName(String name) {
+    this.name = name;
+  }
+  public ZoneId getTimezone() {
+    return timezone;
+  }
+  public void setTimezone(ZoneId timezone) {
+    this.timezone = timezone;
+  }
+
   @Override
-  public boolean addEvent(CalendarEvent event, boolean unusedAutoDecline) {
+  public boolean addEvent(CalendarEvent event, boolean autoDecline) {
     if (duplicateExists(event)) {
       throw new IllegalArgumentException("Duplicate event detected.");
     }
@@ -25,29 +46,23 @@ public class CalendarModel implements ICalendarModel {
         return false;
       }
     }
-
     events.add(event);
     return true;
   }
 
   @Override
-  public boolean addRecurringEvent(RecurringEvent recurringEvent, boolean unusedAutoDecline) {
+  public boolean addRecurringEvent(RecurringEvent recurringEvent, boolean autoDecline) {
     String seriesId = UUID.randomUUID().toString();
     List<SingleEvent> occurrences = recurringEvent.generateOccurrences(seriesId);
 
-    // Check conflicts
-    for (SingleEvent occ : occurrences) {
-      for (CalendarEvent e : events) {
-        if (ConflictChecker.hasConflict(e, occ)) {
+    for (SingleEvent occurrence : occurrences) {
+      if (duplicateExists(occurrence)) {
+        throw new IllegalArgumentException("Duplicate event in recurring series.");
+      }
+      for (CalendarEvent existingEvent : events) {
+        if (ConflictChecker.hasConflict(existingEvent, occurrence)) {
           return false;
         }
-      }
-    }
-
-    // Check duplicates
-    for (SingleEvent occ : occurrences) {
-      if (duplicateExists(occ)) {
-        throw new IllegalArgumentException("Duplicate event in recurring series.");
       }
     }
 
@@ -65,9 +80,8 @@ public class CalendarModel implements ICalendarModel {
   public List<CalendarEvent> getEventsOnDate(LocalDate date) {
     List<CalendarEvent> result = new ArrayList<>();
     for (CalendarEvent event : events) {
-      LocalDate start = event.getStartDateTime().toLocalDate();
-      LocalDate end = event.getEndDateTime().toLocalDate();
-      if (!start.isAfter(date) && !end.isBefore(date)) {
+      if (!event.getStartDateTime().toLocalDate().isAfter(date) &&
+              !event.getEndDateTime().toLocalDate().isBefore(date)) {
         result.add(event);
       }
     }
@@ -88,7 +102,8 @@ public class CalendarModel implements ICalendarModel {
   @Override
   public boolean isBusyAt(LocalDateTime dateTime) {
     for (CalendarEvent event : events) {
-      if (!dateTime.isBefore(event.getStartDateTime()) && !dateTime.isAfter(event.getEndDateTime())) {
+      if (!dateTime.isBefore(event.getStartDateTime()) &&
+              !dateTime.isAfter(event.getEndDateTime())) {
         return true;
       }
     }
@@ -108,14 +123,13 @@ public class CalendarModel implements ICalendarModel {
 
   @Override
   public boolean editEvent(CalendarEvent oldEvent, CalendarEvent newEvent) {
-    // Check for conflicts (excluding old event itself)
-    for (CalendarEvent e : events) {
-      if (!e.equals(oldEvent) && ConflictChecker.hasConflict(e, newEvent)) {
+    events.remove(oldEvent);
+    for (CalendarEvent event : events) {
+      if (ConflictChecker.hasConflict(event, newEvent)) {
+        events.add(oldEvent);
         return false;
       }
     }
-
-    events.remove(oldEvent);
     events.add(newEvent);
     return true;
   }
@@ -123,68 +137,56 @@ public class CalendarModel implements ICalendarModel {
   public boolean editSingleEvent(String property, String eventName,
                                  LocalDateTime originalStart, LocalDateTime originalEnd,
                                  String newValue) {
-    List<SingleEvent> matching = new ArrayList<>();
-
     for (CalendarEvent event : events) {
       if (event instanceof SingleEvent &&
               event.getSubject().equals(eventName) &&
               event.getStartDateTime().equals(originalStart) &&
               event.getEndDateTime().equals(originalEnd)) {
-        matching.add((SingleEvent) event);
-      }
-    }
 
-    if (matching.isEmpty()) {
-      return false;
-    }
+        SingleEvent updated = ((SingleEvent) event).withUpdatedProperty(property, newValue);
 
-    events.removeAll(matching);
-    List<SingleEvent> updated = new ArrayList<>();
-    for (SingleEvent old : matching) {
-      SingleEvent updatedEvent = old.withUpdatedProperty(property, newValue);
-
-      // Check for conflicts with other events
-      for (CalendarEvent e : events) {
-        if (ConflictChecker.hasConflict(e, updatedEvent)) {
-          events.addAll(matching); // Restore original
+        if (updated.getStartDateTime().isAfter(updated.getEndDateTime())) {
           return false;
         }
+        if (hasConflictExcept(event, updated)) {
+          return false;
+        }
+
+        events.remove(event);
+        events.add(updated);
+        return true;
       }
-      updated.add(updatedEvent);
     }
-    events.addAll(updated);
-    return true;
+    return false;
   }
 
   public boolean editEventsFrom(String property, String eventName,
                                 LocalDateTime fromDateTime, String newValue) {
-    List<SingleEvent> matching = new ArrayList<>();
-
+    List<SingleEvent> toUpdate = new ArrayList<>();
     for (CalendarEvent event : events) {
       if (event instanceof SingleEvent &&
               event.getSubject().equals(eventName) &&
               !event.getStartDateTime().isBefore(fromDateTime)) {
-        matching.add((SingleEvent) event);
+        toUpdate.add((SingleEvent) event);
       }
     }
 
-    if (matching.isEmpty()) {
+    if (toUpdate.isEmpty()) {
       return false;
     }
 
-    events.removeAll(matching);
-    List<SingleEvent> updated = new ArrayList<>();
-    for (SingleEvent old : matching) {
-      SingleEvent updatedEvent = old.withUpdatedProperty(property, newValue);
-      for (CalendarEvent e : events) {
-        if (ConflictChecker.hasConflict(e, updatedEvent)) {
-          events.addAll(matching); // Restore original
-          return false;
-        }
+    List<SingleEvent> updatedEvents = new ArrayList<>();
+    for (SingleEvent event : toUpdate) {
+      SingleEvent updated = event.withUpdatedProperty(property, newValue);
+      if (updated.getStartDateTime().isAfter(updated.getEndDateTime()) ||
+              hasConflictExcept(event, updated)) {
+        return false;
       }
-      updated.add(updatedEvent);
+      updatedEvents.add(updated);
     }
-    events.addAll(updated);
+
+    events.removeAll(toUpdate);
+    events.addAll(updatedEvents);
     return true;
   }
 
@@ -193,71 +195,80 @@ public class CalendarModel implements ICalendarModel {
       return editRecurringEvent(eventName, property, newValue);
     }
 
-    List<SingleEvent> matching = new ArrayList<>();
+    List<SingleEvent> toUpdate = new ArrayList<>();
     for (CalendarEvent event : events) {
       if (event instanceof SingleEvent && event.getSubject().equals(eventName)) {
-        matching.add((SingleEvent) event);
+        toUpdate.add((SingleEvent) event);
       }
     }
 
-    if (matching.isEmpty()) {
+    if (toUpdate.isEmpty()) {
       return false;
     }
 
-    events.removeAll(matching);
-    List<SingleEvent> updated = new ArrayList<>();
-    for (SingleEvent old : matching) {
-      SingleEvent updatedEvent = old.withUpdatedProperty(property, newValue);
-      for (CalendarEvent e : events) {
-        if (ConflictChecker.hasConflict(e, updatedEvent)) {
-          events.addAll(matching); // Restore
-          return false;
-        }
+    List<SingleEvent> updatedEvents = new ArrayList<>();
+    for (SingleEvent event : toUpdate) {
+      SingleEvent updated = event.withUpdatedProperty(property, newValue);
+      if (updated.getStartDateTime().isAfter(updated.getEndDateTime()) ||
+              hasConflictExcept(event, updated)) {
+        return false;
       }
-      updated.add(updatedEvent);
+      updatedEvents.add(updated);
     }
-    events.addAll(updated);
-    return true;
-  }
 
-  private boolean isRecurringProperty(String property) {
-    String p = property.toLowerCase();
-    return p.equals("repeattimes") || p.equals("repeatuntil") || p.equals("repeatingdays");
+    events.removeAll(toUpdate);
+    events.addAll(updatedEvents);
+    return true;
   }
 
   public boolean editRecurringEvent(String eventName, String property, String newValue) {
     RecurringEvent existingEvent = recurringMap.get(eventName);
     if (existingEvent == null) {
-      throw new IllegalArgumentException("Recurring event not found: " + eventName);
+      return false;
     }
 
     RecurringEvent updatedEvent = existingEvent.withUpdatedProperty(property, newValue);
+    List<SingleEvent> newOccurrences = updatedEvent.generateOccurrences(UUID.randomUUID().toString());
 
-    // Remove old occurrences
-    List<SingleEvent> toRemove = new ArrayList<>();
-    for (CalendarEvent e : events) {
-      if (e instanceof SingleEvent &&
-              ((SingleEvent) e).getSeriesId() != null &&
-              e.getSubject().equals(existingEvent.getSubject())) {
-        toRemove.add((SingleEvent) e);
+    // Check conflicts and date validity for all new occurrences
+    for (SingleEvent newOccurrence : newOccurrences) {
+      if (newOccurrence.getStartDateTime().isAfter(newOccurrence.getEndDateTime()) ||
+              hasConflictExceptRecurring(eventName, newOccurrence)) {
+        return false; // Conflict or invalid dates detected
       }
     }
-    events.removeAll(toRemove);
 
-    String newSeriesId = UUID.randomUUID().toString();
-    List<SingleEvent> newOccurrences = updatedEvent.generateOccurrences(newSeriesId);
-
-    for (SingleEvent occ : newOccurrences) {
-      for (CalendarEvent e : events) {
-        if (ConflictChecker.hasConflict(e, occ)) {
-          events.addAll(toRemove);
-          return false;
-        }
-      }
-    }
+    // Remove old occurrences and add new validated occurrences
+    events.removeIf(e -> e instanceof SingleEvent &&
+            eventName.equals(e.getSubject()) &&
+            ((SingleEvent)e).getSeriesId() != null);
 
     events.addAll(newOccurrences);
     recurringMap.put(eventName, updatedEvent);
     return true;
+  }
+
+  private boolean hasConflictExcept(CalendarEvent oldEvent, CalendarEvent newEvent) {
+    for (CalendarEvent existing : events) {
+      if (!existing.equals(oldEvent) && ConflictChecker.hasConflict(existing, newEvent)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private boolean hasConflictExceptRecurring(String eventName, CalendarEvent newEvent) {
+    for (CalendarEvent existing : events) {
+      if (!existing.getSubject().equals(eventName) && ConflictChecker.hasConflict(existing, newEvent)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private boolean isRecurringProperty(String property) {
+    return property.equalsIgnoreCase("repeattimes") ||
+            property.equalsIgnoreCase("repeatuntil") ||
+            property.equalsIgnoreCase("repeatingdays");
   }
 }

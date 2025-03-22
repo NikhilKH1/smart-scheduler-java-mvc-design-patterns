@@ -11,7 +11,7 @@ import calendarapp.view.ICalendarView;
  * Command to create a new calendar event.
  * This command holds all details required for creating both single and recurring events.
  */
-public class CreateEventCommand implements Command {
+public class CreateEventCommand implements CalendarModelCommand {
   private final String eventName;
   private final LocalDateTime startDateTime;
   private final LocalDateTime endDateTime;

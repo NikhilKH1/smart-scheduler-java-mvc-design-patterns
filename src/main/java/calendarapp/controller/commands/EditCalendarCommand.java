@@ -1,0 +1,34 @@
+package calendarapp.controller.commands;
+
+import calendarapp.model.CalendarManager;
+import calendarapp.view.ICalendarView;
+
+public class EditCalendarCommand implements CalendarManagerCommand {
+  private final String calendarName;
+  private final String property;
+  private final String newValue;
+
+  public EditCalendarCommand(String calendarName, String property, String newValue) {
+    if (calendarName == null || property == null || newValue == null ||
+            calendarName.trim().isEmpty() || property.trim().isEmpty() || newValue.trim().isEmpty()) {
+      throw new IllegalArgumentException("Calendar name, property, or value cannot be empty.");
+    }
+    this.calendarName = calendarName;
+    this.property = property;
+    this.newValue = newValue;
+  }
+
+  @Override
+  public boolean execute(CalendarManager calendarManager, ICalendarView view) {
+    try {
+      boolean success = calendarManager.editCalendar(calendarName, property, newValue);
+      if (success) {
+        view.displayMessage("Calendar updated: " + calendarName);
+      }
+      return success;
+    } catch (Exception e) {
+      view.displayError("Edit calendar failed: " + e.getMessage());
+      return false;
+    }
+  }
+}

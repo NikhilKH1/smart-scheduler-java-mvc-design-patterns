@@ -10,7 +10,7 @@ import calendarapp.view.ICalendarView;
  * This command supports editing a single occurrence, all occurrences from a
  * specific date and time, or all occurrences of an event.
  */
-public class EditEventCommand implements Command {
+public class EditEventCommand implements CalendarModelCommand {
   /**
    * Enum representing the mode of editing.
    */

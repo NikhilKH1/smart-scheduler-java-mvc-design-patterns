@@ -1,9 +1,11 @@
 package calendarapp.controller;
 
+import calendarapp.model.CalendarManager;
 import calendarapp.model.CalendarModel;
 import calendarapp.controller.commands.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.function.Function;
@@ -12,17 +14,18 @@ import java.util.regex.Pattern;
 
 public class CommandParser {
 
-  private final CalendarModel model;
+  private final CalendarManager calendarManager;
   private final Map<String, Function<List<String>, Command>> parsers;
 
-  public CommandParser(CalendarModel model) {
-    this.model = model;
+  public CommandParser(CalendarManager calendarManager) {
+    this.calendarManager = calendarManager;
     parsers = new HashMap<>();
-    parsers.put("create", this::parseCreateEvent);
+    parsers.put("create", this::parseCreateCommand);
     parsers.put("print", this::parsePrintCommand);
     parsers.put("show", this::parseShowCommand);
     parsers.put("edit", this::parseEditCommand);
     parsers.put("export", this::parseExportCommand);
+    parsers.put("use", this::parseUseCommand);
   }
 
   public Command parse(String command) {
@@ -37,8 +40,79 @@ public class CommandParser {
     }
     throw new IllegalArgumentException("Unknown command: " + mainCommand);
   }
+  private Command parseCreateCommand(List<String> tokens) {
+    if (tokens.size() >= 2 && "calendar".equalsIgnoreCase(tokens.get(1))) {
+      return parseCreateCalendarCommand(tokens);
+    }
+    return parseCreateEvent(tokens);
+  }
 
-  // ------------------ Export Command ------------------
+  private Command parseEditCommand(List<String> tokens) {
+    if (tokens.size() >= 2 && "calendar".equalsIgnoreCase(tokens.get(1))) {
+      return parseEditCalendarCommand(tokens);
+    }
+    return parseEditEvent(tokens);
+  }
+
+  private Command parseUseCommand(List<String> tokens) {
+    if (tokens.size() >= 2 && "calendar".equalsIgnoreCase(tokens.get(1))) {
+      return parseUseCalendarCommand(tokens);
+    }
+    throw new IllegalArgumentException("Invalid use command format.");
+  }
+
+  private Command parseCreateCalendarCommand(List<String> tokens) {
+    String name = null, timezoneStr = null;
+    for (int i = 2; i < tokens.size() - 1; i++) {
+      if ("--name".equalsIgnoreCase(tokens.get(i))) {
+        name = tokens.get(++i);
+      } else if ("--timezone".equalsIgnoreCase(tokens.get(i))) {
+        timezoneStr = tokens.get(++i);
+      }
+    }
+    if (name == null || timezoneStr == null) {
+      throw new IllegalArgumentException("Usage: create calendar --name <name> --timezone <timezone>");
+    }
+    try {
+      ZoneId timezone = ZoneId.of(timezoneStr);
+      return new CreateCalendarCommand(name, timezone);
+    } catch (Exception e) {
+      throw new IllegalArgumentException("Invalid timezone: " + timezoneStr);
+    }
+  }
+
+  private Command parseEditCalendarCommand(List<String> tokens) {
+    String name = null, property = null, newValue = null;
+    for (int i = 2; i < tokens.size() - 1; i++) {
+      if ("--name".equalsIgnoreCase(tokens.get(i))) {
+        name = tokens.get(++i);
+      } else if ("--property".equalsIgnoreCase(tokens.get(i))) {
+        property = tokens.get(++i);
+        if (i + 1 < tokens.size()) {
+          newValue = tokens.get(++i);
+        }
+      }
+    }
+    if (name == null || property == null || newValue == null) {
+      throw new IllegalArgumentException("Usage: edit calendar --name <name> --property <property> <new-value>");
+    }
+    return new EditCalendarCommand(name, property, newValue);
+  }
+
+  private Command parseUseCalendarCommand(List<String> tokens) {
+    String name = null;
+    for (int i = 2; i < tokens.size() - 1; i++) {
+      if ("--name".equalsIgnoreCase(tokens.get(i))) {
+        name = tokens.get(++i);
+      }
+    }
+    if (name == null) {
+      throw new IllegalArgumentException("Usage: use calendar --name <name>");
+    }
+    return new UseCalendarCommand(name);
+  }
+
+
   private Command parseExportCommand(List<String> tokens) {
     if (tokens.size() != 3 || !"cal".equalsIgnoreCase(tokens.get(1))) {
       throw new IllegalArgumentException("Invalid export format. Usage: export cal <file.csv>");
@@ -47,10 +121,13 @@ public class CommandParser {
     if (!fileName.toLowerCase().endsWith(".csv")) {
       throw new IllegalArgumentException("Exported file must have a .csv extension");
     }
-    return new ExportCalendarCommand(model, fileName);
+    if (calendarManager.getActiveCalendar() == null) {
+      throw new IllegalArgumentException("No active calendar selected. Use 'use calendar --name <calName>' first.");
+    }
+    return new ExportCalendarCommand(calendarManager.getActiveCalendar(), fileName);
   }
 
-  // ------------------ Print Commands ------------------
+
   private Command parsePrintCommand(List<String> tokens) {
     if (tokens.size() < 3 || !"events".equalsIgnoreCase(tokens.get(1))) {
       throw new IllegalArgumentException("Invalid print command format");
@@ -86,7 +163,6 @@ public class CommandParser {
     return new QueryRangeDateTimeCommand(start, end);
   }
 
-  // ------------------ Show Command ------------------
   private Command parseShowCommand(List<String> tokens) {
     if (tokens.size() < 4 || !"status".equalsIgnoreCase(tokens.get(1)) || !"on".equalsIgnoreCase(tokens.get(2))) {
       throw new IllegalArgumentException("Invalid show command. Usage: show status on <datetime>");
@@ -94,8 +170,7 @@ public class CommandParser {
     return new BusyQueryCommand(parseDateTime(tokens.get(3)));
   }
 
-  // ------------------ Edit Command ------------------
-  private Command parseEditCommand(List<String> tokens) {
+  private Command parseEditEvent(List<String> tokens) {
     if (tokens.size() < 4) throw new IllegalArgumentException("Incomplete edit command");
 
     switch (tokens.get(1).toLowerCase()) {
@@ -144,7 +219,6 @@ public class CommandParser {
     return new EditEventCommand(property, eventName, start, end, newValue);
   }
 
-  // ------------------ Create Command ------------------
   private Command parseCreateEvent(List<String> tokens) {
     int index = 1;
     boolean autoDecline = true;
@@ -186,7 +260,6 @@ public class CommandParser {
     );
   }
 
-  // ------------------ Helpers ------------------
   private EventTimingResult parseEventTiming(List<String> tokens, int index) {
     EventTimingResult result = new EventTimingResult();
     String keyword = tokens.get(index).toLowerCase();

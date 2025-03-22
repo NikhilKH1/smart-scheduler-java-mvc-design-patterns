@@ -8,7 +8,7 @@ import calendarapp.view.ICalendarView;
 /**
  * Command to query whether the calendar is busy at a specified date and time.
  */
-public class BusyQueryCommand implements Command {
+public class BusyQueryCommand implements CalendarModelCommand {
   private final LocalDateTime queryTime;
 
   /**

@@ -10,7 +10,7 @@ import calendarapp.view.ICalendarView;
 /**
  * Command to query calendar events within a specific date and time range.
  */
-public class QueryRangeDateTimeCommand implements Command {
+public class QueryRangeDateTimeCommand implements CalendarModelCommand {
   private final LocalDateTime startDateTime;
   private final LocalDateTime endDateTime;
 

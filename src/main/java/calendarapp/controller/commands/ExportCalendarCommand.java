@@ -11,7 +11,7 @@ import java.util.List;
 /**
  * Command to export calendar events to a CSV file.
  */
-public class ExportCalendarCommand implements Command {
+public class ExportCalendarCommand implements CalendarModelCommand {
   private final CalendarModel model;
   private final String fileName;
 

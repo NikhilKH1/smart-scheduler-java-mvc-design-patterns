@@ -8,7 +8,7 @@ import calendarapp.view.ICalendarView;
  * This command is used to update recurring-specific properties such as repeat count,
  * repeat-until date, repeating days, description, or location.
  */
-public class EditRecurringEventCommand implements Command {
+public class EditRecurringEventCommand implements CalendarModelCommand {
   private final String property;
   private final String eventName;
   private final String newValue;

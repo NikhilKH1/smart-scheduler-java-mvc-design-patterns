@@ -1,11 +1,7 @@
 package calendarapp.controller.commands;
 
-import calendarapp.model.CalendarModel;
-import calendarapp.view.ICalendarView;
 /**
- * Marker interface for commands.
+ * Marker interface for all commands.
  */
 public interface Command {
-  boolean execute(CalendarModel model, ICalendarView view);
-
 }
