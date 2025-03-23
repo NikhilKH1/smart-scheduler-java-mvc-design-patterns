@@ -1,7 +1,10 @@
 package calendarapp.model.event;
 
 import java.time.DayOfWeek;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,7 +15,7 @@ public class RecurringEvent extends AbstractCalendarEvent {
 
   private final String weekdays;
   private final int repeatCount;
-  private final LocalDateTime repeatUntil;
+  private final ZonedDateTime repeatUntil;
 
   /**
    * Constructs a recurring event.
@@ -28,8 +31,8 @@ public class RecurringEvent extends AbstractCalendarEvent {
    * @param isPublic      visibility flag
    * @param isAllDay      flag for all-day event
    */
-  public RecurringEvent(String subject, LocalDateTime startDateTime, LocalDateTime endDateTime,
-                        String weekdays, int repeatCount, LocalDateTime repeatUntil,
+  public RecurringEvent(String subject, ZonedDateTime startDateTime, ZonedDateTime endDateTime,
+                        String weekdays, int repeatCount, ZonedDateTime repeatUntil,
                         String description, String location, boolean isPublic, boolean isAllDay) {
     this.subject = subject;
     this.startDateTime = startDateTime;
@@ -51,7 +54,7 @@ public class RecurringEvent extends AbstractCalendarEvent {
     return repeatCount;
   }
 
-  public LocalDateTime getRepeatUntil() {
+  public ZonedDateTime getRepeatUntil() {
     return repeatUntil;
   }
 
@@ -67,8 +70,8 @@ public class RecurringEvent extends AbstractCalendarEvent {
       return occurrences;
     }
 
-    LocalDateTime currentStart = startDateTime;
-    LocalDateTime currentEnd = endDateTime;
+    ZonedDateTime currentStart = startDateTime;
+    ZonedDateTime currentEnd = endDateTime;
     int created = 0;
 
     while (true) {
@@ -123,7 +126,7 @@ public class RecurringEvent extends AbstractCalendarEvent {
   public RecurringEvent withUpdatedProperty(String property, String newValue) {
     String updatedWeekdays = weekdays;
     int updatedRepeatCount = repeatCount;
-    LocalDateTime updatedRepeatUntil = repeatUntil;
+    ZonedDateTime updatedRepeatUntil = repeatUntil;
     String updatedDescription = description;
     String updatedLocation = location;
 
@@ -135,7 +138,7 @@ public class RecurringEvent extends AbstractCalendarEvent {
         }
         break;
       case "repeatuntil":
-        updatedRepeatUntil = LocalDateTime.parse(newValue);
+        updatedRepeatUntil = ZonedDateTime.parse(newValue);
         break;
       case "repeatingdays":
         updatedWeekdays = newValue.toUpperCase();

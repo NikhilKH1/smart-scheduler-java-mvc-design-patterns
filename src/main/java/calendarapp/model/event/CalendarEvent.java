@@ -1,6 +1,6 @@
 package calendarapp.model.event;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 /**
  * This interface represents a calendar event.
@@ -21,14 +21,14 @@ public interface CalendarEvent {
    *
    * @return the start date and time
    */
-  public LocalDateTime getStartDateTime();
+  public ZonedDateTime getStartDateTime();
 
   /**
    * Returns the end date and time of the event.
    *
    * @return the end date and time
    */
-  public LocalDateTime getEndDateTime();
+  public ZonedDateTime getEndDateTime();
 
   /**
    * Returns the description of the event.

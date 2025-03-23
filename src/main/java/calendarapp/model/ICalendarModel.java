@@ -1,7 +1,7 @@
 package calendarapp.model;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.List;
 
 import calendarapp.model.event.CalendarEvent;
@@ -56,7 +56,7 @@ public interface ICalendarModel {
    * @param end   the end date/time of the query range
    * @return a list of calendar events that fall within the specified range
    */
-  public List<CalendarEvent> getEventsBetween(LocalDateTime start, LocalDateTime end);
+  public List<CalendarEvent> getEventsBetween(ZonedDateTime start, ZonedDateTime end);
 
   /**
    * Checks if the calendar is busy at the specified date and time.
@@ -64,7 +64,7 @@ public interface ICalendarModel {
    * @param dateTime the date and time to check for an event
    * @return true if there is an event occurring at the given date/time, false otherwise
    */
-  public boolean isBusyAt(LocalDateTime dateTime);
+  public boolean isBusyAt(ZonedDateTime dateTime);
 
   /**
    * Edits an existing calendar event by replacing it with a new event.

@@ -1,6 +1,6 @@
 package calendarapp.controller;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 /**
  * Represents the timing details of an event.
@@ -10,8 +10,8 @@ import java.time.LocalDateTime;
  */
 public class EventTimingResult {
 
-  LocalDateTime start;
-  LocalDateTime end;
+  ZonedDateTime start;
+  ZonedDateTime end;
   boolean isAllDay;
   int index;
 
@@ -29,18 +29,18 @@ public class EventTimingResult {
   /**
    * Gets the start time of the event.
    *
-   * @return the start time as a {@link LocalDateTime} object.
+   * @return the start time as a {@link ZonedDateTime} object.
    */
-  public LocalDateTime getStart() {
+  public ZonedDateTime getStart() {
     return start;
   }
 
   /**
    * Gets the end time of the event.
    *
-   * @return the end time as a {@link LocalDateTime} object.
+   * @return the end time as a {@link ZonedDateTime} object.
    */
-  public LocalDateTime getEnd() {
+  public ZonedDateTime getEnd() {
     return end;
   }
 

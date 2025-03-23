@@ -1,6 +1,6 @@
 package calendarapp.controller.commands;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.List;
 
 import calendarapp.model.CalendarModel;
@@ -11,15 +11,15 @@ import calendarapp.view.ICalendarView;
  * Command to query calendar events within a specific date and time range.
  */
 public class QueryRangeDateTimeCommand implements CalendarModelCommand {
-  private final LocalDateTime startDateTime;
-  private final LocalDateTime endDateTime;
+  private final ZonedDateTime startDateTime;
+  private final ZonedDateTime endDateTime;
 
   /**
    * Processes a query range command. It retrieves events between the specified start and
    * end date-time and displays them in the view.
    *
    * @param model the calendar model used for checking conflicts
-   * @param view the calendar view for displaying messages
+   * @param view  the calendar view for displaying messages
    * @return true after executing the query
    */
   @Override
@@ -40,7 +40,7 @@ public class QueryRangeDateTimeCommand implements CalendarModelCommand {
    * @param startDateTime the beginning of the query range
    * @param endDateTime   the end of the query range
    */
-  public QueryRangeDateTimeCommand(LocalDateTime startDateTime, LocalDateTime endDateTime) {
+  public QueryRangeDateTimeCommand(ZonedDateTime startDateTime, ZonedDateTime endDateTime) {
     this.startDateTime = startDateTime;
     this.endDateTime = endDateTime;
   }
@@ -50,7 +50,7 @@ public class QueryRangeDateTimeCommand implements CalendarModelCommand {
    *
    * @return the start date and time
    */
-  public LocalDateTime getStartDateTime() {
+  public ZonedDateTime getStartDateTime() {
     return startDateTime;
   }
 
@@ -59,7 +59,7 @@ public class QueryRangeDateTimeCommand implements CalendarModelCommand {
    *
    * @return the end date and time
    */
-  public LocalDateTime getEndDateTime() {
+  public ZonedDateTime getEndDateTime() {
     return endDateTime;
   }
 }

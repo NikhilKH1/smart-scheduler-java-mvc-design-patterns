@@ -1,10 +1,10 @@
 package calendarapp.controller;
 
 import calendarapp.model.CalendarManager;
-import calendarapp.model.CalendarModel;
 import calendarapp.controller.commands.*;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZonedDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeParseException;
 import java.util.*;
@@ -40,6 +40,7 @@ public class CommandParser {
     }
     throw new IllegalArgumentException("Unknown command: " + mainCommand);
   }
+
   private Command parseCreateCommand(List<String> tokens) {
     if (tokens.size() >= 2 && "calendar".equalsIgnoreCase(tokens.get(1))) {
       return parseCreateCalendarCommand(tokens);
@@ -112,7 +113,6 @@ public class CommandParser {
     return new UseCalendarCommand(name);
   }
 
-
   private Command parseExportCommand(List<String> tokens) {
     if (tokens.size() != 3 || !"cal".equalsIgnoreCase(tokens.get(1))) {
       throw new IllegalArgumentException("Invalid export format. Usage: export cal <file.csv>");
@@ -126,7 +126,6 @@ public class CommandParser {
     }
     return new ExportCalendarCommand(calendarManager.getActiveCalendar(), fileName);
   }
-
 
   private Command parsePrintCommand(List<String> tokens) {
     if (tokens.size() < 3 || !"events".equalsIgnoreCase(tokens.get(1))) {
@@ -158,8 +157,8 @@ public class CommandParser {
     if (tokens.size() < 6 || !"to".equalsIgnoreCase(tokens.get(4))) {
       throw new IllegalArgumentException("Expected format: print events from <start> to <end>");
     }
-    LocalDateTime start = parseDateTime(tokens.get(3));
-    LocalDateTime end = parseDateTime(tokens.get(5));
+    ZonedDateTime start = parseDateTime(tokens.get(3));
+    ZonedDateTime end = parseDateTime(tokens.get(5));
     return new QueryRangeDateTimeCommand(start, end);
   }
 
@@ -197,7 +196,7 @@ public class CommandParser {
       if (!"from".equalsIgnoreCase(tokens.get(4)) || !"with".equalsIgnoreCase(tokens.get(6))) {
         throw new IllegalArgumentException("Invalid edit events command format");
       }
-      LocalDateTime filterDateTime = parseDateTime(tokens.get(5));
+      ZonedDateTime filterDateTime = parseDateTime(tokens.get(5));
       String newValue = stripQuotes(tokens.get(7));
       return isRecurringProperty
               ? new EditRecurringEventCommand(property, eventName, newValue)
@@ -213,8 +212,8 @@ public class CommandParser {
     }
     String property = tokens.get(2).toLowerCase();
     String eventName = stripQuotes(tokens.get(3));
-    LocalDateTime start = parseDateTime(tokens.get(5));
-    LocalDateTime end = parseDateTime(tokens.get(7));
+    ZonedDateTime start = parseDateTime(tokens.get(5));
+    ZonedDateTime end = parseDateTime(tokens.get(7));
     String newValue = stripQuotes(tokens.get(9));
     return new EditEventCommand(property, eventName, start, end, newValue);
   }
@@ -234,11 +233,11 @@ public class CommandParser {
     String eventName = stripQuotes(tokens.get(index++));
 
     EventTimingResult timing = parseEventTiming(tokens, index);
-    index = timing.index;
+    index = timing.getIndex();
 
     RecurringResult recurring = parseRecurringSection(tokens, index);
-    index = recurring.index;
-    if (recurring.isRecurring && timing.end.isAfter(timing.start.plusHours(24))) {
+    index = recurring.getIndex();
+    if (recurring.isRecurring() && timing.getEnd().isAfter(timing.getStart().plusHours(24))) {
       throw new IllegalArgumentException("Recurring event must end within 24 hours of the start time.");
     }
 
@@ -246,20 +245,19 @@ public class CommandParser {
 
     return new CreateEventCommand(
             eventName,
-            timing.start,
-            timing.end,
+            timing.getStart(),
+            timing.getEnd(),
             autoDecline,
-            props.description,
-            props.location,
-            props.isPublic,
-            timing.isAllDay,
-            recurring.isRecurring,
-            recurring.weekdays,
-            recurring.repeatCount,
-            recurring.repeatUntil
+            props.getDescription(),
+            props.getLocation(),
+            props.isPublic(),
+            timing.isAllDay(),
+            recurring.isRecurring(),
+            recurring.getWeekdays(),
+            recurring.getRepeatCount(),
+            recurring.getRepeatUntil()
     );
   }
-
   private EventTimingResult parseEventTiming(List<String> tokens, int index) {
     EventTimingResult result = new EventTimingResult();
     String keyword = tokens.get(index).toLowerCase();
@@ -274,13 +272,13 @@ public class CommandParser {
         }
         result.isAllDay = false;
       } else {
-        result.end = result.start.toLocalDate().atTime(23, 59, 59);
+        result.end = result.start.toLocalDate().atTime(23, 59, 59).atZone(result.start.getZone());
         result.isAllDay = true;
       }
     } else if ("on".equals(keyword)) {
       index++;
       result.start = parseDateTime(tokens.get(index++));
-      result.end = result.start.toLocalDate().atTime(23, 59, 59);
+      result.end = result.start.toLocalDate().atTime(23, 59, 59).atZone(result.start.getZone());
       result.isAllDay = true;
     } else {
       throw new IllegalArgumentException("Expected 'from' or 'on' after event name");
@@ -349,13 +347,25 @@ public class CommandParser {
     return result;
   }
 
-  private LocalDateTime parseDateTime(String token) {
+
+  private ZonedDateTime parseDateTime(String token) {
     try {
-      return LocalDateTime.parse(token);
+      // First parse as LocalDateTime because input doesn't have timezone offset
+      return ZonedDateTime.of(java.time.LocalDateTime.parse(token), calendarManager.getActiveCalendar().getTimezone());
     } catch (DateTimeParseException e) {
-      return LocalDate.parse(token).atStartOfDay();
+      // Fallback: parse as LocalDate and attach default time
+      return LocalDate.parse(token).atStartOfDay(calendarManager.getActiveCalendar().getTimezone());
     }
   }
+
+
+  private ZonedDateTime parseDateTime(String date, String time) {
+    LocalDate localDate = LocalDate.parse(date);
+    LocalTime localTime = LocalTime.parse(time);
+    ZoneId zone = calendarManager.getActiveCalendar().getTimezone();
+    return ZonedDateTime.of(localDate, localTime, zone);
+  }
+
 
   private String stripQuotes(String token) {
     if (token.startsWith("\"") && token.endsWith("\"") && token.length() > 1) {

@@ -6,8 +6,9 @@ import calendarapp.model.event.SingleEvent;
 import calendarapp.model.ConflictChecker;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.*;
 
 public class CalendarModel implements ICalendarModel {
@@ -21,7 +22,6 @@ public class CalendarModel implements ICalendarModel {
     this.name = name;
     this.timezone = timezone;
   }
-
 
   public String getName() {
     return name;
@@ -89,7 +89,7 @@ public class CalendarModel implements ICalendarModel {
   }
 
   @Override
-  public List<CalendarEvent> getEventsBetween(LocalDateTime start, LocalDateTime end) {
+  public List<CalendarEvent> getEventsBetween(ZonedDateTime start, ZonedDateTime end) {
     List<CalendarEvent> result = new ArrayList<>();
     for (CalendarEvent event : events) {
       if (event.getStartDateTime().isBefore(end) && event.getEndDateTime().isAfter(start)) {
@@ -100,7 +100,7 @@ public class CalendarModel implements ICalendarModel {
   }
 
   @Override
-  public boolean isBusyAt(LocalDateTime dateTime) {
+  public boolean isBusyAt(ZonedDateTime dateTime) {
     for (CalendarEvent event : events) {
       if (!dateTime.isBefore(event.getStartDateTime()) &&
               !dateTime.isAfter(event.getEndDateTime())) {
@@ -135,7 +135,7 @@ public class CalendarModel implements ICalendarModel {
   }
 
   public boolean editSingleEvent(String property, String eventName,
-                                 LocalDateTime originalStart, LocalDateTime originalEnd,
+                                 ZonedDateTime originalStart, ZonedDateTime originalEnd,
                                  String newValue) {
     for (CalendarEvent event : events) {
       if (event instanceof SingleEvent &&
@@ -161,7 +161,7 @@ public class CalendarModel implements ICalendarModel {
   }
 
   public boolean editEventsFrom(String property, String eventName,
-                                LocalDateTime fromDateTime, String newValue) {
+                                ZonedDateTime fromDateTime, String newValue) {
     List<SingleEvent> toUpdate = new ArrayList<>();
     for (CalendarEvent event : events) {
       if (event instanceof SingleEvent &&

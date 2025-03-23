@@ -1,6 +1,6 @@
 package calendarapp.controller.commands;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 import calendarapp.model.CalendarModel;
 import calendarapp.view.ICalendarView;
@@ -23,9 +23,9 @@ public class EditEventCommand implements CalendarModelCommand {
   private final EditMode mode;
   private final String property;
   private final String eventName;
-  private final LocalDateTime originalStart;
-  private final LocalDateTime originalEnd;
-  private final LocalDateTime filterDateTime;
+  private final ZonedDateTime originalStart;
+  private final ZonedDateTime originalEnd;
+  private final ZonedDateTime filterDateTime;
   private final String newValue;
 
   /**
@@ -37,8 +37,8 @@ public class EditEventCommand implements CalendarModelCommand {
    * @param originalEnd   the original end date and time of the event
    * @param newValue      the new value for the specified property
    */
-  public EditEventCommand(String property, String eventName, LocalDateTime originalStart,
-                          LocalDateTime originalEnd, String newValue) {
+  public EditEventCommand(String property, String eventName, ZonedDateTime originalStart,
+                          ZonedDateTime originalEnd, String newValue) {
     this.mode = EditMode.SINGLE;
     this.property = property;
     this.eventName = eventName;
@@ -56,7 +56,7 @@ public class EditEventCommand implements CalendarModelCommand {
    * @param filterDateTime the date and time from which the edit should be applied
    * @param newValue       the new value for the specified property
    */
-  public EditEventCommand(String property, String eventName, LocalDateTime filterDateTime,
+  public EditEventCommand(String property, String eventName, ZonedDateTime filterDateTime,
                           String newValue) {
     this.mode = EditMode.FROM;
     this.property = property;
@@ -147,7 +147,7 @@ public class EditEventCommand implements CalendarModelCommand {
    *
    * @return the original start date and time, or null if not applicable
    */
-  public LocalDateTime getOriginalStart() {
+  public ZonedDateTime getOriginalStart() {
     return originalStart;
   }
 
@@ -156,7 +156,7 @@ public class EditEventCommand implements CalendarModelCommand {
    *
    * @return the original end date and time, or null if not applicable
    */
-  public LocalDateTime getOriginalEnd() {
+  public ZonedDateTime getOriginalEnd() {
     return originalEnd;
   }
 
@@ -165,7 +165,7 @@ public class EditEventCommand implements CalendarModelCommand {
    *
    * @return the filter date and time, or null if not applicable
    */
-  public LocalDateTime getFilterDateTime() {
+  public ZonedDateTime getFilterDateTime() {
     return filterDateTime;
   }
 

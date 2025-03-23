@@ -1,6 +1,6 @@
 package calendarapp.controller;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 /**
  * Represents the properties related to a recurring event.
@@ -13,7 +13,7 @@ public class RecurringResult {
   protected boolean isRecurring = false;
   protected String weekdays = "";
   protected int repeatCount = 0;
-  protected LocalDateTime repeatUntil = null;
+  protected ZonedDateTime repeatUntil = null;
   protected int index;
 
   /**
@@ -60,7 +60,7 @@ public class RecurringResult {
    *
    * @return the repeat until date, or null if there is no end date.
    */
-  public LocalDateTime getRepeatUntil() {
+  public ZonedDateTime getRepeatUntil() {
     return repeatUntil;
   }
 

@@ -1,6 +1,6 @@
 package calendarapp.controller.commands;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 import calendarapp.model.CalendarModel;
 import calendarapp.view.ICalendarView;
@@ -9,7 +9,7 @@ import calendarapp.view.ICalendarView;
  * Command to query whether the calendar is busy at a specified date and time.
  */
 public class BusyQueryCommand implements CalendarModelCommand {
-  private final LocalDateTime queryTime;
+  private final ZonedDateTime queryTime;
 
   /**
    * Executes the busy query command by checking if the calendar has a conflict
@@ -35,7 +35,7 @@ public class BusyQueryCommand implements CalendarModelCommand {
    *
    * @param queryTime the date and time at which to check for calendar conflicts
    */
-  public BusyQueryCommand(LocalDateTime queryTime) {
+  public BusyQueryCommand(ZonedDateTime queryTime) {
     this.queryTime = queryTime;
   }
 
@@ -44,7 +44,7 @@ public class BusyQueryCommand implements CalendarModelCommand {
    *
    * @return the query time
    */
-  public LocalDateTime getQueryTime() {
+  public ZonedDateTime getQueryTime() {
     return queryTime;
   }
 

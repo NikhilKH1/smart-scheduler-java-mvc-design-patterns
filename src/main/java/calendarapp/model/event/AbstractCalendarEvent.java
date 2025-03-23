@@ -1,6 +1,6 @@
 package calendarapp.model.event;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 /**
  * This abstract class provides a common implementation for calendar events.
@@ -9,8 +9,8 @@ import java.time.LocalDateTime;
  */
 public abstract class AbstractCalendarEvent implements CalendarEvent {
   protected String subject;
-  protected LocalDateTime startDateTime;
-  protected LocalDateTime endDateTime;
+  protected ZonedDateTime startDateTime;
+  protected ZonedDateTime endDateTime;
   protected String description;
   protected String location;
   protected boolean isPublic;
@@ -32,7 +32,7 @@ public abstract class AbstractCalendarEvent implements CalendarEvent {
    * @return the event start date and time
    */
   @Override
-  public LocalDateTime getStartDateTime() {
+  public ZonedDateTime getStartDateTime() {
     return startDateTime;
   }
 
@@ -42,7 +42,7 @@ public abstract class AbstractCalendarEvent implements CalendarEvent {
    * @return the event end date and time
    */
   @Override
-  public LocalDateTime getEndDateTime() {
+  public ZonedDateTime getEndDateTime() {
     return endDateTime;
   }
 

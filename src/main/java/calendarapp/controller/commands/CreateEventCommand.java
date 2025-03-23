@@ -1,6 +1,7 @@
 package calendarapp.controller.commands;
 
-import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 
 import calendarapp.model.CalendarModel;
 import calendarapp.model.event.RecurringEvent;
@@ -13,8 +14,8 @@ import calendarapp.view.ICalendarView;
  */
 public class CreateEventCommand implements CalendarModelCommand {
   private final String eventName;
-  private final LocalDateTime startDateTime;
-  private final LocalDateTime endDateTime;
+  private final ZonedDateTime startDateTime;
+  private final ZonedDateTime endDateTime;
   private final boolean autoDecline;
   private final String description;
   private final String location;
@@ -23,7 +24,7 @@ public class CreateEventCommand implements CalendarModelCommand {
   private final boolean isRecurring;
   private final String weekdays;
   private final int repeatCount;
-  private final LocalDateTime repeatUntil;
+  private final ZonedDateTime repeatUntil;
 
   /**
    * Constructs a CreateEventCommand with the specified event details.
@@ -41,12 +42,12 @@ public class CreateEventCommand implements CalendarModelCommand {
    * @param repeatCount   the number of repetitions for recurring events
    * @param repeatUntil   the date and time until which the event repeats
    */
-  public CreateEventCommand(String eventName, LocalDateTime startDateTime,
-                            LocalDateTime endDateTime,
+  public CreateEventCommand(String eventName, ZonedDateTime startDateTime,
+                            ZonedDateTime endDateTime,
                             boolean autoDecline, String description, String location,
                             boolean isPublic, boolean isAllDay,
                             boolean isRecurring, String weekdays, int repeatCount,
-                            LocalDateTime repeatUntil) {
+                            ZonedDateTime repeatUntil) {
     this.eventName = eventName;
     this.startDateTime = startDateTime;
     this.endDateTime = endDateTime;
@@ -61,111 +62,51 @@ public class CreateEventCommand implements CalendarModelCommand {
     this.repeatUntil = repeatUntil;
   }
 
-  /**
-   * Returns the event name.
-   *
-   * @return the event name
-   */
   public String getEventName() {
     return eventName;
   }
 
-  /**
-   * Returns the start date and time of the event.
-   *
-   * @return the start date and time
-   */
-  public LocalDateTime getStartDateTime() {
+  public ZonedDateTime getStartDateTime() {
     return startDateTime;
   }
 
-  /**
-   * Returns the end date and time of the event.
-   *
-   * @return the end date and time
-   */
-  public LocalDateTime getEndDateTime() {
+  public ZonedDateTime getEndDateTime() {
     return endDateTime;
   }
 
-  /**
-   * Indicates whether the event should be automatically declined in case of a conflict.
-   *
-   * @return true if auto-decline is enabled; false otherwise
-   */
   public boolean isAutoDecline() {
     return autoDecline;
   }
 
-  /**
-   * Returns the event description.
-   *
-   * @return the event description
-   */
   public String getDescription() {
     return description;
   }
 
-  /**
-   * Returns the event location.
-   *
-   * @return the event location
-   */
   public String getLocation() {
     return location;
   }
 
-  /**
-   * Indicates whether the event is public.
-   *
-   * @return true if the event is public; false otherwise
-   */
   public boolean isPublic() {
     return isPublic;
   }
 
-  /**
-   * Indicates whether the event lasts all day.
-   *
-   * @return true if it is an all-day event; false otherwise
-   */
   public boolean isAllDay() {
     return isAllDay;
   }
 
-  /**
-   * Indicates whether the event is recurring.
-   *
-   * @return true if the event is recurring; false otherwise
-   */
   public boolean isRecurring() {
     return isRecurring;
   }
 
-  /**
-   * Returns the weekdays on which a recurring event occurs.
-   *
-   * @return a string representing the weekdays
-   */
   public String getWeekdays() {
     return weekdays;
   }
 
-  /**
-   * Returns the number of repetitions for a recurring event.
-   *
-   * @return the repeat count
-   */
   public int getRepeatCount() {
     return repeatCount;
   }
 
-  /**
-   * Returns the date and time until which a recurring event should repeat.
-   *
-   * @return the repeat-until date and time
-   */
-  public LocalDateTime getRepeatUntil() {
+  public ZonedDateTime getRepeatUntil() {
     return repeatUntil;
   }
 
@@ -174,19 +115,25 @@ public class CreateEventCommand implements CalendarModelCommand {
    * either a recurring event or a single event and attempts to add it to the calendar model.
    *
    * @param model the calendar model used for checking conflicts
-   * @param view the calendar view for displaying messages
+   * @param view  the calendar view for displaying messages
    * @return true if the event was created successfully; false otherwise
    */
   @Override
   public boolean execute(CalendarModel model, ICalendarView view) {
     try {
       boolean success;
+      ZoneId targetZone = model.getTimezone();
+
+      ZonedDateTime adjustedStart = startDateTime.withZoneSameInstant(targetZone);
+      ZonedDateTime adjustedEnd = endDateTime.withZoneSameInstant(targetZone);
+      ZonedDateTime adjustedRepeatUntil = (repeatUntil != null) ? repeatUntil.withZoneSameInstant(targetZone) : null;
+
       if (isRecurring) {
-        RecurringEvent recurringEvent = new RecurringEvent(eventName, startDateTime,
-                endDateTime, weekdays, repeatCount, repeatUntil, description, location, isPublic, isAllDay);
+        RecurringEvent recurringEvent = new RecurringEvent(eventName, adjustedStart,
+                adjustedEnd, weekdays, repeatCount, adjustedRepeatUntil, description, location, isPublic, isAllDay);
         success = model.addRecurringEvent(recurringEvent, autoDecline);
       } else {
-        SingleEvent event = new SingleEvent(eventName, startDateTime, endDateTime,
+        SingleEvent event = new SingleEvent(eventName, adjustedStart, adjustedEnd,
                 description, location, isPublic, isAllDay, null);
         success = model.addEvent(event, autoDecline);
       }
@@ -201,6 +148,4 @@ public class CreateEventCommand implements CalendarModelCommand {
       return false;
     }
   }
-
-
 }

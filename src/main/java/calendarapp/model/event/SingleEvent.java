@@ -1,8 +1,9 @@
 package calendarapp.model.event;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 
 /**
  * Represents a single (non-recurring) calendar event.
@@ -24,7 +25,7 @@ public class SingleEvent extends AbstractCalendarEvent {
    * @param seriesId      an identifier linking the event to a recurring series,
    *                      or null if not applicable
    */
-  public SingleEvent(String subject, LocalDateTime startDateTime, LocalDateTime endDateTime,
+  public SingleEvent(String subject, ZonedDateTime startDateTime, ZonedDateTime endDateTime,
                      String description, String location, boolean isPublic,
                      boolean isAllDay, String seriesId) {
     this.subject = subject;
@@ -58,8 +59,8 @@ public class SingleEvent extends AbstractCalendarEvent {
     String newSubject = this.subject;
     String newDescription = this.description;
     String newLocation = this.location;
-    LocalDateTime newStart = this.startDateTime;
-    LocalDateTime newEnd = this.endDateTime;
+    ZonedDateTime newStart = this.startDateTime;
+    ZonedDateTime newEnd = this.endDateTime;
     boolean newIsPublic = this.isPublic;
 
     switch (property.toLowerCase().trim()) {
@@ -73,22 +74,26 @@ public class SingleEvent extends AbstractCalendarEvent {
         newLocation = newValue;
         break;
       case "startdatetime":
-        newStart = LocalDateTime.parse(newValue);
+        newStart = ZonedDateTime.parse(newValue);
         break;
       case "enddatetime":
-        newEnd = LocalDateTime.parse(newValue);
+        newEnd = ZonedDateTime.parse(newValue);
         break;
       case "startdate":
-        newStart = LocalDate.parse(newValue).atTime(newStart.toLocalTime());
+        newStart = LocalDate.parse(newValue).atTime(newStart.toLocalTime())
+                .atZone(newStart.getZone());
         break;
       case "enddate":
-        newEnd = LocalDate.parse(newValue).atTime(newEnd.toLocalTime());
+        newEnd = LocalDate.parse(newValue).atTime(newEnd.toLocalTime())
+                .atZone(newEnd.getZone());
         break;
       case "starttime":
-        newStart = newStart.toLocalDate().atTime(LocalTime.parse(newValue));
+        newStart = newStart.toLocalDate().atTime(LocalTime.parse(newValue))
+                .atZone(newStart.getZone());
         break;
       case "endtime":
-        newEnd = newEnd.toLocalDate().atTime(LocalTime.parse(newValue));
+        newEnd = newEnd.toLocalDate().atTime(LocalTime.parse(newValue))
+                .atZone(newEnd.getZone());
         break;
       case "public":
         newIsPublic = Boolean.parseBoolean(newValue);

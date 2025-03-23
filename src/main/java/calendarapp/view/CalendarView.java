@@ -2,6 +2,7 @@ package calendarapp.view;
 
 import calendarapp.model.event.CalendarEvent;
 
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 /**
@@ -9,6 +10,9 @@ import java.util.List;
  * It provides methods to display a list of events, normal messages, and error messages.
  */
 public class CalendarView implements ICalendarView {
+
+  private static final DateTimeFormatter FORMATTER =
+          DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm z");
 
   /**
    * Displays the provided list of calendar events.
@@ -37,8 +41,8 @@ public class CalendarView implements ICalendarView {
     StringBuilder sb = new StringBuilder();
 
     sb.append("- ").append(event.getSubject())
-            .append(": ").append(event.getStartDateTime())
-            .append(" to ").append(event.getEndDateTime());
+            .append(": ").append(event.getStartDateTime().format(FORMATTER))
+            .append(" to ").append(event.getEndDateTime().format(FORMATTER));
 
     if (event.getDescription() != null && !event.getDescription().isEmpty()) {
       sb.append(" | Description: ").append(event.getDescription());
