@@ -5,11 +5,17 @@ import calendarapp.model.event.RecurringEvent;
 import calendarapp.model.event.SingleEvent;
 import calendarapp.model.ConflictChecker;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.*;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 public class CalendarModel implements ICalendarModel {
   private final List<CalendarEvent> events = new ArrayList<>();
@@ -35,6 +41,161 @@ public class CalendarModel implements ICalendarModel {
   public void setTimezone(ZoneId timezone) {
     this.timezone = timezone;
   }
+
+  public void updateTimezone(ZoneId newTimezone) {
+    // Update timezone field
+    ZoneId oldTimezone = this.timezone;
+    this.timezone = newTimezone;
+
+    List<CalendarEvent> updatedEvents = new ArrayList<>();
+
+    for (CalendarEvent event : events) {
+      ZonedDateTime oldStart = event.getStartDateTime().withZoneSameInstant(newTimezone);
+      ZonedDateTime oldEnd = event.getEndDateTime().withZoneSameInstant(newTimezone);
+
+      if (event instanceof SingleEvent) {
+        SingleEvent updatedEvent = new SingleEvent(
+                event.getSubject(),
+                oldStart,
+                oldEnd,
+                event.getDescription(),
+                event.getLocation(),
+                event.isPublic(),
+                event.isAllDay(),
+                ((SingleEvent) event).getSeriesId()
+        );
+        updatedEvents.add(updatedEvent);
+      } else {
+        // Keep recurring events as is (because they are templates)
+        updatedEvents.add(event);
+      }
+    }
+
+    // Replace all events with updated ones
+    events.clear();
+    events.addAll(updatedEvents);
+
+    // Handle recurringMap: regenerate occurrences in new timezone
+    Map<String, RecurringEvent> updatedRecurringMap = new HashMap<>();
+    for (Map.Entry<String, RecurringEvent> entry : recurringMap.entrySet()) {
+      RecurringEvent recurringEvent = entry.getValue();
+
+      // Remove old occurrences
+      events.removeIf(e -> e instanceof SingleEvent &&
+              e.getSubject().equals(entry.getKey()) &&
+              ((SingleEvent) e).getSeriesId() != null);
+
+      // Recreate recurring event occurrences in new timezone
+      RecurringEvent updatedRecurringEvent = recurringEvent.withUpdatedTimezone(newTimezone);
+      List<SingleEvent> newOccurrences = updatedRecurringEvent.generateOccurrences(UUID.randomUUID().toString());
+
+      events.addAll(newOccurrences);
+      updatedRecurringMap.put(entry.getKey(), updatedRecurringEvent);
+    }
+
+    // Update recurring map
+    recurringMap.clear();
+    recurringMap.putAll(updatedRecurringMap);
+  }
+
+
+  public boolean copySingleEventTo(CalendarModel sourceCalendar, String eventName, ZonedDateTime sourceDateTime, CalendarModel targetCalendar, ZonedDateTime targetDateTime) {
+    for (CalendarEvent event : sourceCalendar.getEvents()) {
+      if (event.getSubject().equals(eventName) && event.getStartDateTime().equals(sourceDateTime)) {
+
+        // ✅ Correct duration calculation (preserves timezone correctness)
+        long durationMinutes = Duration.between(
+                event.getStartDateTime(),
+                event.getEndDateTime()
+        ).toMinutes();
+
+        // ✅ Set new start explicitly to target timezone (already done by manager)
+        ZonedDateTime newStart = targetDateTime;
+        ZonedDateTime newEnd = newStart.plusMinutes(durationMinutes);
+
+        CalendarEvent copiedEvent = new SingleEvent(
+                event.getSubject(),
+                newStart,
+                newEnd,
+                event.getDescription(),
+                event.getLocation(),
+                event.isPublic(),
+                event.isAllDay(),
+                null
+        );
+
+        if (!targetCalendar.addEvent(copiedEvent, false)) {
+          return false;
+        }
+        return true;
+      }
+    }
+    return false;
+  }
+
+  public boolean copyEventsOnDateTo(CalendarModel sourceCalendar, LocalDate sourceDate, CalendarModel targetCalendar, LocalDate targetDate) {
+    boolean allCopied = true;
+    for (CalendarEvent event : sourceCalendar.getEventsOnDate(sourceDate)) {
+
+      long durationMinutes = Duration.between(event.getStartDateTime(), event.getEndDateTime()).toMinutes();
+
+      ZonedDateTime newStart = ZonedDateTime.of(
+              targetDate,
+              event.getStartDateTime().toLocalTime(),
+              targetCalendar.getTimezone()
+      );
+
+      ZonedDateTime newEnd = newStart.plusMinutes(durationMinutes);
+
+      CalendarEvent copiedEvent = new SingleEvent(
+              event.getSubject(),
+              newStart,
+              newEnd,
+              event.getDescription(),
+              event.getLocation(),
+              event.isPublic(),
+              event.isAllDay(),
+              null
+      );
+
+      if (!targetCalendar.addEvent(copiedEvent, false)) {
+        allCopied = false;
+      }
+    }
+    return allCopied;
+  }
+
+  public boolean copyEventsBetweenTo(CalendarModel sourceCalendar, LocalDate startDate, LocalDate endDate, CalendarModel targetCalendar, LocalDate targetStartDate) {
+    boolean allCopied = true;
+    long daysOffset = ChronoUnit.DAYS.between(startDate, targetStartDate);
+
+    for (CalendarEvent event : sourceCalendar.getEventsBetween(
+            startDate.atStartOfDay(sourceCalendar.getTimezone()),
+            endDate.plusDays(1).atStartOfDay(sourceCalendar.getTimezone()))) {
+
+      long durationMinutes = Duration.between(event.getStartDateTime(), event.getEndDateTime()).toMinutes();
+
+      ZonedDateTime newStart = event.getStartDateTime().plusDays(daysOffset).withZoneSameInstant(targetCalendar.getTimezone());
+      ZonedDateTime newEnd = newStart.plusMinutes(durationMinutes);
+
+      CalendarEvent copiedEvent = new SingleEvent(
+              event.getSubject(),
+              newStart,
+              newEnd,
+              event.getDescription(),
+              event.getLocation(),
+              event.isPublic(),
+              event.isAllDay(),
+              null
+      );
+
+      if (!targetCalendar.addEvent(copiedEvent, false)) {
+        allCopied = false;
+      }
+    }
+    return allCopied;
+  }
+
 
   @Override
   public boolean addEvent(CalendarEvent event, boolean autoDecline) {

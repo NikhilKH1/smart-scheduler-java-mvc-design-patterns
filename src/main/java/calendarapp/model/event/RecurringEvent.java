@@ -17,6 +17,21 @@ public class RecurringEvent extends AbstractCalendarEvent {
   private final int repeatCount;
   private final ZonedDateTime repeatUntil;
 
+  public RecurringEvent withUpdatedTimezone(ZoneId newZone) {
+    return new RecurringEvent(
+            this.subject,
+            this.startDateTime.withZoneSameInstant(newZone),
+            this.endDateTime.withZoneSameInstant(newZone),
+            this.weekdays,
+            this.repeatCount,
+            this.repeatUntil != null ? this.repeatUntil.withZoneSameInstant(newZone) : null,
+            this.description,
+            this.location,
+            this.isPublic,
+            this.isAllDay
+    );
+  }
+
   /**
    * Constructs a recurring event.
    *
@@ -45,6 +60,7 @@ public class RecurringEvent extends AbstractCalendarEvent {
     this.isPublic = isPublic;
     this.isAllDay = isAllDay;
   }
+
 
   public String getWeekdays() {
     return weekdays;
@@ -157,4 +173,6 @@ public class RecurringEvent extends AbstractCalendarEvent {
             updatedWeekdays, updatedRepeatCount, updatedRepeatUntil,
             updatedDescription, updatedLocation, isPublic, isAllDay);
   }
+
+
 }

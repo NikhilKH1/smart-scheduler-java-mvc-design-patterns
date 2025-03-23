@@ -1,8 +1,12 @@
 package calendarapp.model;
 
+import calendarapp.model.event.CalendarEvent;
+import calendarapp.model.event.SingleEvent;
+
+import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.HashMap;
-import java.util.Map;
+import java.time.ZonedDateTime;
+import java.util.*;
 
 /**
  * Manages multiple calendars by name and tracks the active calendar.
@@ -22,11 +26,12 @@ public class CalendarManager implements ICalendarManager {
    * @return true if added successfully, false if a calendar with the same name exists.
    */
   public boolean addCalendar(String name, ZoneId timezone) {
-    if (calendars.containsKey(name)) {
+    String cleanName = name.trim();
+    if (calendars.containsKey(cleanName)) {
       return false;
     }
-    CalendarModel model = new CalendarModel(name, timezone);
-    calendars.put(name, model);
+    CalendarModel model = new CalendarModel(cleanName, timezone);
+    calendars.put(cleanName, model);
     return true;
   }
 
@@ -38,25 +43,26 @@ public class CalendarManager implements ICalendarManager {
    * @return true if update successful
    */
   public boolean editCalendar(String name, String property, String newValue) {
-    CalendarModel cal = calendars.get(name);
+    CalendarModel cal = calendars.get(name.trim());
     if (cal == null) {
       throw new IllegalArgumentException("Calendar not found: " + name);
     }
     switch (property.toLowerCase()) {
       case "name":
-        if (calendars.containsKey(newValue)) {
+        if (calendars.containsKey(newValue.trim())) {
           throw new IllegalArgumentException("Calendar name already exists: " + newValue);
         }
-        calendars.remove(name);
-        cal.setName(newValue);
-        calendars.put(newValue, cal);
+        calendars.remove(name.trim());
+        cal.setName(newValue.trim());
+        calendars.put(newValue.trim(), cal);
         if (activeCalendar == cal) {
           activeCalendar = cal;
         }
         break;
       case "timezone":
         try {
-          cal.setTimezone(ZoneId.of(newValue));
+          ZoneId newZone = ZoneId.of(newValue);
+          cal.updateTimezone(newZone);
         } catch (Exception e) {
           throw new IllegalArgumentException("Invalid timezone: " + newValue);
         }
@@ -73,7 +79,7 @@ public class CalendarManager implements ICalendarManager {
    * @return true if found and set as active, false otherwise.
    */
   public boolean useCalendar(String name) {
-    CalendarModel cal = calendars.get(name);
+    CalendarModel cal = calendars.get(name.trim());
     if (cal == null) {
       return false;
     }
@@ -83,5 +89,53 @@ public class CalendarManager implements ICalendarManager {
 
   public CalendarModel getActiveCalendar() {
     return activeCalendar;
+  }
+
+  /**
+   * Returns a calendar by name after trimming and stripping quotes.
+   * @param name the calendar name
+   * @return the CalendarModel if found, null otherwise.
+   */
+  public CalendarModel getCalendar(String name) {
+    String cleanName = name.trim();
+    if (cleanName.startsWith("\"") && cleanName.endsWith("\"")) {
+      cleanName = cleanName.substring(1, cleanName.length() - 1).trim();
+    }
+    return calendars.get(cleanName);
+  }
+
+  /**
+   * Copies a single event from the active calendar to the target calendar with timezone conversion.
+   */
+  public boolean copySingleEvent(String eventName, ZonedDateTime sourceDateTime, String targetCalendarName, ZonedDateTime targetDateTime) {
+    CalendarModel sourceCalendar = activeCalendar;
+    CalendarModel targetCalendar = getCalendar(targetCalendarName);
+    if (sourceCalendar == null || targetCalendar == null) {
+      throw new IllegalArgumentException("Source or target calendar not found.");
+    }
+    return sourceCalendar.copySingleEventTo(sourceCalendar, eventName, sourceDateTime, targetCalendar, targetDateTime);
+  }
+  /**
+   * Copies all events on a specific date to the target calendar.
+   */
+  public boolean copyEventsOnDate(LocalDate sourceDate, String targetCalendarName, LocalDate targetDate) {
+    CalendarModel sourceCalendar = activeCalendar;
+    CalendarModel targetCalendar = getCalendar(targetCalendarName);
+    if (sourceCalendar == null || targetCalendar == null) {
+      throw new IllegalArgumentException("Source or target calendar not found.");
+    }
+    return sourceCalendar.copyEventsOnDateTo(sourceCalendar, sourceDate, targetCalendar, targetDate);
+  }
+
+  /**
+   * Copies all events within a date range to the target calendar.
+   */
+  public boolean copyEventsBetween(LocalDate startDate, LocalDate endDate, String targetCalendarName, LocalDate targetStartDate) {
+    CalendarModel sourceCalendar = activeCalendar;
+    CalendarModel targetCalendar = getCalendar(targetCalendarName);
+    if (sourceCalendar == null || targetCalendar == null) {
+      throw new IllegalArgumentException("Source or target calendar not found.");
+    }
+    return sourceCalendar.copyEventsBetweenTo(sourceCalendar, startDate, endDate, targetCalendar, targetStartDate);
   }
 }

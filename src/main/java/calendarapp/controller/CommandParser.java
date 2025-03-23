@@ -26,6 +26,7 @@ public class CommandParser {
     parsers.put("edit", this::parseEditCommand);
     parsers.put("export", this::parseExportCommand);
     parsers.put("use", this::parseUseCommand);
+    parsers.put("copy", this::parseCopyCommand);
   }
 
   public Command parse(String command) {
@@ -39,6 +40,62 @@ public class CommandParser {
       return parserFunc.apply(tokens);
     }
     throw new IllegalArgumentException("Unknown command: " + mainCommand);
+  }
+
+  private Command parseCopyCommand(List<String> tokens) {
+    if (tokens.size() < 2) {
+      throw new IllegalArgumentException("Incomplete copy command");
+    }
+
+    String type = tokens.get(1).toLowerCase();
+
+    switch (type) {
+      case "event":
+        return parseCopySingleEvent(tokens);
+      case "events":
+        if (tokens.get(2).equalsIgnoreCase("on")) {
+          return parseCopyEventsOnDate(tokens);
+        } else if (tokens.get(2).equalsIgnoreCase("between")) {
+          return parseCopyEventsBetween(tokens);
+        } else {
+          throw new IllegalArgumentException("Invalid copy events format");
+        }
+      default:
+        throw new IllegalArgumentException("Unsupported copy command type");
+    }
+  }
+
+  private Command parseCopySingleEvent(List<String> tokens) {
+    if (tokens.size() < 9 || !"on".equalsIgnoreCase(tokens.get(3)) || !"--target".equalsIgnoreCase(tokens.get(5)) || !"to".equalsIgnoreCase(tokens.get(7))) {
+      throw new IllegalArgumentException("Invalid copy event format");
+    }
+    String eventName = stripQuotes(tokens.get(2));
+    ZonedDateTime sourceDateTime = parseDateTime(tokens.get(4));
+    String targetCalendar = stripQuotes(tokens.get(6)).trim();
+    ZonedDateTime targetDateTime = parseDateTime(tokens.get(8));
+
+    return new CopySingleEventCommand(eventName, sourceDateTime, targetCalendar, targetDateTime);
+  }
+
+  private Command parseCopyEventsOnDate(List<String> tokens) {
+    if (tokens.size() < 7 || !"--target".equalsIgnoreCase(tokens.get(4)) || !"to".equalsIgnoreCase(tokens.get(6))) {
+      throw new IllegalArgumentException("Invalid copy events on format");
+    }
+    LocalDate sourceDate = LocalDate.parse(tokens.get(3));
+    String targetCalendar = stripQuotes(tokens.get(5)).trim();
+    LocalDate targetDate = LocalDate.parse(tokens.get(7));
+    return new CopyEventsOnDateCommand(sourceDate, targetCalendar, targetDate);
+  }
+
+  private Command parseCopyEventsBetween(List<String> tokens) {
+    if (tokens.size() < 9 || !"and".equalsIgnoreCase(tokens.get(4)) || !"--target".equalsIgnoreCase(tokens.get(6)) || !"to".equalsIgnoreCase(tokens.get(8))) {
+      throw new IllegalArgumentException("Invalid copy events between format");
+    }
+    LocalDate startDate = LocalDate.parse(tokens.get(3));
+    LocalDate endDate = LocalDate.parse(tokens.get(5));
+    String targetCalendar = stripQuotes(tokens.get(7)).trim();
+    LocalDate targetStartDate = LocalDate.parse(tokens.get(9));
+    return new CopyEventsBetweenDatesCommand(startDate, endDate, targetCalendar, targetStartDate);
   }
 
   private Command parseCreateCommand(List<String> tokens) {
