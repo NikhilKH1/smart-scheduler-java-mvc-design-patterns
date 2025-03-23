@@ -72,9 +72,18 @@ public class CommandParser {
     String eventName = stripQuotes(tokens.get(2));
     ZonedDateTime sourceDateTime = parseDateTime(tokens.get(4));
     String targetCalendar = stripQuotes(tokens.get(6)).trim();
-    ZonedDateTime targetDateTime = parseDateTime(tokens.get(8));
+    ZoneId targetZone = calendarManager.getCalendar(targetCalendar).getTimezone();
+    ZonedDateTime targetDateTime = parseDateTimeWithZone(tokens.get(8), targetZone);
 
     return new CopySingleEventCommand(eventName, sourceDateTime, targetCalendar, targetDateTime);
+  }
+
+  private ZonedDateTime parseDateTimeWithZone(String token, ZoneId zone) {
+    try {
+      return ZonedDateTime.of(java.time.LocalDateTime.parse(token), zone);
+    } catch (DateTimeParseException e) {
+      return LocalDate.parse(token).atStartOfDay(zone);
+    }
   }
 
   private Command parseCopyEventsOnDate(List<String> tokens) {
@@ -407,10 +416,8 @@ public class CommandParser {
 
   private ZonedDateTime parseDateTime(String token) {
     try {
-      // First parse as LocalDateTime because input doesn't have timezone offset
       return ZonedDateTime.of(java.time.LocalDateTime.parse(token), calendarManager.getActiveCalendar().getTimezone());
     } catch (DateTimeParseException e) {
-      // Fallback: parse as LocalDate and attach default time
       return LocalDate.parse(token).atStartOfDay(calendarManager.getActiveCalendar().getTimezone());
     }
   }

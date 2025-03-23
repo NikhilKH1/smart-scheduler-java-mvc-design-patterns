@@ -6,6 +6,7 @@ import calendarapp.model.event.CalendarEvent;
 import calendarapp.model.event.SingleEvent;
 import calendarapp.view.ICalendarView;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.UUID;
@@ -30,22 +31,32 @@ public class CopySingleEventCommand implements CalendarManagerCommand {
   public boolean execute(CalendarManager calendarManager, ICalendarView view) {
     CalendarModel sourceCalendar = calendarManager.getActiveCalendar();
     CalendarModel targetCalendar = calendarManager.getCalendar(targetCalendarName);
+
     if (sourceCalendar == null || targetCalendar == null) {
       view.displayError("Invalid source or target calendar.");
       return false;
     }
+
     for (CalendarEvent event : sourceCalendar.getEvents()) {
       if (event.getSubject().equals(eventName) && event.getStartDateTime().equals(sourceDateTime)) {
-        ZonedDateTime newStart = targetDateTime.withZoneSameInstant(targetCalendar.getTimezone());
-        ZonedDateTime newEnd = event.getEndDateTime()
-                .withZoneSameInstant(targetCalendar.getTimezone())
-                .withHour(newStart.getHour())
-                .withMinute(newStart.getMinute())
-                .plusMinutes(event.getEndDateTime().minusMinutes(event.getStartDateTime().getMinute()).getMinute());
 
-        SingleEvent copied = new SingleEvent(event.getSubject(), newStart, newEnd,
-                event.getDescription(), event.getLocation(), event.isPublic(), event.isAllDay(), UUID.randomUUID().toString());
-        if (targetCalendar.addEvent(copied, true)) {
+        long durationMinutes = Duration.between(event.getStartDateTime(), event.getEndDateTime()).toMinutes();
+
+        ZonedDateTime newStart = targetDateTime.withZoneSameInstant(targetCalendar.getTimezone());
+        ZonedDateTime newEnd = newStart.plusMinutes(durationMinutes);
+
+        SingleEvent copied = new SingleEvent(
+                event.getSubject(),
+                newStart,
+                newEnd,
+                event.getDescription(),
+                event.getLocation(),
+                event.isPublic(),
+                event.isAllDay(),
+                null // Not recurring
+        );
+
+        if (targetCalendar.addEvent(copied, false)) {
           view.displayMessage("Event copied successfully.");
           return true;
         } else {
@@ -57,4 +68,5 @@ public class CopySingleEventCommand implements CalendarManagerCommand {
     view.displayError("Event not found.");
     return false;
   }
+
 }

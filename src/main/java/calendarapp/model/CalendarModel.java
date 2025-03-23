@@ -43,7 +43,6 @@ public class CalendarModel implements ICalendarModel {
   }
 
   public void updateTimezone(ZoneId newTimezone) {
-    // Update timezone field
     ZoneId oldTimezone = this.timezone;
     this.timezone = newTimezone;
 
@@ -66,26 +65,21 @@ public class CalendarModel implements ICalendarModel {
         );
         updatedEvents.add(updatedEvent);
       } else {
-        // Keep recurring events as is (because they are templates)
         updatedEvents.add(event);
       }
     }
 
-    // Replace all events with updated ones
     events.clear();
     events.addAll(updatedEvents);
 
-    // Handle recurringMap: regenerate occurrences in new timezone
     Map<String, RecurringEvent> updatedRecurringMap = new HashMap<>();
     for (Map.Entry<String, RecurringEvent> entry : recurringMap.entrySet()) {
       RecurringEvent recurringEvent = entry.getValue();
 
-      // Remove old occurrences
       events.removeIf(e -> e instanceof SingleEvent &&
               e.getSubject().equals(entry.getKey()) &&
               ((SingleEvent) e).getSeriesId() != null);
 
-      // Recreate recurring event occurrences in new timezone
       RecurringEvent updatedRecurringEvent = recurringEvent.withUpdatedTimezone(newTimezone);
       List<SingleEvent> newOccurrences = updatedRecurringEvent.generateOccurrences(UUID.randomUUID().toString());
 
@@ -93,25 +87,39 @@ public class CalendarModel implements ICalendarModel {
       updatedRecurringMap.put(entry.getKey(), updatedRecurringEvent);
     }
 
-    // Update recurring map
     recurringMap.clear();
     recurringMap.putAll(updatedRecurringMap);
   }
 
+  public boolean copySingleEventTo(CalendarModel sourceCalendar, String eventName,
+                                   ZonedDateTime sourceDateTime, CalendarModel targetCalendar,
+                                   ZonedDateTime targetDateTime) {
 
-  public boolean copySingleEventTo(CalendarModel sourceCalendar, String eventName, ZonedDateTime sourceDateTime, CalendarModel targetCalendar, ZonedDateTime targetDateTime) {
+    System.out.println("DEBUG: Starting copySingleEventTo");
+    System.out.println("DEBUG: Source calendar: " + sourceCalendar.getName() + ", Target calendar: " + targetCalendar.getName());
+    System.out.println("DEBUG: Source event name: " + eventName);
+    System.out.println("DEBUG: Source event datetime: " + sourceDateTime);
+    System.out.println("DEBUG: Target event datetime: " + targetDateTime);
+
     for (CalendarEvent event : sourceCalendar.getEvents()) {
-      if (event.getSubject().equals(eventName) && event.getStartDateTime().equals(sourceDateTime)) {
+      System.out.println("DEBUG: Checking event - " + event.getSubject() + " at " + event.getStartDateTime());
 
-        // ✅ Correct duration calculation (preserves timezone correctness)
+      if (event.getSubject().equals(eventName) && event.getStartDateTime().equals(sourceDateTime)) {
+        System.out.println("DEBUG: Found matching event!");
+        System.out.println("DEBUG: Original event start: " + event.getStartDateTime() + ", end: " + event.getEndDateTime());
+
         long durationMinutes = Duration.between(
                 event.getStartDateTime(),
                 event.getEndDateTime()
         ).toMinutes();
 
-        // ✅ Set new start explicitly to target timezone (already done by manager)
+        System.out.println("DEBUG: Calculated duration (minutes): " + durationMinutes);
+
+        // The target start datetime is already parsed in correct target timezone
         ZonedDateTime newStart = targetDateTime;
         ZonedDateTime newEnd = newStart.plusMinutes(durationMinutes);
+
+        System.out.println("DEBUG: New event start: " + newStart + ", end: " + newEnd);
 
         CalendarEvent copiedEvent = new SingleEvent(
                 event.getSubject(),
@@ -124,20 +132,24 @@ public class CalendarModel implements ICalendarModel {
                 null
         );
 
-        if (!targetCalendar.addEvent(copiedEvent, false)) {
-          return false;
-        }
-        return true;
+        boolean added = targetCalendar.addEvent(copiedEvent, false);
+        System.out.println("DEBUG: Event added to target calendar: " + added);
+        return added;
       }
     }
+    System.out.println("DEBUG: Event not found in source calendar.");
     return false;
   }
+
 
   public boolean copyEventsOnDateTo(CalendarModel sourceCalendar, LocalDate sourceDate, CalendarModel targetCalendar, LocalDate targetDate) {
     boolean allCopied = true;
     for (CalendarEvent event : sourceCalendar.getEventsOnDate(sourceDate)) {
 
-      long durationMinutes = Duration.between(event.getStartDateTime(), event.getEndDateTime()).toMinutes();
+      long durationMinutes = Duration.between(
+              event.getStartDateTime().toLocalTime(),
+              event.getEndDateTime().toLocalTime()
+      ).toMinutes();
 
       ZonedDateTime newStart = ZonedDateTime.of(
               targetDate,
@@ -173,7 +185,10 @@ public class CalendarModel implements ICalendarModel {
             startDate.atStartOfDay(sourceCalendar.getTimezone()),
             endDate.plusDays(1).atStartOfDay(sourceCalendar.getTimezone()))) {
 
-      long durationMinutes = Duration.between(event.getStartDateTime(), event.getEndDateTime()).toMinutes();
+      long durationMinutes = Duration.between(
+              event.getStartDateTime().toLocalTime(),
+              event.getEndDateTime().toLocalTime()
+      ).toMinutes();
 
       ZonedDateTime newStart = event.getStartDateTime().plusDays(daysOffset).withZoneSameInstant(targetCalendar.getTimezone());
       ZonedDateTime newEnd = newStart.plusMinutes(durationMinutes);
@@ -195,7 +210,6 @@ public class CalendarModel implements ICalendarModel {
     }
     return allCopied;
   }
-
 
   @Override
   public boolean addEvent(CalendarEvent event, boolean autoDecline) {
@@ -391,15 +405,13 @@ public class CalendarModel implements ICalendarModel {
     RecurringEvent updatedEvent = existingEvent.withUpdatedProperty(property, newValue);
     List<SingleEvent> newOccurrences = updatedEvent.generateOccurrences(UUID.randomUUID().toString());
 
-    // Check conflicts and date validity for all new occurrences
     for (SingleEvent newOccurrence : newOccurrences) {
       if (newOccurrence.getStartDateTime().isAfter(newOccurrence.getEndDateTime()) ||
               hasConflictExceptRecurring(eventName, newOccurrence)) {
-        return false; // Conflict or invalid dates detected
+        return false;
       }
     }
 
-    // Remove old occurrences and add new validated occurrences
     events.removeIf(e -> e instanceof SingleEvent &&
             eventName.equals(e.getSubject()) &&
             ((SingleEvent)e).getSeriesId() != null);
