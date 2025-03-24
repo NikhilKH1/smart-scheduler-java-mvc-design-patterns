@@ -2,7 +2,7 @@ package calendarapp.controller.commands;
 
 import java.time.LocalDateTime;
 
-import calendarapp.model.CalendarModel;
+import calendarapp.model.ICalendarModel;
 import calendarapp.view.ICalendarView;
 
 /**
@@ -94,7 +94,7 @@ public class EditEventCommand implements CalendarModelCommand {
    * @return true if the event(s) were edited successfully; false otherwise
    */
   @Override
-  public boolean execute(CalendarModel model, ICalendarView view) {
+  public boolean execute(ICalendarModel model, ICalendarView view) {
     boolean success = false;
     switch (mode) {
       case SINGLE:

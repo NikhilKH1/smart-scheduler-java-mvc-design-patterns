@@ -3,7 +3,7 @@ package calendarapp.controller.commands;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import calendarapp.model.CalendarModel;
+import calendarapp.model.ICalendarModel;
 import calendarapp.model.event.CalendarEvent;
 import calendarapp.view.ICalendarView;
 
@@ -23,7 +23,7 @@ public class QueryRangeDateTimeCommand implements CalendarModelCommand {
    * @return true after executing the query
    */
   @Override
-  public boolean execute(CalendarModel model, ICalendarView view) {
+  public boolean execute(ICalendarModel model, ICalendarView view) {
     List<CalendarEvent> events = model.getEventsBetween(startDateTime, endDateTime);
     if (events.isEmpty()) {
       view.displayMessage("No events found from " + startDateTime + " to " + endDateTime);

@@ -2,7 +2,7 @@ package calendarapp.controller.commands;
 
 import java.time.LocalDateTime;
 
-import calendarapp.model.CalendarModel;
+import calendarapp.model.ICalendarModel;
 import calendarapp.model.event.RecurringEvent;
 import calendarapp.model.event.SingleEvent;
 import calendarapp.view.ICalendarView;
@@ -178,7 +178,7 @@ public class CreateEventCommand implements CalendarModelCommand {
    * @return true if the event was created successfully; false otherwise
    */
   @Override
-  public boolean execute(CalendarModel model, ICalendarView view) {
+  public boolean execute(ICalendarModel model, ICalendarView view) {
     try {
       boolean success;
       if (isRecurring) {

@@ -1,10 +1,11 @@
 package calendarapp.controller;
 
-import calendarapp.model.CalendarManager;
 import calendarapp.model.CalendarModel;
 import calendarapp.controller.commands.Command;
 import calendarapp.controller.commands.CalendarManagerCommand;
 import calendarapp.controller.commands.CalendarModelCommand;
+import calendarapp.model.ICalendarManager;
+import calendarapp.model.ICalendarModel;
 import calendarapp.view.ICalendarView;
 
 /**
@@ -12,11 +13,11 @@ import calendarapp.view.ICalendarView;
  * and updating the calendar view with the results.
  */
 public class CalendarController implements ICalendarController {
-  private final CalendarManager calendarManager;
+  private final ICalendarManager calendarManager;
   private final ICalendarView view;
   private final CommandParser parser;
 
-  public CalendarController(CalendarManager calendarManager, ICalendarView view, CommandParser parser) {
+  public CalendarController(ICalendarManager calendarManager, ICalendarView view, CommandParser parser) {
     this.calendarManager = calendarManager;
     this.view = view;
     this.parser = parser;
@@ -66,7 +67,7 @@ public class CalendarController implements ICalendarController {
     }
   }
 
-  public CalendarModel getActiveCalendar() {
+  public ICalendarModel getActiveCalendar() {
     return calendarManager.getActiveCalendar();
   }
 
