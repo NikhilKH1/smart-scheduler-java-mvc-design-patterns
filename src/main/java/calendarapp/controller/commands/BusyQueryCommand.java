@@ -2,7 +2,7 @@ package calendarapp.controller.commands;
 
 import java.time.ZonedDateTime;
 
-import calendarapp.model.CalendarModel;
+import calendarapp.model.ICalendarModel;
 import calendarapp.view.ICalendarView;
 
 /**
@@ -20,7 +20,7 @@ public class BusyQueryCommand implements CalendarModelCommand {
    * @return true after executing the query
    */
   @Override
-  public boolean execute(CalendarModel model, ICalendarView view) {
+  public boolean execute(ICalendarModel model, ICalendarView view) {
     boolean busy = model.isBusyAt(queryTime);
     if (busy) {
       view.displayMessage("Busy at " + queryTime);

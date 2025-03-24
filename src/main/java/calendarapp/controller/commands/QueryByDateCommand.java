@@ -3,7 +3,7 @@ package calendarapp.controller.commands;
 import java.time.LocalDate;
 import java.util.List;
 
-import calendarapp.model.CalendarModel;
+import calendarapp.model.ICalendarModel;
 import calendarapp.model.event.CalendarEvent;
 import calendarapp.view.ICalendarView;
 
@@ -21,7 +21,7 @@ public class QueryByDateCommand implements CalendarModelCommand {
    * @return true after processing the command
    */
   @Override
-  public boolean execute(CalendarModel model, ICalendarView view) {
+  public boolean execute(ICalendarModel model, ICalendarView view) {
     List<CalendarEvent> events = model.getEventsOnDate(queryDate);
     if (events.isEmpty()) {
       view.displayMessage("No events found on " + queryDate);

@@ -1,6 +1,6 @@
 package calendarapp.controller.commands;
 
-import calendarapp.model.CalendarManager;
+import calendarapp.model.ICalendarManager;
 import calendarapp.view.ICalendarView;
 
 import java.time.ZoneId;
@@ -20,11 +20,16 @@ public class CreateCalendarCommand implements CalendarManagerCommand {
     this.timezone = timezone;
   }
 
-  public String getCalendarName() { return calendarName; }
-  public ZoneId getTimezone() { return timezone; }
+  public String getCalendarName()
+  {
+    return calendarName;
+  }
+  public ZoneId getTimezone() {
+    return timezone;
+  }
 
   @Override
-  public boolean execute(CalendarManager calendarManager, ICalendarView view) {
+  public boolean execute(ICalendarManager calendarManager, ICalendarView view) {
     boolean success = calendarManager.addCalendar(calendarName, timezone);
     if (success) {
       view.displayMessage("Calendar created: " + calendarName + " (" + timezone + ")");

@@ -2,6 +2,8 @@ package calendarapp.controller;
 
 import calendarapp.model.CalendarManager;
 import calendarapp.controller.commands.*;
+import calendarapp.model.ICalendarManager;
+
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
@@ -14,10 +16,10 @@ import java.util.regex.Pattern;
 
 public class CommandParser {
 
-  private final CalendarManager calendarManager;
+  private final ICalendarManager calendarManager;
   private final Map<String, Function<List<String>, Command>> parsers;
 
-  public CommandParser(CalendarManager calendarManager) {
+  public CommandParser(ICalendarManager calendarManager) {
     this.calendarManager = calendarManager;
     parsers = new HashMap<>();
     parsers.put("create", this::parseCreateCommand);
@@ -129,7 +131,8 @@ public class CommandParser {
   }
 
   private Command parseCreateCalendarCommand(List<String> tokens) {
-    String name = null, timezoneStr = null;
+    String name = null;
+    String timezoneStr = null;
     for (int i = 2; i < tokens.size() - 1; i++) {
       if ("--name".equalsIgnoreCase(tokens.get(i))) {
         name = tokens.get(++i);

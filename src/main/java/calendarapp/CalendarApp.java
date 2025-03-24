@@ -8,8 +8,9 @@ import java.util.Scanner;
 import calendarapp.controller.CalendarController;
 import calendarapp.controller.CommandParser;
 import calendarapp.model.CalendarManager;
-import calendarapp.model.CalendarModel;
+import calendarapp.model.ICalendarManager;
 import calendarapp.view.CalendarView;
+import calendarapp.view.ICalendarView;
 
 /**
  * Main class for running the calendar application.
@@ -26,8 +27,8 @@ public class CalendarApp {
    *             "--mode headless commandsfile" for headless mode
    */
   public static void main(String[] args) {
-    CalendarManager manager = new CalendarManager();
-    CalendarView view = new CalendarView();
+    ICalendarManager manager = new CalendarManager();
+    ICalendarView view = new CalendarView();
     CommandParser parser = new CommandParser(manager);
     CalendarController controller = new CalendarController(manager, view, parser);
 
@@ -46,7 +47,7 @@ public class CalendarApp {
     }
   }
 
-  public static void runInteractiveMode(CalendarController controller, CalendarView view) {
+  public static void runInteractiveMode(CalendarController controller, ICalendarView view) {
     Scanner scanner = new Scanner(System.in);
     System.out.println("Enter commands (type 'exit' to quit):");
     while (true) {
@@ -60,7 +61,7 @@ public class CalendarApp {
     scanner.close();
   }
 
-  public static void runHeadlessMode(CalendarController controller, CalendarView view, String fileName) {
+  public static void runHeadlessMode(CalendarController controller, ICalendarView view, String fileName) {
     try (BufferedReader reader = new BufferedReader(new FileReader(fileName))) {
       String command;
       while ((command = reader.readLine()) != null) {

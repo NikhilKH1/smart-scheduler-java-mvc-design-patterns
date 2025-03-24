@@ -1,6 +1,6 @@
 package calendarapp.controller.commands;
 
-import calendarapp.model.CalendarManager;
+import calendarapp.model.ICalendarManager;
 import calendarapp.view.ICalendarView;
 
 public class EditCalendarCommand implements CalendarManagerCommand {
@@ -19,7 +19,7 @@ public class EditCalendarCommand implements CalendarManagerCommand {
   }
 
   @Override
-  public boolean execute(CalendarManager calendarManager, ICalendarView view) {
+  public boolean execute(ICalendarManager calendarManager, ICalendarView view) {
     try {
       boolean success = calendarManager.editCalendar(calendarName, property, newValue);
       if (success) {

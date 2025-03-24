@@ -85,4 +85,12 @@ public interface ICalendarModel {
    * @return true if the recurring event was updated successfully, false otherwise
    */
   public boolean editRecurringEvent(String eventName, String property, String newValue);
+
+  boolean editSingleEvent(String property, String eventName, LocalDateTime originalStart,
+                          LocalDateTime originalEnd, String newValue);
+
+  boolean editEventsFrom(String property, String eventName, LocalDateTime fromDateTime,
+                         String newValue);
+
+  boolean editEventsAll(String property, String eventName, String newValue);
 }

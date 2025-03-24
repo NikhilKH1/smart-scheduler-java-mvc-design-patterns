@@ -1,6 +1,6 @@
 package calendarapp.controller.commands;
 
-import calendarapp.model.CalendarModel;
+import calendarapp.model.ICalendarModel;
 import calendarapp.view.ICalendarView;
 
 /**
@@ -21,7 +21,7 @@ public class EditRecurringEventCommand implements CalendarModelCommand {
    * @return true after executing the query
    */
   @Override
-  public boolean execute(CalendarModel model, ICalendarView view) {
+  public boolean execute(ICalendarModel model, ICalendarView view) {
     boolean success = model.editRecurringEvent(eventName, property, newValue);
     if (success) {
       view.displayMessage("Recurring event modified successfully.");

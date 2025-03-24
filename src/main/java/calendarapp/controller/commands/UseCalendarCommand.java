@@ -1,6 +1,6 @@
 package calendarapp.controller.commands;
 
-import calendarapp.model.CalendarManager;
+import calendarapp.model.ICalendarManager;
 import calendarapp.view.ICalendarView;
 
 public class UseCalendarCommand implements CalendarManagerCommand {
@@ -14,7 +14,7 @@ public class UseCalendarCommand implements CalendarManagerCommand {
   }
 
   @Override
-  public boolean execute(CalendarManager calendarManager, ICalendarView view) {
+  public boolean execute(ICalendarManager calendarManager, ICalendarView view) {
     boolean success = calendarManager.useCalendar(calendarName);
     if (success) {
       view.displayMessage("Using calendar: " + calendarName);
