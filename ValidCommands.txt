@@ -1,4 +1,5 @@
-create calendar --name Nisha
+create calendar --name Nisha --timezone Asia/Kolkata
+use calendar --name Nisha
 create event "Nisha" from 2025-03-09T10:00 to 2025-03-09T11:00
 edit event name "Nisha" from 2025-03-09T10:00 to 2025-03-09T11:00 with "Edited Name"
 edit event startdatetime "Edited Name" from 2025-03-09T10:00 to 2025-03-09T11:00 with 2025-03-08T10:00

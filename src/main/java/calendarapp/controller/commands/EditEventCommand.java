@@ -96,17 +96,37 @@ public class EditEventCommand implements CalendarModelCommand {
   @Override
   public boolean execute(ICalendarModel model, ICalendarView view) {
     boolean success = false;
-    switch (mode) {
-      case SINGLE:
-        success = model.editSingleEvent(property, eventName, originalStart, originalEnd, newValue);
-        break;
-      case FROM:
-        success = model.editEventsFrom(property, eventName, filterDateTime, newValue);
-        break;
-      case ALL:
-        success = model.editEventsAll(property, eventName, newValue);
-        break;
+    String propertyLower = property.toLowerCase();
+
+    try {
+      switch (mode) {
+        case SINGLE:
+          String processedValue = newValue;
+          if (propertyLower.equals("startdatetime") || propertyLower.equals("enddatetime")) {
+            ZonedDateTime zonedNewValue = ZonedDateTime.of(java.time.LocalDateTime.parse(newValue),
+                    model.getTimezone());
+            processedValue = zonedNewValue.toString();
+          }
+          success = model.editSingleEvent(property, eventName, originalStart, originalEnd, processedValue);
+          break;
+        case FROM:
+          processedValue = newValue;
+          if (propertyLower.equals("startdatetime") || propertyLower.equals("enddatetime")) {
+            ZonedDateTime zonedNewValue = ZonedDateTime.of(java.time.LocalDateTime.parse(newValue),
+                    model.getTimezone());
+            processedValue = zonedNewValue.toString();
+          }
+          success = model.editEventsFrom(property, eventName, filterDateTime, processedValue);
+          break;
+        case ALL:
+          success = model.editEventsAll(property, eventName, newValue);
+          break;
+      }
+    } catch (Exception e) {
+      view.displayError("Error while editing event(s): " + e.getMessage());
+      return false;
     }
+
     if (success) {
       view.displayMessage("Event(s) edited successfully");
     } else {
@@ -114,6 +134,7 @@ public class EditEventCommand implements CalendarModelCommand {
     }
     return success;
   }
+
 
   /**
    * Returns the mode in which the event is to be edited.
