@@ -9,7 +9,7 @@ import java.io.IOException;
 /**
  * Command to export calendar events to a CSV file.
  */
-public class ExportCalendarCalendarModelCommand implements ICalendarModelCommand {
+public class ExportCalendarCommand implements ICalendarModelCommand {
   private final ICalendarModel model;
   private final String fileName;
 
@@ -19,7 +19,7 @@ public class ExportCalendarCalendarModelCommand implements ICalendarModelCommand
    * @param model    the calendar model from which events are exported
    * @param fileName the name of the output CSV file
    */
-  public ExportCalendarCalendarModelCommand(ICalendarModel model, String fileName) {
+  public ExportCalendarCommand(ICalendarModel model, String fileName) {
     if (model == null || fileName == null || fileName.trim().isEmpty()) {
       throw new IllegalArgumentException("Model and file name must not be null or empty.");
     }

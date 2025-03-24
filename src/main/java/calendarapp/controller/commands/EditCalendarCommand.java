@@ -3,12 +3,12 @@ package calendarapp.controller.commands;
 import calendarapp.model.ICalendarManager;
 import calendarapp.view.ICalendarView;
 
-public class EditICalendarCalendarManagerCommand implements ICalendarManagerCommand {
+public class EditCalendarCommand implements ICalendarManagerCommand {
   private final String calendarName;
   private final String property;
   private final String newValue;
 
-  public EditICalendarCalendarManagerCommand(String calendarName, String property, String newValue) {
+  public EditCalendarCommand(String calendarName, String property, String newValue) {
     if (calendarName == null || property == null || newValue == null ||
             calendarName.trim().isEmpty() || property.trim().isEmpty() || newValue.trim().isEmpty()) {
       throw new IllegalArgumentException("Calendar name, property, or value cannot be empty.");

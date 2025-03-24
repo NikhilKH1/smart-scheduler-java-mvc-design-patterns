@@ -5,11 +5,11 @@ import calendarapp.view.ICalendarView;
 
 import java.time.ZoneId;
 
-public class CreateCalendarCalendarManagerCommand implements ICalendarManagerCommand {
+public class CreateCalendarCommand implements ICalendarManagerCommand {
   private final String calendarName;
   private final ZoneId timezone;
 
-  public CreateCalendarCalendarManagerCommand(String calendarName, ZoneId timezone) {
+  public CreateCalendarCommand(String calendarName, ZoneId timezone) {
     if (calendarName == null || calendarName.trim().isEmpty()) {
       throw new IllegalArgumentException("Calendar name cannot be empty.");
     }

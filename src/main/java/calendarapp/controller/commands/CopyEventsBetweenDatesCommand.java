@@ -13,13 +13,13 @@ import java.util.UUID;
 /**
  * Command to copy all events within a specified date range to another calendar.
  */
-public class CopyEventsBetweenDatesCalendarManagerCommand implements ICalendarManagerCommand {
+public class CopyEventsBetweenDatesCommand implements ICalendarManagerCommand {
   private final LocalDate startDate;
   private final LocalDate endDate;
   private final String targetCalendarName;
   private final LocalDate targetStartDate;
 
-  public CopyEventsBetweenDatesCalendarManagerCommand(LocalDate startDate, LocalDate endDate, String targetCalendarName, LocalDate targetStartDate) {
+  public CopyEventsBetweenDatesCommand(LocalDate startDate, LocalDate endDate, String targetCalendarName, LocalDate targetStartDate) {
     this.startDate = startDate;
     this.endDate = endDate;
     this.targetCalendarName = targetCalendarName;

@@ -8,7 +8,7 @@ import calendarapp.view.ICalendarView;
 /**
  * Command to query whether the calendar is busy at a specified date and time.
  */
-public class BusyQueryCalendarModelCommand implements ICalendarModelCommand {
+public class BusyQueryCommand implements ICalendarModelCommand {
   private final ZonedDateTime queryTime;
 
   /**
@@ -35,7 +35,7 @@ public class BusyQueryCalendarModelCommand implements ICalendarModelCommand {
    *
    * @param queryTime the date and time at which to check for calendar conflicts
    */
-  public BusyQueryCalendarModelCommand(ZonedDateTime queryTime) {
+  public BusyQueryCommand(ZonedDateTime queryTime) {
     this.queryTime = queryTime;
   }
 

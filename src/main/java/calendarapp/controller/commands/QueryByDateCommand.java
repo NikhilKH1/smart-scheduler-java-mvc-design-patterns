@@ -10,7 +10,7 @@ import calendarapp.view.ICalendarView;
 /**
  * Command to query calendar events for a specific date.
  */
-public class QueryByDateCalendarModelCommand implements ICalendarModelCommand {
+public class QueryByDateCommand implements ICalendarModelCommand {
   private final LocalDate queryDate;
   /**
    * Processes a query-by-date command. It retrieves events on the specified date and displays
@@ -37,7 +37,7 @@ public class QueryByDateCalendarModelCommand implements ICalendarModelCommand {
    *
    * @param queryDate the date for which to retrieve calendar events
    */
-  public QueryByDateCalendarModelCommand(LocalDate queryDate) {
+  public QueryByDateCommand(LocalDate queryDate) {
     this.queryDate = queryDate;
   }
 

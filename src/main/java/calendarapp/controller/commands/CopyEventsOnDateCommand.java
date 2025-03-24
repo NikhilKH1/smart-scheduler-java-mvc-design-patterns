@@ -13,12 +13,12 @@ import java.time.ZonedDateTime;
 /**
  * Command to copy all events on a specific date to another calendar.
  */
-public class CopyEventsOnDateCalendarManagerCommand implements ICalendarManagerCommand {
+public class CopyEventsOnDateCommand implements ICalendarManagerCommand {
   private final LocalDate sourceDate;
   private final String targetCalendarName;
   private final LocalDate targetDate;
 
-  public CopyEventsOnDateCalendarManagerCommand(LocalDate sourceDate, String targetCalendarName, LocalDate targetDate) {
+  public CopyEventsOnDateCommand(LocalDate sourceDate, String targetCalendarName, LocalDate targetDate) {
     this.sourceDate = sourceDate;
     this.targetCalendarName = targetCalendarName;
     this.targetDate = targetDate;

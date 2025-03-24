@@ -12,13 +12,13 @@ import java.time.ZonedDateTime;
 /**
  * Command to copy a specific event to another calendar with timezone adjustment.
  */
-public class CopySingleEventCalendarManagerCommand implements ICalendarManagerCommand {
+public class CopySingleEventCommand implements ICalendarManagerCommand {
   private final String eventName;
   private final ZonedDateTime sourceDateTime;
   private final String targetCalendarName;
   private final ZonedDateTime targetDateTime;
 
-  public CopySingleEventCalendarManagerCommand(String eventName, ZonedDateTime sourceDateTime, String targetCalendarName, ZonedDateTime targetDateTime) {
+  public CopySingleEventCommand(String eventName, ZonedDateTime sourceDateTime, String targetCalendarName, ZonedDateTime targetDateTime) {
     this.eventName = eventName;
     this.sourceDateTime = sourceDateTime;
     this.targetCalendarName = targetCalendarName;

@@ -7,6 +7,7 @@ import java.util.Scanner;
 
 import calendarapp.controller.CalendarController;
 import calendarapp.controller.CommandParser;
+import calendarapp.controller.ICalendarController;
 import calendarapp.model.CalendarManager;
 import calendarapp.model.ICalendarManager;
 import calendarapp.view.CalendarView;
@@ -47,7 +48,7 @@ public class CalendarApp {
     }
   }
 
-  public static void runInteractiveMode(CalendarController controller, ICalendarView view) {
+  public static void runInteractiveMode(ICalendarController controller, ICalendarView view) {
     Scanner scanner = new Scanner(System.in);
     System.out.println("Enter commands (type 'exit' to quit):");
     while (true) {
@@ -61,7 +62,7 @@ public class CalendarApp {
     scanner.close();
   }
 
-  public static void runHeadlessMode(CalendarController controller, ICalendarView view, String fileName) {
+  public static void runHeadlessMode(ICalendarController controller, ICalendarView view, String fileName) {
     try (BufferedReader reader = new BufferedReader(new FileReader(fileName))) {
       String command;
       while ((command = reader.readLine()) != null) {

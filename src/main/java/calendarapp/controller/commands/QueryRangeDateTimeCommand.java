@@ -10,7 +10,7 @@ import calendarapp.view.ICalendarView;
 /**
  * Command to query calendar events within a specific date and time range.
  */
-public class QueryRangeDateTimeCalendarModelCommand implements ICalendarModelCommand {
+public class QueryRangeDateTimeCommand implements ICalendarModelCommand {
   private final ZonedDateTime startDateTime;
   private final ZonedDateTime endDateTime;
 
@@ -40,7 +40,7 @@ public class QueryRangeDateTimeCalendarModelCommand implements ICalendarModelCom
    * @param startDateTime the beginning of the query range
    * @param endDateTime   the end of the query range
    */
-  public QueryRangeDateTimeCalendarModelCommand(ZonedDateTime startDateTime, ZonedDateTime endDateTime) {
+  public QueryRangeDateTimeCommand(ZonedDateTime startDateTime, ZonedDateTime endDateTime) {
     this.startDateTime = startDateTime;
     this.endDateTime = endDateTime;
   }
