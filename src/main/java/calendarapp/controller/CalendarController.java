@@ -38,7 +38,7 @@ public class CalendarController implements ICalendarController {
       }
 
       if (cmd instanceof CalendarModelCommand) {
-        CalendarModel activeCalendar = calendarManager.getActiveCalendar();
+        ICalendarModel activeCalendar = calendarManager.getActiveCalendar();
         if (activeCalendar == null) {
           view.displayError("No active calendar selected. Use 'use calendar --name <calName>' first.");
           return false;

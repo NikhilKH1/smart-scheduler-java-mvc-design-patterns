@@ -1,3 +1,4 @@
+create calendar --name Nisha
 create event "Nisha" from 2025-03-09T10:00 to 2025-03-09T11:00
 edit event name "Nisha" from 2025-03-09T10:00 to 2025-03-09T11:00 with "Edited Name"
 edit event startdatetime "Edited Name" from 2025-03-09T10:00 to 2025-03-09T11:00 with 2025-03-08T10:00
@@ -10,11 +11,13 @@ edit events location "Class" "Snell Room 108"
 edit events name "Class" from 2025-03-11T15:00 with "PDP Class"
 create event "Conference" on 2025-03-12T10:00 repeats MTW until 2025-03-20T10:00
 edit events repeatuntil "Conference" 2025-03-25T10:00
+create event "Conference" on 2025-04-10T10:00 repeats MTW until 2025-04-20T10:00
+-- edit events repeatuntil "Conference" 2025-04-13T10:00
 edit events repeatingdays "Conference" MW
-create event "Meeting" on 2025-03-36T14:00 repeats MTW for 3 times
+create event "Meeting" on 2025-03-06T14:00 repeats MTW for 3 times
 edit events repeattimes "Meeting" 5
 create event "All Day event" from 2025-03-09T13:00
-create event --autodecline "Nikhil's Birthday" from 2025-03-11T10:00 to 2025-03-11T12:00
+create event "Nikhil's Birthday" from 2025-03-11T10:00 to 2025-03-11T12:00
 create event "Event with Description and Location" from 2025-03-10T11:00 to 2025-03-10T12:00 description "Initial meeting" location "Old Room"
 edit event location "Event with Description and Location" from 2025-03-10T11:00 to 2025-03-10T12:00 with "New Room!!"
 create event "Study Session" from 2025-03-09T19:00 to 2025-03-09T20:00 description "DBMS" location "Shillman Hall"

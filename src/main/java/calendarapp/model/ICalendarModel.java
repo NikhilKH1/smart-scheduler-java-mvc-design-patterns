@@ -3,6 +3,7 @@ package calendarapp.model;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.time.ZoneId;
 
 import calendarapp.model.event.CalendarEvent;
 import calendarapp.model.event.RecurringEvent;
@@ -86,11 +87,16 @@ public interface ICalendarModel {
    */
   public boolean editRecurringEvent(String eventName, String property, String newValue);
 
-  boolean editSingleEvent(String property, String eventName, LocalDateTime originalStart,
-                          LocalDateTime originalEnd, String newValue);
+  boolean editSingleEvent(String property, String eventName, ZonedDateTime originalStart,
+                          ZonedDateTime originalEnd, String newValue);
 
-  boolean editEventsFrom(String property, String eventName, LocalDateTime fromDateTime,
+  boolean editEventsFrom(String property, String eventName, ZonedDateTime fromDateTime,
                          String newValue);
 
   boolean editEventsAll(String property, String eventName, String newValue);
+
+  String getName();
+
+  ZoneId getTimezone();
+
 }

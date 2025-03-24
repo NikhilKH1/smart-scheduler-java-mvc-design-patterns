@@ -12,5 +12,6 @@ public interface ICalendarManager {
    *
    * @return the active calendar, or null if no calendar is active
    */
-  CalendarModel getActiveCalendar();
+  ICalendarModel getActiveCalendar();
+  CalendarModel getCalendar(String name);
 }

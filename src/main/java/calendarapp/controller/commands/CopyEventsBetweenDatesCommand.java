@@ -2,6 +2,8 @@ package calendarapp.controller.commands;
 
 import calendarapp.model.CalendarManager;
 import calendarapp.model.CalendarModel;
+import calendarapp.model.ICalendarManager;
+import calendarapp.model.ICalendarModel;
 import calendarapp.model.event.CalendarEvent;
 import calendarapp.model.event.SingleEvent;
 import calendarapp.view.ICalendarView;
@@ -27,9 +29,9 @@ public class CopyEventsBetweenDatesCommand implements CalendarManagerCommand {
   }
 
   @Override
-  public boolean execute(CalendarManager calendarManager, ICalendarView view) {
-    CalendarModel sourceCalendar = calendarManager.getActiveCalendar();
-    CalendarModel targetCalendar = calendarManager.getCalendar(targetCalendarName);
+  public boolean execute(ICalendarManager calendarManager, ICalendarView view) {
+    ICalendarModel sourceCalendar = calendarManager.getActiveCalendar();
+    ICalendarModel targetCalendar = calendarManager.getCalendar(targetCalendarName);
     if (sourceCalendar == null || targetCalendar == null) {
       view.displayError("Invalid source or target calendar.");
       return false;
