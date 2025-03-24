@@ -10,7 +10,7 @@ import calendarapp.view.ICalendarView;
  * This command supports editing a single occurrence, all occurrences from a
  * specific date and time, or all occurrences of an event.
  */
-public class EditEventCommand implements CalendarModelCommand {
+public class EditEventCalendarModelCommand implements ICalendarModelCommand {
   /**
    * Enum representing the mode of editing.
    */
@@ -37,8 +37,8 @@ public class EditEventCommand implements CalendarModelCommand {
    * @param originalEnd   the original end date and time of the event
    * @param newValue      the new value for the specified property
    */
-  public EditEventCommand(String property, String eventName, ZonedDateTime originalStart,
-                          ZonedDateTime originalEnd, String newValue) {
+  public EditEventCalendarModelCommand(String property, String eventName, ZonedDateTime originalStart,
+                                       ZonedDateTime originalEnd, String newValue) {
     this.mode = EditMode.SINGLE;
     this.property = property;
     this.eventName = eventName;
@@ -56,8 +56,8 @@ public class EditEventCommand implements CalendarModelCommand {
    * @param filterDateTime the date and time from which the edit should be applied
    * @param newValue       the new value for the specified property
    */
-  public EditEventCommand(String property, String eventName, ZonedDateTime filterDateTime,
-                          String newValue) {
+  public EditEventCalendarModelCommand(String property, String eventName, ZonedDateTime filterDateTime,
+                                       String newValue) {
     this.mode = EditMode.FROM;
     this.property = property;
     this.eventName = eventName;
@@ -74,7 +74,7 @@ public class EditEventCommand implements CalendarModelCommand {
    * @param eventName the name of the event
    * @param newValue  the new value for the specified property
    */
-  public EditEventCommand(String property, String eventName, String newValue) {
+  public EditEventCalendarModelCommand(String property, String eventName, String newValue) {
     this.mode = EditMode.ALL;
     this.property = property;
     this.eventName = eventName;

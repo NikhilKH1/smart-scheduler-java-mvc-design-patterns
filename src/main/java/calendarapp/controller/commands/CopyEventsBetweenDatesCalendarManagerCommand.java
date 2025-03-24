@@ -1,7 +1,5 @@
 package calendarapp.controller.commands;
 
-import calendarapp.model.CalendarManager;
-import calendarapp.model.CalendarModel;
 import calendarapp.model.ICalendarManager;
 import calendarapp.model.ICalendarModel;
 import calendarapp.model.event.CalendarEvent;
@@ -15,13 +13,13 @@ import java.util.UUID;
 /**
  * Command to copy all events within a specified date range to another calendar.
  */
-public class CopyEventsBetweenDatesCommand implements CalendarManagerCommand {
+public class CopyEventsBetweenDatesCalendarManagerCommand implements ICalendarManagerCommand {
   private final LocalDate startDate;
   private final LocalDate endDate;
   private final String targetCalendarName;
   private final LocalDate targetStartDate;
 
-  public CopyEventsBetweenDatesCommand(LocalDate startDate, LocalDate endDate, String targetCalendarName, LocalDate targetStartDate) {
+  public CopyEventsBetweenDatesCalendarManagerCommand(LocalDate startDate, LocalDate endDate, String targetCalendarName, LocalDate targetStartDate) {
     this.startDate = startDate;
     this.endDate = endDate;
     this.targetCalendarName = targetCalendarName;

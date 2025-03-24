@@ -1,6 +1,5 @@
 package calendarapp.controller;
 
-import calendarapp.model.CalendarManager;
 import calendarapp.controller.commands.*;
 import calendarapp.model.ICalendarManager;
 
@@ -17,7 +16,7 @@ import java.util.regex.Pattern;
 public class CommandParser {
 
   private final ICalendarManager calendarManager;
-  private final Map<String, Function<List<String>, Command>> parsers;
+  private final Map<String, Function<List<String>, ICommand>> parsers;
 
   public CommandParser(ICalendarManager calendarManager) {
     this.calendarManager = calendarManager;
@@ -31,20 +30,20 @@ public class CommandParser {
     parsers.put("copy", this::parseCopyCommand);
   }
 
-  public Command parse(String command) {
+  public ICommand parse(String command) {
     if (command == null || command.trim().isEmpty()) {
       throw new IllegalArgumentException("Command cannot be null or empty");
     }
     List<String> tokens = tokenize(command);
     String mainCommand = tokens.get(0).toLowerCase();
-    Function<List<String>, Command> parserFunc = parsers.get(mainCommand);
+    Function<List<String>, ICommand> parserFunc = parsers.get(mainCommand);
     if (parserFunc != null) {
       return parserFunc.apply(tokens);
     }
     throw new IllegalArgumentException("Unknown command: " + mainCommand);
   }
 
-  private Command parseCopyCommand(List<String> tokens) {
+  private ICommand parseCopyCommand(List<String> tokens) {
     if (tokens.size() < 2) {
       throw new IllegalArgumentException("Incomplete copy command");
     }
@@ -67,7 +66,7 @@ public class CommandParser {
     }
   }
 
-  private Command parseCopySingleEvent(List<String> tokens) {
+  private ICommand parseCopySingleEvent(List<String> tokens) {
     if (tokens.size() < 9 || !"on".equalsIgnoreCase(tokens.get(3)) || !"--target".equalsIgnoreCase(tokens.get(5)) || !"to".equalsIgnoreCase(tokens.get(7))) {
       throw new IllegalArgumentException("Invalid copy event format");
     }
@@ -77,7 +76,7 @@ public class CommandParser {
     ZoneId targetZone = calendarManager.getCalendar(targetCalendar).getTimezone();
     ZonedDateTime targetDateTime = parseDateTimeWithZone(tokens.get(8), targetZone);
 
-    return new CopySingleEventCommand(eventName, sourceDateTime, targetCalendar, targetDateTime);
+    return new CopySingleEventCalendarManagerCommand(eventName, sourceDateTime, targetCalendar, targetDateTime);
   }
 
   private ZonedDateTime parseDateTimeWithZone(String token, ZoneId zone) {
@@ -88,17 +87,17 @@ public class CommandParser {
     }
   }
 
-  private Command parseCopyEventsOnDate(List<String> tokens) {
+  private ICommand parseCopyEventsOnDate(List<String> tokens) {
     if (tokens.size() < 7 || !"--target".equalsIgnoreCase(tokens.get(4)) || !"to".equalsIgnoreCase(tokens.get(6))) {
       throw new IllegalArgumentException("Invalid copy events on format");
     }
     LocalDate sourceDate = LocalDate.parse(tokens.get(3));
     String targetCalendar = stripQuotes(tokens.get(5)).trim();
     LocalDate targetDate = LocalDate.parse(tokens.get(7));
-    return new CopyEventsOnDateCommand(sourceDate, targetCalendar, targetDate);
+    return new CopyEventsOnDateCalendarManagerCommand(sourceDate, targetCalendar, targetDate);
   }
 
-  private Command parseCopyEventsBetween(List<String> tokens) {
+  private ICommand parseCopyEventsBetween(List<String> tokens) {
     if (tokens.size() < 9 || !"and".equalsIgnoreCase(tokens.get(4)) || !"--target".equalsIgnoreCase(tokens.get(6)) || !"to".equalsIgnoreCase(tokens.get(8))) {
       throw new IllegalArgumentException("Invalid copy events between format");
     }
@@ -106,31 +105,31 @@ public class CommandParser {
     LocalDate endDate = LocalDate.parse(tokens.get(5));
     String targetCalendar = stripQuotes(tokens.get(7)).trim();
     LocalDate targetStartDate = LocalDate.parse(tokens.get(9));
-    return new CopyEventsBetweenDatesCommand(startDate, endDate, targetCalendar, targetStartDate);
+    return new CopyEventsBetweenDatesCalendarManagerCommand(startDate, endDate, targetCalendar, targetStartDate);
   }
 
-  private Command parseCreateCommand(List<String> tokens) {
+  private ICommand parseCreateCommand(List<String> tokens) {
     if (tokens.size() >= 2 && "calendar".equalsIgnoreCase(tokens.get(1))) {
       return parseCreateCalendarCommand(tokens);
     }
     return parseCreateEvent(tokens);
   }
 
-  private Command parseEditCommand(List<String> tokens) {
+  private ICommand parseEditCommand(List<String> tokens) {
     if (tokens.size() >= 2 && "calendar".equalsIgnoreCase(tokens.get(1))) {
       return parseEditCalendarCommand(tokens);
     }
     return parseEditEvent(tokens);
   }
 
-  private Command parseUseCommand(List<String> tokens) {
+  private ICommand parseUseCommand(List<String> tokens) {
     if (tokens.size() >= 2 && "calendar".equalsIgnoreCase(tokens.get(1))) {
       return parseUseCalendarCommand(tokens);
     }
     throw new IllegalArgumentException("Invalid use command format.");
   }
 
-  private Command parseCreateCalendarCommand(List<String> tokens) {
+  private ICommand parseCreateCalendarCommand(List<String> tokens) {
     String name = null;
     String timezoneStr = null;
     for (int i = 2; i < tokens.size() - 1; i++) {
@@ -145,13 +144,13 @@ public class CommandParser {
     }
     try {
       ZoneId timezone = ZoneId.of(timezoneStr);
-      return new CreateCalendarCommand(name, timezone);
+      return new CreateCalendarCalendarManagerCommand(name, timezone);
     } catch (Exception e) {
       throw new IllegalArgumentException("Invalid timezone: " + timezoneStr);
     }
   }
 
-  private Command parseEditCalendarCommand(List<String> tokens) {
+  private ICommand parseEditCalendarCommand(List<String> tokens) {
     String name = null, property = null, newValue = null;
     for (int i = 2; i < tokens.size() - 1; i++) {
       if ("--name".equalsIgnoreCase(tokens.get(i))) {
@@ -166,10 +165,10 @@ public class CommandParser {
     if (name == null || property == null || newValue == null) {
       throw new IllegalArgumentException("Usage: edit calendar --name <name> --property <property> <new-value>");
     }
-    return new EditCalendarCommand(name, property, newValue);
+    return new EditICalendarCalendarManagerCommand(name, property, newValue);
   }
 
-  private Command parseUseCalendarCommand(List<String> tokens) {
+  private ICommand parseUseCalendarCommand(List<String> tokens) {
     String name = null;
     for (int i = 2; i < tokens.size() - 1; i++) {
       if ("--name".equalsIgnoreCase(tokens.get(i))) {
@@ -179,10 +178,10 @@ public class CommandParser {
     if (name == null) {
       throw new IllegalArgumentException("Usage: use calendar --name <name>");
     }
-    return new UseCalendarCommand(name);
+    return new UseCalendarManagerCommand(name);
   }
 
-  private Command parseExportCommand(List<String> tokens) {
+  private ICommand parseExportCommand(List<String> tokens) {
     if (tokens.size() != 3 || !"cal".equalsIgnoreCase(tokens.get(1))) {
       throw new IllegalArgumentException("Invalid export format. Usage: export cal <file.csv>");
     }
@@ -193,10 +192,10 @@ public class CommandParser {
     if (calendarManager.getActiveCalendar() == null) {
       throw new IllegalArgumentException("No active calendar selected. Use 'use calendar --name <calName>' first.");
     }
-    return new ExportCalendarCommand(calendarManager.getActiveCalendar(), fileName);
+    return new ExportCalendarCalendarModelCommand(calendarManager.getActiveCalendar(), fileName);
   }
 
-  private Command parsePrintCommand(List<String> tokens) {
+  private ICommand parsePrintCommand(List<String> tokens) {
     if (tokens.size() < 3 || !"events".equalsIgnoreCase(tokens.get(1))) {
       throw new IllegalArgumentException("Invalid print command format");
     }
@@ -210,35 +209,35 @@ public class CommandParser {
     }
   }
 
-  private Command parsePrintOnCommand(List<String> tokens) {
+  private ICommand parsePrintOnCommand(List<String> tokens) {
     if (tokens.size() < 4) {
       throw new IllegalArgumentException("Expected date after 'on'");
     }
     try {
       LocalDate date = LocalDate.parse(tokens.get(3));
-      return new QueryByDateCommand(date);
+      return new QueryByDateCalendarModelCommand(date);
     } catch (DateTimeParseException e) {
       throw new IllegalArgumentException("Invalid date format. Use YYYY-MM-DD");
     }
   }
 
-  private Command parsePrintRangeCommand(List<String> tokens) {
+  private ICommand parsePrintRangeCommand(List<String> tokens) {
     if (tokens.size() < 6 || !"to".equalsIgnoreCase(tokens.get(4))) {
       throw new IllegalArgumentException("Expected format: print events from <start> to <end>");
     }
     ZonedDateTime start = parseDateTime(tokens.get(3));
     ZonedDateTime end = parseDateTime(tokens.get(5));
-    return new QueryRangeDateTimeCommand(start, end);
+    return new QueryRangeDateTimeCalendarModelCommand(start, end);
   }
 
-  private Command parseShowCommand(List<String> tokens) {
+  private ICommand parseShowCommand(List<String> tokens) {
     if (tokens.size() < 4 || !"status".equalsIgnoreCase(tokens.get(1)) || !"on".equalsIgnoreCase(tokens.get(2))) {
       throw new IllegalArgumentException("Invalid show command. Usage: show status on <datetime>");
     }
-    return new BusyQueryCommand(parseDateTime(tokens.get(3)));
+    return new BusyQueryCalendarModelCommand(parseDateTime(tokens.get(3)));
   }
 
-  private Command parseEditEvent(List<String> tokens) {
+  private ICommand parseEditEvent(List<String> tokens) {
     if (tokens.size() < 4) throw new IllegalArgumentException("Incomplete edit command");
 
     switch (tokens.get(1).toLowerCase()) {
@@ -251,7 +250,7 @@ public class CommandParser {
     }
   }
 
-  private Command parseEditEventsCommand(List<String> tokens) {
+  private ICommand parseEditEventsCommand(List<String> tokens) {
     String property = tokens.get(2).toLowerCase();
     String eventName = stripQuotes(tokens.get(3));
     boolean isRecurringProperty = property.equals("repeattimes") || property.equals("repeatuntil") || property.equals("repeatingdays");
@@ -259,8 +258,8 @@ public class CommandParser {
     if (tokens.size() == 5) {
       String newValue = stripQuotes(tokens.get(4));
       return isRecurringProperty
-              ? new EditRecurringEventCommand(property, eventName, newValue)
-              : new EditEventCommand(property, eventName, newValue);
+              ? new EditRecurringEventCalendarModelCommand(property, eventName, newValue)
+              : new EditEventCalendarModelCommand(property, eventName, newValue);
     } else if (tokens.size() == 8) {
       if (!"from".equalsIgnoreCase(tokens.get(4)) || !"with".equalsIgnoreCase(tokens.get(6))) {
         throw new IllegalArgumentException("Invalid edit events command format");
@@ -268,14 +267,14 @@ public class CommandParser {
       ZonedDateTime filterDateTime = parseDateTime(tokens.get(5));
       String newValue = stripQuotes(tokens.get(7));
       return isRecurringProperty
-              ? new EditRecurringEventCommand(property, eventName, newValue)
-              : new EditEventCommand(property, eventName, filterDateTime, newValue);
+              ? new EditRecurringEventCalendarModelCommand(property, eventName, newValue)
+              : new EditEventCalendarModelCommand(property, eventName, filterDateTime, newValue);
     } else {
       throw new IllegalArgumentException("Invalid edit events command format");
     }
   }
 
-  private Command parseEditSingleEventCommand(List<String> tokens) {
+  private ICommand parseEditSingleEventCommand(List<String> tokens) {
     if (tokens.size() < 10 || !"from".equalsIgnoreCase(tokens.get(4)) || !"to".equalsIgnoreCase(tokens.get(6)) || !"with".equalsIgnoreCase(tokens.get(8))) {
       throw new IllegalArgumentException("Invalid edit event command format");
     }
@@ -284,10 +283,10 @@ public class CommandParser {
     ZonedDateTime start = parseDateTime(tokens.get(5));
     ZonedDateTime end = parseDateTime(tokens.get(7));
     String newValue = stripQuotes(tokens.get(9));
-    return new EditEventCommand(property, eventName, start, end, newValue);
+    return new EditEventCalendarModelCommand(property, eventName, start, end, newValue);
   }
 
-  private Command parseCreateEvent(List<String> tokens) {
+  private ICommand parseCreateEvent(List<String> tokens) {
     int index = 1;
     boolean autoDecline = true;
 
@@ -312,7 +311,7 @@ public class CommandParser {
 
     PropertiesResult props = parseProperties(tokens, index);
 
-    return new CreateEventCommand(
+    return new CreateEventCalendarModelCommand(
             eventName,
             timing.getStart(),
             timing.getEnd(),

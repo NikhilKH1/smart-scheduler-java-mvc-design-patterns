@@ -3,10 +3,10 @@ package calendarapp.controller.commands;
 import calendarapp.model.ICalendarManager;
 import calendarapp.view.ICalendarView;
 
-public class UseCalendarCommand implements CalendarManagerCommand {
+public class UseCalendarManagerCommand implements ICalendarManagerCommand {
   private final String calendarName;
 
-  public UseCalendarCommand(String calendarName) {
+  public UseCalendarManagerCommand(String calendarName) {
     if (calendarName == null || calendarName.trim().isEmpty()) {
       throw new IllegalArgumentException("Calendar name cannot be empty.");
     }

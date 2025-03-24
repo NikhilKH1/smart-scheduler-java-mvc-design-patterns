@@ -1,9 +1,8 @@
 package calendarapp.controller;
 
-import calendarapp.model.CalendarModel;
-import calendarapp.controller.commands.Command;
-import calendarapp.controller.commands.CalendarManagerCommand;
-import calendarapp.controller.commands.CalendarModelCommand;
+import calendarapp.controller.commands.ICommand;
+import calendarapp.controller.commands.ICalendarManagerCommand;
+import calendarapp.controller.commands.ICalendarModelCommand;
 import calendarapp.model.ICalendarManager;
 import calendarapp.model.ICalendarModel;
 import calendarapp.view.ICalendarView;
@@ -26,24 +25,24 @@ public class CalendarController implements ICalendarController {
   @Override
   public boolean processCommand(String commandInput) {
     try {
-      Command cmd = parser.parse(commandInput);
+      ICommand cmd = parser.parse(commandInput);
       if (cmd == null) {
         view.displayError("Command parsing returned null");
         return false;
       }
       boolean success;
-      if (cmd instanceof CalendarManagerCommand) {
-        success = ((CalendarManagerCommand) cmd).execute(calendarManager, view);
+      if (cmd instanceof ICalendarManagerCommand) {
+        success = ((ICalendarManagerCommand) cmd).execute(calendarManager, view);
         return success;
       }
 
-      if (cmd instanceof CalendarModelCommand) {
+      if (cmd instanceof ICalendarModelCommand) {
         ICalendarModel activeCalendar = calendarManager.getActiveCalendar();
         if (activeCalendar == null) {
           view.displayError("No active calendar selected. Use 'use calendar --name <calName>' first.");
           return false;
         }
-        success = ((CalendarModelCommand) cmd).execute(activeCalendar, view);
+        success = ((ICalendarModelCommand) cmd).execute(activeCalendar, view);
 
         if (success) {
           if (activeCalendar.getEvents().isEmpty()) {

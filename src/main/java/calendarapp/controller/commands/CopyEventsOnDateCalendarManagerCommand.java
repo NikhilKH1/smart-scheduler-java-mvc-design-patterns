@@ -1,7 +1,5 @@
 package calendarapp.controller.commands;
 
-import calendarapp.model.CalendarManager;
-import calendarapp.model.CalendarModel;
 import calendarapp.model.ICalendarManager;
 import calendarapp.model.ICalendarModel;
 import calendarapp.model.event.CalendarEvent;
@@ -15,12 +13,12 @@ import java.time.ZonedDateTime;
 /**
  * Command to copy all events on a specific date to another calendar.
  */
-public class CopyEventsOnDateCommand implements CalendarManagerCommand {
+public class CopyEventsOnDateCalendarManagerCommand implements ICalendarManagerCommand {
   private final LocalDate sourceDate;
   private final String targetCalendarName;
   private final LocalDate targetDate;
 
-  public CopyEventsOnDateCommand(LocalDate sourceDate, String targetCalendarName, LocalDate targetDate) {
+  public CopyEventsOnDateCalendarManagerCommand(LocalDate sourceDate, String targetCalendarName, LocalDate targetDate) {
     this.sourceDate = sourceDate;
     this.targetCalendarName = targetCalendarName;
     this.targetDate = targetDate;

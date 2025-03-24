@@ -1,7 +1,5 @@
 package calendarapp.controller.commands;
 
-import calendarapp.model.CalendarManager;
-import calendarapp.model.CalendarModel;
 import calendarapp.model.ICalendarManager;
 import calendarapp.model.ICalendarModel;
 import calendarapp.model.event.CalendarEvent;
@@ -9,20 +7,18 @@ import calendarapp.model.event.SingleEvent;
 import calendarapp.view.ICalendarView;
 
 import java.time.Duration;
-import java.time.LocalDate;
 import java.time.ZonedDateTime;
-import java.util.UUID;
 
 /**
  * Command to copy a specific event to another calendar with timezone adjustment.
  */
-public class CopySingleEventCommand implements CalendarManagerCommand {
+public class CopySingleEventCalendarManagerCommand implements ICalendarManagerCommand {
   private final String eventName;
   private final ZonedDateTime sourceDateTime;
   private final String targetCalendarName;
   private final ZonedDateTime targetDateTime;
 
-  public CopySingleEventCommand(String eventName, ZonedDateTime sourceDateTime, String targetCalendarName, ZonedDateTime targetDateTime) {
+  public CopySingleEventCalendarManagerCommand(String eventName, ZonedDateTime sourceDateTime, String targetCalendarName, ZonedDateTime targetDateTime) {
     this.eventName = eventName;
     this.sourceDateTime = sourceDateTime;
     this.targetCalendarName = targetCalendarName;

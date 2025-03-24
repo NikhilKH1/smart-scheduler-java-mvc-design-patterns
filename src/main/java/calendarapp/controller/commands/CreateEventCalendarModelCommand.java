@@ -12,7 +12,7 @@ import calendarapp.view.ICalendarView;
  * Command to create a new calendar event.
  * This command holds all details required for creating both single and recurring events.
  */
-public class CreateEventCommand implements CalendarModelCommand {
+public class CreateEventCalendarModelCommand implements ICalendarModelCommand {
   private final String eventName;
   private final ZonedDateTime startDateTime;
   private final ZonedDateTime endDateTime;
@@ -42,12 +42,12 @@ public class CreateEventCommand implements CalendarModelCommand {
    * @param repeatCount   the number of repetitions for recurring events
    * @param repeatUntil   the date and time until which the event repeats
    */
-  public CreateEventCommand(String eventName, ZonedDateTime startDateTime,
-                            ZonedDateTime endDateTime,
-                            boolean autoDecline, String description, String location,
-                            boolean isPublic, boolean isAllDay,
-                            boolean isRecurring, String weekdays, int repeatCount,
-                            ZonedDateTime repeatUntil) {
+  public CreateEventCalendarModelCommand(String eventName, ZonedDateTime startDateTime,
+                                         ZonedDateTime endDateTime,
+                                         boolean autoDecline, String description, String location,
+                                         boolean isPublic, boolean isAllDay,
+                                         boolean isRecurring, String weekdays, int repeatCount,
+                                         ZonedDateTime repeatUntil) {
     this.eventName = eventName;
     this.startDateTime = startDateTime;
     this.endDateTime = endDateTime;

@@ -1,6 +1,5 @@
 package calendarapp.controller.commands;
 
-import calendarapp.model.CalendarModel;
 import calendarapp.model.ICalendarModel;
 import calendarapp.utils.CSVExporter;
 import calendarapp.view.ICalendarView;
@@ -10,7 +9,7 @@ import java.io.IOException;
 /**
  * Command to export calendar events to a CSV file.
  */
-public class ExportCalendarCommand implements CalendarModelCommand {
+public class ExportCalendarCalendarModelCommand implements ICalendarModelCommand {
   private final ICalendarModel model;
   private final String fileName;
 
@@ -20,7 +19,7 @@ public class ExportCalendarCommand implements CalendarModelCommand {
    * @param model    the calendar model from which events are exported
    * @param fileName the name of the output CSV file
    */
-  public ExportCalendarCommand(ICalendarModel model, String fileName) {
+  public ExportCalendarCalendarModelCommand(ICalendarModel model, String fileName) {
     if (model == null || fileName == null || fileName.trim().isEmpty()) {
       throw new IllegalArgumentException("Model and file name must not be null or empty.");
     }
