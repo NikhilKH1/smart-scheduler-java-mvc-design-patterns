@@ -1,6 +1,9 @@
 package calendarapp.controller.commands;
 
 import java.time.ZonedDateTime;
+import java.time.temporal.Temporal;
+import java.time.temporal.TemporalAccessor;
+import java.time.ZoneId;
 
 import calendarapp.model.ICalendarModel;
 import calendarapp.view.ICalendarView;
@@ -9,23 +12,33 @@ import calendarapp.view.ICalendarView;
  * Command to query whether the calendar is busy at a specified date and time.
  */
 public class BusyQueryCommand implements ICalendarModelCommand {
-  private final ZonedDateTime queryTime;
+  private final Temporal queryTime;
 
   /**
    * Executes the busy query command by checking if the calendar has a conflict
    * at the specified query time, and displaying the result using the view.
    *
    * @param model the calendar model used for checking conflicts
-   * @param view the calendar view for displaying messages
+   * @param view  the calendar view for displaying messages
    * @return true after executing the query
    */
   @Override
   public boolean execute(ICalendarModel model, ICalendarView view) {
-    boolean busy = model.isBusyAt(queryTime);
-    if (busy) {
-      view.displayMessage("Busy at " + queryTime);
+    // Safely convert to ZonedDateTime (assuming model uses ZonedDateTime internally)
+    ZonedDateTime zonedQueryTime;
+    if (queryTime instanceof ZonedDateTime) {
+      zonedQueryTime = (ZonedDateTime) queryTime;
     } else {
-      view.displayMessage("Available at " + queryTime);
+      // Fallback: Use model's timezone
+      ZoneId zone = model.getTimezone();
+      zonedQueryTime = ZonedDateTime.from(queryTime).withZoneSameInstant(zone);
+    }
+
+    boolean busy = model.isBusyAt(zonedQueryTime);
+    if (busy) {
+      view.displayMessage("Busy at " + zonedQueryTime);
+    } else {
+      view.displayMessage("Available at " + zonedQueryTime);
     }
     return true;
   }
@@ -35,7 +48,7 @@ public class BusyQueryCommand implements ICalendarModelCommand {
    *
    * @param queryTime the date and time at which to check for calendar conflicts
    */
-  public BusyQueryCommand(ZonedDateTime queryTime) {
+  public BusyQueryCommand(Temporal queryTime) {
     this.queryTime = queryTime;
   }
 
@@ -44,9 +57,8 @@ public class BusyQueryCommand implements ICalendarModelCommand {
    *
    * @return the query time
    */
-  public ZonedDateTime getQueryTime() {
+  public Temporal getQueryTime() {
     return queryTime;
   }
 
 }
-

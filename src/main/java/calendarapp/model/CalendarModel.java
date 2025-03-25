@@ -1,16 +1,16 @@
 package calendarapp.model;
 
-import calendarapp.model.event.CalendarEvent;
+import calendarapp.model.event.ICalendarEvent;
 import calendarapp.model.event.RecurringEvent;
 import calendarapp.model.event.SingleEvent;
-import calendarapp.model.ConflictChecker;
 
 import java.time.Duration;
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.time.chrono.ChronoZonedDateTime;
 import java.time.temporal.ChronoUnit;
+import java.time.temporal.Temporal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -18,7 +18,7 @@ import java.util.Map;
 import java.util.UUID;
 
 public class CalendarModel implements ICalendarModel {
-  private final List<CalendarEvent> events = new ArrayList<>();
+  private final List<ICalendarEvent> events = new ArrayList<>();
   private final Map<String, RecurringEvent> recurringMap = new HashMap<>();
 
   private String name;
@@ -46,11 +46,11 @@ public class CalendarModel implements ICalendarModel {
     ZoneId oldTimezone = this.timezone;
     this.timezone = newTimezone;
 
-    List<CalendarEvent> updatedEvents = new ArrayList<>();
+    List<ICalendarEvent> updatedEvents = new ArrayList<>();
 
-    for (CalendarEvent event : events) {
-      ZonedDateTime oldStart = event.getStartDateTime().withZoneSameInstant(newTimezone);
-      ZonedDateTime oldEnd = event.getEndDateTime().withZoneSameInstant(newTimezone);
+    for (ICalendarEvent event : events) {
+      ZonedDateTime oldStart = ZonedDateTime.from(event.getStartDateTime()).withZoneSameInstant(newTimezone);
+      ZonedDateTime oldEnd = ZonedDateTime.from(event.getEndDateTime()).withZoneSameInstant(newTimezone);
 
       if (event instanceof SingleEvent) {
         SingleEvent updatedEvent = new SingleEvent(
@@ -92,82 +92,50 @@ public class CalendarModel implements ICalendarModel {
   }
 
   public boolean copySingleEventTo(CalendarModel sourceCalendar, String eventName,
-                                   ZonedDateTime sourceDateTime, CalendarModel targetCalendar,
-                                   ZonedDateTime targetDateTime) {
+                                   Temporal sourceDateTime, CalendarModel targetCalendar,
+                                   Temporal targetDateTime) {
 
-    System.out.println("DEBUG: Starting copySingleEventTo");
-    System.out.println("DEBUG: Source calendar: " + sourceCalendar.getName() + ", Target calendar: " + targetCalendar.getName());
-    System.out.println("DEBUG: Source event name: " + eventName);
-    System.out.println("DEBUG: Source event datetime: " + sourceDateTime);
-    System.out.println("DEBUG: Target event datetime: " + targetDateTime);
+    ZonedDateTime sourceZoned = ZonedDateTime.from(sourceDateTime);
+    ZonedDateTime targetZoned = ZonedDateTime.from(targetDateTime);
 
-    for (CalendarEvent event : sourceCalendar.getEvents()) {
-      System.out.println("DEBUG: Checking event - " + event.getSubject() + " at " + event.getStartDateTime());
-
-      if (event.getSubject().equals(eventName) && event.getStartDateTime().equals(sourceDateTime)) {
-        System.out.println("DEBUG: Found matching event!");
-        System.out.println("DEBUG: Original event start: " + event.getStartDateTime() + ", end: " + event.getEndDateTime());
-
+    for (ICalendarEvent event : sourceCalendar.getEvents()) {
+      if (event.getSubject().equals(eventName) && event.getStartDateTime().equals(sourceZoned)) {
         long durationMinutes = Duration.between(
                 event.getStartDateTime(),
-                event.getEndDateTime()
-        ).toMinutes();
+                event.getEndDateTime()).toMinutes();
 
-        System.out.println("DEBUG: Calculated duration (minutes): " + durationMinutes);
-
-        // The target start datetime is already parsed in correct target timezone
-        ZonedDateTime newStart = targetDateTime;
-        ZonedDateTime newEnd = newStart.plusMinutes(durationMinutes);
-
-        System.out.println("DEBUG: New event start: " + newStart + ", end: " + newEnd);
-
-        CalendarEvent copiedEvent = new SingleEvent(
-                event.getSubject(),
-                newStart,
-                newEnd,
-                event.getDescription(),
-                event.getLocation(),
-                event.isPublic(),
-                event.isAllDay(),
-                null
+        ZonedDateTime newEnd = targetZoned.plusMinutes(durationMinutes);
+        ICalendarEvent copiedEvent = new SingleEvent(
+                event.getSubject(), targetZoned, newEnd,
+                event.getDescription(), event.getLocation(),
+                event.isPublic(), event.isAllDay(), null
         );
 
-        boolean added = targetCalendar.addEvent(copiedEvent, false);
-        System.out.println("DEBUG: Event added to target calendar: " + added);
-        return added;
+        return targetCalendar.addEvent(copiedEvent, false);
       }
     }
-    System.out.println("DEBUG: Event not found in source calendar.");
     return false;
   }
 
-
-  public boolean copyEventsOnDateTo(CalendarModel sourceCalendar, LocalDate sourceDate, CalendarModel targetCalendar, LocalDate targetDate) {
+  public boolean copyEventsOnDateTo(CalendarModel sourceCalendar, Temporal sourceDate,
+                                    CalendarModel targetCalendar, Temporal targetDate) {
     boolean allCopied = true;
-    for (CalendarEvent event : sourceCalendar.getEventsOnDate(sourceDate)) {
+    LocalDate sourceLocalDate = LocalDate.from(sourceDate);
+    LocalDate targetLocalDate = LocalDate.from(targetDate);
 
+    for (ICalendarEvent event : sourceCalendar.getEventsOnDate(sourceLocalDate)) {
       long durationMinutes = Duration.between(
-              event.getStartDateTime().toLocalTime(),
-              event.getEndDateTime().toLocalTime()
-      ).toMinutes();
+              event.getStartDateTime(), event.getEndDateTime()).toMinutes();
 
       ZonedDateTime newStart = ZonedDateTime.of(
-              targetDate,
-              event.getStartDateTime().toLocalTime(),
-              targetCalendar.getTimezone()
-      );
+              targetLocalDate, ZonedDateTime.from(event.getStartDateTime()).toLocalTime(),
+              targetCalendar.getTimezone());
 
       ZonedDateTime newEnd = newStart.plusMinutes(durationMinutes);
-
-      CalendarEvent copiedEvent = new SingleEvent(
-              event.getSubject(),
-              newStart,
-              newEnd,
-              event.getDescription(),
-              event.getLocation(),
-              event.isPublic(),
-              event.isAllDay(),
-              null
+      ICalendarEvent copiedEvent = new SingleEvent(
+              event.getSubject(), newStart, newEnd,
+              event.getDescription(), event.getLocation(),
+              event.isPublic(), event.isAllDay(), null
       );
 
       if (!targetCalendar.addEvent(copiedEvent, false)) {
@@ -177,31 +145,33 @@ public class CalendarModel implements ICalendarModel {
     return allCopied;
   }
 
-  public boolean copyEventsBetweenTo(CalendarModel sourceCalendar, LocalDate startDate, LocalDate endDate, CalendarModel targetCalendar, LocalDate targetStartDate) {
+  public boolean copyEventsBetweenTo(CalendarModel sourceCalendar, Temporal startDate,
+                                     Temporal endDate, CalendarModel targetCalendar,
+                                     Temporal targetStartDate) {
     boolean allCopied = true;
-    long daysOffset = ChronoUnit.DAYS.between(startDate, targetStartDate);
 
-    for (CalendarEvent event : sourceCalendar.getEventsBetween(
-            startDate.atStartOfDay(sourceCalendar.getTimezone()),
-            endDate.plusDays(1).atStartOfDay(sourceCalendar.getTimezone()))) {
+    LocalDate startLocalDate = LocalDate.from(startDate);
+    LocalDate endLocalDate = LocalDate.from(endDate);
+    LocalDate targetStartLocalDate = LocalDate.from(targetStartDate);
 
+    long daysOffset = ChronoUnit.DAYS.between(startLocalDate, targetStartLocalDate);
+
+    ZonedDateTime rangeStart = startLocalDate.atStartOfDay(sourceCalendar.getTimezone());
+    ZonedDateTime rangeEnd = endLocalDate.plusDays(1).atStartOfDay(sourceCalendar.getTimezone());
+
+    for (ICalendarEvent event : sourceCalendar.getEventsBetween(rangeStart, rangeEnd)) {
       long durationMinutes = Duration.between(
-              event.getStartDateTime().toLocalTime(),
-              event.getEndDateTime().toLocalTime()
-      ).toMinutes();
+              event.getStartDateTime(), event.getEndDateTime()).toMinutes();
 
-      ZonedDateTime newStart = event.getStartDateTime().plusDays(daysOffset).withZoneSameInstant(targetCalendar.getTimezone());
+      ZonedDateTime newStart = ZonedDateTime.from(event.getStartDateTime())
+              .plusDays(daysOffset)
+              .withZoneSameInstant(targetCalendar.getTimezone());
       ZonedDateTime newEnd = newStart.plusMinutes(durationMinutes);
 
-      CalendarEvent copiedEvent = new SingleEvent(
-              event.getSubject(),
-              newStart,
-              newEnd,
-              event.getDescription(),
-              event.getLocation(),
-              event.isPublic(),
-              event.isAllDay(),
-              null
+      ICalendarEvent copiedEvent = new SingleEvent(
+              event.getSubject(), newStart, newEnd,
+              event.getDescription(), event.getLocation(),
+              event.isPublic(), event.isAllDay(), null
       );
 
       if (!targetCalendar.addEvent(copiedEvent, false)) {
@@ -212,11 +182,11 @@ public class CalendarModel implements ICalendarModel {
   }
 
   @Override
-  public boolean addEvent(CalendarEvent event, boolean autoDecline) {
+  public boolean addEvent(ICalendarEvent event, boolean autoDecline) {
     if (duplicateExists(event)) {
       throw new IllegalArgumentException("Duplicate event detected.");
     }
-    for (CalendarEvent e : events) {
+    for (ICalendarEvent e : events) {
       if (ConflictChecker.hasConflict(e, event)) {
         return false;
       }
@@ -234,7 +204,7 @@ public class CalendarModel implements ICalendarModel {
       if (duplicateExists(occurrence)) {
         throw new IllegalArgumentException("Duplicate event in recurring series.");
       }
-      for (CalendarEvent existingEvent : events) {
+      for (ICalendarEvent existingEvent : events) {
         if (ConflictChecker.hasConflict(existingEvent, occurrence)) {
           return false;
         }
@@ -247,46 +217,62 @@ public class CalendarModel implements ICalendarModel {
   }
 
   @Override
-  public List<CalendarEvent> getEvents() {
+  public List<ICalendarEvent> getEvents() {
     return new ArrayList<>(events);
   }
 
   @Override
-  public List<CalendarEvent> getEventsOnDate(LocalDate date) {
-    List<CalendarEvent> result = new ArrayList<>();
-    for (CalendarEvent event : events) {
-      if (!event.getStartDateTime().toLocalDate().isAfter(date) &&
-              !event.getEndDateTime().toLocalDate().isBefore(date)) {
+  public List<ICalendarEvent> getEventsOnDate(Temporal date) {
+    List<ICalendarEvent> result = new ArrayList<>();
+    LocalDate queryDate = LocalDate.from(date);  // Convert Temporal to LocalDate
+
+    for (ICalendarEvent event : events) {
+      LocalDate eventStartDate = ZonedDateTime.from(event.getStartDateTime()).toLocalDate();
+      LocalDate eventEndDate = ZonedDateTime.from(event.getEndDateTime()).toLocalDate();
+
+      if (!eventStartDate.isAfter(queryDate) && !eventEndDate.isBefore(queryDate)) {
         result.add(event);
       }
     }
     return result;
   }
 
+
   @Override
-  public List<CalendarEvent> getEventsBetween(ZonedDateTime start, ZonedDateTime end) {
-    List<CalendarEvent> result = new ArrayList<>();
-    for (CalendarEvent event : events) {
-      if (event.getStartDateTime().isBefore(end) && event.getEndDateTime().isAfter(start)) {
+  public List<ICalendarEvent> getEventsBetween(Temporal start, Temporal end) {
+    List<ICalendarEvent> result = new ArrayList<>();
+    ZonedDateTime startZoned = ZonedDateTime.from(start);
+    ZonedDateTime endZoned = ZonedDateTime.from(end);
+
+    for (ICalendarEvent event : events) {
+      ZonedDateTime eventStart = ZonedDateTime.from(event.getStartDateTime());
+      ZonedDateTime eventEnd = ZonedDateTime.from(event.getEndDateTime());
+
+      if (eventStart.isBefore(endZoned) && eventEnd.isAfter(startZoned)) {
         result.add(event);
       }
     }
     return result;
   }
 
+
   @Override
-  public boolean isBusyAt(ZonedDateTime dateTime) {
-    for (CalendarEvent event : events) {
-      if (!dateTime.isBefore(event.getStartDateTime()) &&
-              !dateTime.isAfter(event.getEndDateTime())) {
+  public boolean isBusyAt(Temporal dateTime) {
+    ZonedDateTime checkTime = ZonedDateTime.from(dateTime);
+
+    for (ICalendarEvent event : events) {
+      ZonedDateTime startZoned = ZonedDateTime.from(event.getStartDateTime());
+      ZonedDateTime endZoned = ZonedDateTime.from(event.getEndDateTime());
+
+      if (!checkTime.isBefore(startZoned) && checkTime.isBefore(endZoned)) {
         return true;
       }
     }
     return false;
   }
 
-  private boolean duplicateExists(CalendarEvent newEvent) {
-    for (CalendarEvent event : events) {
+  private boolean duplicateExists(ICalendarEvent newEvent) {
+    for (ICalendarEvent event : events) {
       if (event.getSubject().equals(newEvent.getSubject()) &&
               event.getStartDateTime().equals(newEvent.getStartDateTime()) &&
               event.getEndDateTime().equals(newEvent.getEndDateTime())) {
@@ -297,9 +283,9 @@ public class CalendarModel implements ICalendarModel {
   }
 
   @Override
-  public boolean editEvent(CalendarEvent oldEvent, CalendarEvent newEvent) {
+  public boolean editEvent(ICalendarEvent oldEvent, ICalendarEvent newEvent) {
     events.remove(oldEvent);
-    for (CalendarEvent event : events) {
+    for (ICalendarEvent event : events) {
       if (ConflictChecker.hasConflict(event, newEvent)) {
         events.add(oldEvent);
         return false;
@@ -309,21 +295,23 @@ public class CalendarModel implements ICalendarModel {
     return true;
   }
 
+  @Override
   public boolean editSingleEvent(String property, String eventName,
-                                 ZonedDateTime originalStart, ZonedDateTime originalEnd,
+                                 Temporal originalStart, Temporal originalEnd,
                                  String newValue) {
-    for (CalendarEvent event : events) {
+    ZonedDateTime originalStartZoned = ZonedDateTime.from(originalStart);
+    ZonedDateTime originalEndZoned = ZonedDateTime.from(originalEnd);
+
+    for (ICalendarEvent event : events) {
       if (event instanceof SingleEvent &&
               event.getSubject().equals(eventName) &&
-              event.getStartDateTime().equals(originalStart) &&
-              event.getEndDateTime().equals(originalEnd)) {
+              event.getStartDateTime().equals(originalStartZoned) &&
+              event.getEndDateTime().equals(originalEndZoned)) {
 
         SingleEvent updated = ((SingleEvent) event).withUpdatedProperty(property, newValue);
 
-        if (updated.getStartDateTime().isAfter(updated.getEndDateTime())) {
-          return false;
-        }
-        if (hasConflictExcept(event, updated)) {
+        if (ZonedDateTime.from(updated.getStartDateTime()).isAfter(ZonedDateTime.from(updated.getEndDateTime())) ||
+                hasConflictExcept(event, updated)) {
           return false;
         }
 
@@ -335,13 +323,16 @@ public class CalendarModel implements ICalendarModel {
     return false;
   }
 
+  @Override
   public boolean editEventsFrom(String property, String eventName,
-                                ZonedDateTime fromDateTime, String newValue) {
+                                Temporal fromDateTime, String newValue) {
+    ZonedDateTime fromZoned = ZonedDateTime.from(fromDateTime);
     List<SingleEvent> toUpdate = new ArrayList<>();
-    for (CalendarEvent event : events) {
+
+    for (ICalendarEvent event : events) {
       if (event instanceof SingleEvent &&
               event.getSubject().equals(eventName) &&
-              !event.getStartDateTime().isBefore(fromDateTime)) {
+              !ZonedDateTime.from(event.getStartDateTime()).isBefore(fromZoned)) {
         toUpdate.add((SingleEvent) event);
       }
     }
@@ -353,7 +344,7 @@ public class CalendarModel implements ICalendarModel {
     List<SingleEvent> updatedEvents = new ArrayList<>();
     for (SingleEvent event : toUpdate) {
       SingleEvent updated = event.withUpdatedProperty(property, newValue);
-      if (updated.getStartDateTime().isAfter(updated.getEndDateTime()) ||
+      if (ZonedDateTime.from(updated.getStartDateTime()).isAfter(ZonedDateTime.from(updated.getEndDateTime())) ||
               hasConflictExcept(event, updated)) {
         return false;
       }
@@ -371,7 +362,7 @@ public class CalendarModel implements ICalendarModel {
     }
 
     List<SingleEvent> toUpdate = new ArrayList<>();
-    for (CalendarEvent event : events) {
+    for (ICalendarEvent event : events) {
       if (event instanceof SingleEvent && event.getSubject().equals(eventName)) {
         toUpdate.add((SingleEvent) event);
       }
@@ -384,7 +375,7 @@ public class CalendarModel implements ICalendarModel {
     List<SingleEvent> updatedEvents = new ArrayList<>();
     for (SingleEvent event : toUpdate) {
       SingleEvent updated = event.withUpdatedProperty(property, newValue);
-      if (updated.getStartDateTime().isAfter(updated.getEndDateTime()) ||
+      if (ZonedDateTime.from(updated.getStartDateTime()).isAfter(ZonedDateTime.from(updated.getEndDateTime())) ||
               hasConflictExcept(event, updated)) {
         return false;
       }
@@ -406,7 +397,7 @@ public class CalendarModel implements ICalendarModel {
     List<SingleEvent> newOccurrences = updatedEvent.generateOccurrences(UUID.randomUUID().toString());
 
     for (SingleEvent newOccurrence : newOccurrences) {
-      if (newOccurrence.getStartDateTime().isAfter(newOccurrence.getEndDateTime()) ||
+      if (ZonedDateTime.from(newOccurrence.getStartDateTime()).isAfter(ZonedDateTime.from(newOccurrence.getEndDateTime())) ||
               hasConflictExceptRecurring(eventName, newOccurrence)) {
         return false;
       }
@@ -421,8 +412,8 @@ public class CalendarModel implements ICalendarModel {
     return true;
   }
 
-  private boolean hasConflictExcept(CalendarEvent oldEvent, CalendarEvent newEvent) {
-    for (CalendarEvent existing : events) {
+  private boolean hasConflictExcept(ICalendarEvent oldEvent, ICalendarEvent newEvent) {
+    for (ICalendarEvent existing : events) {
       if (!existing.equals(oldEvent) && ConflictChecker.hasConflict(existing, newEvent)) {
         return true;
       }
@@ -430,8 +421,8 @@ public class CalendarModel implements ICalendarModel {
     return false;
   }
 
-  private boolean hasConflictExceptRecurring(String eventName, CalendarEvent newEvent) {
-    for (CalendarEvent existing : events) {
+  private boolean hasConflictExceptRecurring(String eventName, ICalendarEvent newEvent) {
+    for (ICalendarEvent existing : events) {
       if (!existing.getSubject().equals(eventName) && ConflictChecker.hasConflict(existing, newEvent)) {
         return true;
       }

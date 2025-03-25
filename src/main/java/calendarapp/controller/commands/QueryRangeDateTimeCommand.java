@@ -1,18 +1,18 @@
 package calendarapp.controller.commands;
 
-import java.time.ZonedDateTime;
+import java.time.temporal.Temporal;
 import java.util.List;
 
 import calendarapp.model.ICalendarModel;
-import calendarapp.model.event.CalendarEvent;
+import calendarapp.model.event.ICalendarEvent;
 import calendarapp.view.ICalendarView;
 
 /**
  * Command to query calendar events within a specific date and time range.
  */
 public class QueryRangeDateTimeCommand implements ICalendarModelCommand {
-  private final ZonedDateTime startDateTime;
-  private final ZonedDateTime endDateTime;
+  private final Temporal startDateTime;
+  private final Temporal endDateTime;
 
   /**
    * Processes a query range command. It retrieves events between the specified start and
@@ -24,7 +24,7 @@ public class QueryRangeDateTimeCommand implements ICalendarModelCommand {
    */
   @Override
   public boolean execute(ICalendarModel model, ICalendarView view) {
-    List<CalendarEvent> events = model.getEventsBetween(startDateTime, endDateTime);
+    List<ICalendarEvent> events = model.getEventsBetween(startDateTime, endDateTime);
     if (events.isEmpty()) {
       view.displayMessage("No events found from " + startDateTime + " to " + endDateTime);
     } else {
@@ -40,7 +40,7 @@ public class QueryRangeDateTimeCommand implements ICalendarModelCommand {
    * @param startDateTime the beginning of the query range
    * @param endDateTime   the end of the query range
    */
-  public QueryRangeDateTimeCommand(ZonedDateTime startDateTime, ZonedDateTime endDateTime) {
+  public QueryRangeDateTimeCommand(Temporal startDateTime, Temporal endDateTime) {
     this.startDateTime = startDateTime;
     this.endDateTime = endDateTime;
   }
@@ -50,7 +50,7 @@ public class QueryRangeDateTimeCommand implements ICalendarModelCommand {
    *
    * @return the start date and time
    */
-  public ZonedDateTime getStartDateTime() {
+  public Temporal getStartDateTime() {
     return startDateTime;
   }
 
@@ -59,7 +59,7 @@ public class QueryRangeDateTimeCommand implements ICalendarModelCommand {
    *
    * @return the end date and time
    */
-  public ZonedDateTime getEndDateTime() {
+  public Temporal getEndDateTime() {
     return endDateTime;
   }
 }

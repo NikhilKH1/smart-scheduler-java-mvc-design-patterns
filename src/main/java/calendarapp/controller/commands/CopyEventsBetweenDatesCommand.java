@@ -2,24 +2,26 @@ package calendarapp.controller.commands;
 
 import calendarapp.model.ICalendarManager;
 import calendarapp.model.ICalendarModel;
-import calendarapp.model.event.CalendarEvent;
+import calendarapp.model.event.ICalendarEvent;
 import calendarapp.model.event.SingleEvent;
 import calendarapp.view.ICalendarView;
 
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.Temporal;
 import java.util.UUID;
 
 /**
  * Command to copy all events within a specified date range to another calendar.
  */
 public class CopyEventsBetweenDatesCommand implements ICalendarManagerCommand {
-  private final LocalDate startDate;
-  private final LocalDate endDate;
+  private final Temporal startDate;
+  private final Temporal endDate;
   private final String targetCalendarName;
-  private final LocalDate targetStartDate;
+  private final Temporal targetStartDate;
 
-  public CopyEventsBetweenDatesCommand(LocalDate startDate, LocalDate endDate, String targetCalendarName, LocalDate targetStartDate) {
+  public CopyEventsBetweenDatesCommand(Temporal startDate, Temporal endDate, String targetCalendarName, Temporal targetStartDate) {
     this.startDate = startDate;
     this.endDate = endDate;
     this.targetCalendarName = targetCalendarName;
@@ -35,16 +37,29 @@ public class CopyEventsBetweenDatesCommand implements ICalendarManagerCommand {
       return false;
     }
     boolean eventCopied = false;
-    long daysOffset = java.time.temporal.ChronoUnit.DAYS.between(startDate, targetStartDate);
-    for (CalendarEvent event : sourceCalendar.getEvents()) {
-      LocalDate eventDate = event.getStartDateTime().toLocalDate();
-      if (!eventDate.isBefore(startDate) && !eventDate.isAfter(endDate)) {
-        ZonedDateTime newStart = event.getStartDateTime()
+
+    // Convert startDate and targetStartDate to LocalDate
+    LocalDate sourceStartLocalDate = LocalDate.from(startDate);
+    LocalDate targetStartLocalDate = LocalDate.from(targetStartDate);
+    long daysOffset = ChronoUnit.DAYS.between(sourceStartLocalDate, targetStartLocalDate);
+
+    for (ICalendarEvent event : sourceCalendar.getEvents()) {
+      // Cast start and end times to ZonedDateTime
+      ZonedDateTime eventStart = (ZonedDateTime) event.getStartDateTime();
+      ZonedDateTime eventEnd = (ZonedDateTime) event.getEndDateTime();
+      LocalDate eventDate = eventStart.toLocalDate();
+
+      // Check if event falls in the range
+      if (!eventDate.isBefore(sourceStartLocalDate) && !eventDate.isAfter(LocalDate.from(endDate))) {
+        // Adjust start and end date-time
+        ZonedDateTime newStart = eventStart
                 .plusDays(daysOffset)
                 .withZoneSameInstant(targetCalendar.getTimezone());
-        ZonedDateTime newEnd = event.getEndDateTime()
+
+        ZonedDateTime newEnd = eventEnd
                 .plusDays(daysOffset)
                 .withZoneSameInstant(targetCalendar.getTimezone());
+
         SingleEvent copied = new SingleEvent(
                 event.getSubject(),
                 newStart,
@@ -53,13 +68,15 @@ public class CopyEventsBetweenDatesCommand implements ICalendarManagerCommand {
                 event.getLocation(),
                 event.isPublic(),
                 event.isAllDay(),
-                UUID.randomUUID().toString() // new unique ID
+                UUID.randomUUID().toString() // unique ID
         );
+
         if (targetCalendar.addEvent(copied, true)) {
           eventCopied = true;
         }
       }
     }
+
     if (eventCopied) {
       view.displayMessage("Events copied successfully to calendar: " + targetCalendarName);
       return true;

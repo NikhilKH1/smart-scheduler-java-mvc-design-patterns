@@ -1,6 +1,10 @@
 package calendarapp.model;
 
-import calendarapp.model.event.CalendarEvent;
+import calendarapp.model.event.ICalendarEvent;
+
+import java.time.ZonedDateTime;
+import java.time.chrono.ChronoZonedDateTime;
+import java.time.temporal.Temporal;
 
 /**
  * This utility class provides a method to determine if two calendar events conflict.
@@ -8,6 +12,14 @@ import calendarapp.model.event.CalendarEvent;
  * ends after the other starts.
  */
 public class ConflictChecker {
+
+  /**
+   * Converts a Temporal to ZonedDateTime.
+   */
+  private static ZonedDateTime toZonedDateTime(Temporal temporal) {
+    return ZonedDateTime.from(temporal);
+  }
+
   /**
    * Checks if two calendar events conflict.
    *
@@ -15,9 +27,14 @@ public class ConflictChecker {
    * @param e2 the second calendar event
    * @return true if the events conflict; false otherwise
    */
-  public static boolean hasConflict(CalendarEvent e1, CalendarEvent e2) {
-    return e1.getStartDateTime().isBefore(e2.getEndDateTime())
-            && !e1.getEndDateTime().isEqual(e2.getStartDateTime())
-            && e1.getEndDateTime().isAfter(e2.getStartDateTime());
+  public static boolean hasConflict(ICalendarEvent e1, ICalendarEvent e2) {
+    ZonedDateTime start1 = toZonedDateTime(e1.getStartDateTime());
+    ZonedDateTime end1 = toZonedDateTime(e1.getEndDateTime());
+    ZonedDateTime start2 = toZonedDateTime(e2.getStartDateTime());
+    ZonedDateTime end2 = toZonedDateTime(e2.getEndDateTime());
+
+    return start1.isBefore(end2)
+            && !end1.isEqual(start2)
+            && end1.isAfter(start2);
   }
 }

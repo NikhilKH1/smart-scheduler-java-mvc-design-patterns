@@ -1,6 +1,6 @@
 package calendarapp.controller;
 
-import java.time.ZonedDateTime;
+import java.time.temporal.Temporal;
 
 /**
  * Represents the properties related to a recurring event.
@@ -13,7 +13,7 @@ public class RecurringResult {
   protected boolean isRecurring = false;
   protected String weekdays = "";
   protected int repeatCount = 0;
-  protected ZonedDateTime repeatUntil = null;
+  protected Temporal repeatUntil = null;
   protected int index;
 
   /**
@@ -21,11 +21,11 @@ public class RecurringResult {
    * Initializes the fields for isRecurring, weekdays, repeatCount, repeatUntil, and index.
    */
   public RecurringResult() {
-    this.isRecurring = isRecurring;
-    this.weekdays = weekdays;
-    this.repeatCount = repeatCount;
-    this.repeatUntil = repeatUntil;
-    this.index = index;
+    this.isRecurring = false;
+    this.weekdays = "";
+    this.repeatCount = 0;
+    this.repeatUntil = null;
+    this.index = -1;
   }
 
   /**
@@ -60,7 +60,7 @@ public class RecurringResult {
    *
    * @return the repeat until date, or null if there is no end date.
    */
-  public ZonedDateTime getRepeatUntil() {
+  public Temporal getRepeatUntil() {
     return repeatUntil;
   }
 

@@ -2,23 +2,24 @@ package calendarapp.controller.commands;
 
 import calendarapp.model.ICalendarManager;
 import calendarapp.model.ICalendarModel;
-import calendarapp.model.event.CalendarEvent;
+import calendarapp.model.event.ICalendarEvent;
 import calendarapp.model.event.SingleEvent;
 import calendarapp.view.ICalendarView;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.time.temporal.Temporal;
 
 /**
  * Command to copy all events on a specific date to another calendar.
  */
 public class CopyEventsOnDateCommand implements ICalendarManagerCommand {
-  private final LocalDate sourceDate;
+  private final Temporal sourceDate;
   private final String targetCalendarName;
-  private final LocalDate targetDate;
+  private final Temporal targetDate;
 
-  public CopyEventsOnDateCommand(LocalDate sourceDate, String targetCalendarName, LocalDate targetDate) {
+  public CopyEventsOnDateCommand(Temporal sourceDate, String targetCalendarName, Temporal targetDate) {
     this.sourceDate = sourceDate;
     this.targetCalendarName = targetCalendarName;
     this.targetDate = targetDate;
@@ -36,17 +37,27 @@ public class CopyEventsOnDateCommand implements ICalendarManagerCommand {
     boolean eventCopied = false;
     ZoneId targetZone = targetCalendar.getTimezone();
 
-    for (CalendarEvent event : sourceCalendar.getEventsOnDate(sourceDate)) {
-      ZonedDateTime newStart = event.getStartDateTime().withZoneSameInstant(targetZone)
-              .withYear(targetDate.getYear())
-              .withMonth(targetDate.getMonthValue())
-              .withDayOfMonth(targetDate.getDayOfMonth());
+    LocalDate sourceLocalDate = LocalDate.from(sourceDate);
+    LocalDate targetLocalDate = LocalDate.from(targetDate);
 
-      ZonedDateTime newEnd = event.getEndDateTime().withZoneSameInstant(targetZone)
-              .withYear(targetDate.getYear())
-              .withMonth(targetDate.getMonthValue())
-              .withDayOfMonth(targetDate.getDayOfMonth());
+    for (ICalendarEvent event : sourceCalendar.getEventsOnDate(sourceLocalDate)) {
+      // Cast start and end times to ZonedDateTime
+      ZonedDateTime eventStart = (ZonedDateTime) event.getStartDateTime();
+      ZonedDateTime eventEnd = (ZonedDateTime) event.getEndDateTime();
 
+      // Adjust the start time to the target zone and date
+      ZonedDateTime newStart = eventStart.withZoneSameInstant(targetZone)
+              .withYear(targetLocalDate.getYear())
+              .withMonth(targetLocalDate.getMonthValue())
+              .withDayOfMonth(targetLocalDate.getDayOfMonth());
+
+      // Adjust the end time to the target zone and date
+      ZonedDateTime newEnd = eventEnd.withZoneSameInstant(targetZone)
+              .withYear(targetLocalDate.getYear())
+              .withMonth(targetLocalDate.getMonthValue())
+              .withDayOfMonth(targetLocalDate.getDayOfMonth());
+
+      // Create a new SingleEvent with the adjusted times
       SingleEvent copied = new SingleEvent(
               event.getSubject(),
               newStart,
@@ -57,11 +68,14 @@ public class CopyEventsOnDateCommand implements ICalendarManagerCommand {
               event.isAllDay(),
               null
       );
+
+      // Attempt to add the new event to the target calendar
       boolean added = targetCalendar.addEvent(copied, true);
       if (added) {
         eventCopied = true;
       }
     }
+
     if (eventCopied) {
       view.displayMessage("Events copied successfully to calendar: " + targetCalendarName);
     } else {

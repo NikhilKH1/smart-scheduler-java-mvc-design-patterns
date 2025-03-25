@@ -1,21 +1,22 @@
 package calendarapp.controller.commands;
 
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-
 import calendarapp.model.ICalendarModel;
 import calendarapp.model.event.RecurringEvent;
 import calendarapp.model.event.SingleEvent;
 import calendarapp.view.ICalendarView;
 
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.temporal.Temporal;
+
 /**
  * Command to create a new calendar event.
- * This command holds all details required for creating both single and recurring events.
+ * Supports both single and recurring events.
  */
 public class CreateEventCommand implements ICalendarModelCommand {
   private final String eventName;
-  private final ZonedDateTime startDateTime;
-  private final ZonedDateTime endDateTime;
+  private final Temporal startDateTime;
+  private final Temporal endDateTime;
   private final boolean autoDecline;
   private final String description;
   private final String location;
@@ -24,30 +25,14 @@ public class CreateEventCommand implements ICalendarModelCommand {
   private final boolean isRecurring;
   private final String weekdays;
   private final int repeatCount;
-  private final ZonedDateTime repeatUntil;
+  private final Temporal repeatUntil;
 
-  /**
-   * Constructs a CreateEventCommand with the specified event details.
-   *
-   * @param eventName     the name of the event
-   * @param startDateTime the start date and time of the event
-   * @param endDateTime   the end date and time of the event
-   * @param autoDecline   true if conflicts should be automatically declined
-   * @param description   the event description
-   * @param location      the event location
-   * @param isPublic      true if the event is public
-   * @param isAllDay      true if the event lasts all day
-   * @param isRecurring   true if the event is recurring
-   * @param weekdays      the days on which the event recurs
-   * @param repeatCount   the number of repetitions for recurring events
-   * @param repeatUntil   the date and time until which the event repeats
-   */
-  public CreateEventCommand(String eventName, ZonedDateTime startDateTime,
-                            ZonedDateTime endDateTime,
+  public CreateEventCommand(String eventName, Temporal startDateTime,
+                            Temporal endDateTime,
                             boolean autoDecline, String description, String location,
                             boolean isPublic, boolean isAllDay,
                             boolean isRecurring, String weekdays, int repeatCount,
-                            ZonedDateTime repeatUntil) {
+                            Temporal repeatUntil) {
     this.eventName = eventName;
     this.startDateTime = startDateTime;
     this.endDateTime = endDateTime;
@@ -66,11 +51,11 @@ public class CreateEventCommand implements ICalendarModelCommand {
     return eventName;
   }
 
-  public ZonedDateTime getStartDateTime() {
+  public Temporal getStartDateTime() {
     return startDateTime;
   }
 
-  public ZonedDateTime getEndDateTime() {
+  public Temporal getEndDateTime() {
     return endDateTime;
   }
 
@@ -106,27 +91,20 @@ public class CreateEventCommand implements ICalendarModelCommand {
     return repeatCount;
   }
 
-  public ZonedDateTime getRepeatUntil() {
+  public Temporal getRepeatUntil() {
     return repeatUntil;
   }
 
-  /**
-   * Processes the create event command. Depending on whether the event is recurring, it creates
-   * either a recurring event or a single event and attempts to add it to the calendar model.
-   *
-   * @param model the calendar model used for checking conflicts
-   * @param view  the calendar view for displaying messages
-   * @return true if the event was created successfully; false otherwise
-   */
   @Override
   public boolean execute(ICalendarModel model, ICalendarView view) {
     try {
       boolean success;
       ZoneId targetZone = model.getTimezone();
 
-      ZonedDateTime adjustedStart = startDateTime.withZoneSameInstant(targetZone);
-      ZonedDateTime adjustedEnd = endDateTime.withZoneSameInstant(targetZone);
-      ZonedDateTime adjustedRepeatUntil = (repeatUntil != null) ? repeatUntil.withZoneSameInstant(targetZone) : null;
+      // Adjusting the start/end/repeatUntil Temporal values to targetZone
+      ZonedDateTime adjustedStart = ZonedDateTime.from(startDateTime).withZoneSameInstant(targetZone);
+      ZonedDateTime adjustedEnd = ZonedDateTime.from(endDateTime).withZoneSameInstant(targetZone);
+      ZonedDateTime adjustedRepeatUntil = (repeatUntil != null) ? ZonedDateTime.from(repeatUntil).withZoneSameInstant(targetZone) : null;
 
       if (isRecurring) {
         RecurringEvent recurringEvent = new RecurringEvent(eventName, adjustedStart,

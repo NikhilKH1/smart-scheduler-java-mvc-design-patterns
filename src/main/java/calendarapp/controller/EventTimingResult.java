@@ -1,6 +1,6 @@
 package calendarapp.controller;
 
-import java.time.ZonedDateTime;
+import java.time.temporal.Temporal;
 
 /**
  * Represents the timing details of an event.
@@ -10,53 +10,84 @@ import java.time.ZonedDateTime;
  */
 public class EventTimingResult {
 
-  ZonedDateTime start;
-  ZonedDateTime end;
+  Temporal start;
+  Temporal end;
   boolean isAllDay;
   int index;
 
   /**
-   * Default constructor for initializing the EventTimingResult instance.
-   * Initializes the start, end, isAllDay, and index with default values.
+   * Default constructor initializing fields to null/default.
    */
   public EventTimingResult() {
+    this.start = null;
+    this.end = null;
+    this.isAllDay = false;
+    this.index = -1;
+  }
+
+  /**
+   * Sets the start time.
+   *
+   * @param start the start time as a {@link Temporal} object
+   */
+  public void setStart(Temporal start) {
     this.start = start;
+  }
+
+  /**
+   * Sets the end time.
+   *
+   * @param end the end time as a {@link Temporal} object
+   */
+  public void setEnd(Temporal end) {
     this.end = end;
+  }
+
+  /**
+   * Sets whether the event is all day.
+   *
+   * @param isAllDay true if all-day, false otherwise
+   */
+  public void setAllDay(boolean isAllDay) {
     this.isAllDay = isAllDay;
+  }
+
+  /**
+   * Sets the index.
+   *
+   * @param index the index
+   */
+  public void setIndex(int index) {
     this.index = index;
   }
 
   /**
-   * Gets the start time of the event.
+   * Gets the start time.
    *
-   * @return the start time as a {@link ZonedDateTime} object.
+   * @return the start time as a {@link Temporal}
    */
-  public ZonedDateTime getStart() {
+  public Temporal getStart() {
     return start;
   }
 
   /**
-   * Gets the end time of the event.
+   * Gets the end time.
    *
-   * @return the end time as a {@link ZonedDateTime} object.
+   * @return the end time as a {@link Temporal}
    */
-  public ZonedDateTime getEnd() {
+  public Temporal getEnd() {
     return end;
   }
 
   /**
-   * Checks whether the event is an all-day event.
-   *
-   * @return true if the event is an all-day event, false otherwise.
+   * Returns whether it's all day.
    */
   public boolean isAllDay() {
     return isAllDay;
   }
 
   /**
-   * Gets the index of the event.
-   *
-   * @return the index of the event, used to identify the event in a list or sequence.
+   * Gets index.
    */
   public int getIndex() {
     return index;

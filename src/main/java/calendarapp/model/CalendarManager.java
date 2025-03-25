@@ -1,8 +1,5 @@
 package calendarapp.model;
 
-import calendarapp.model.event.CalendarEvent;
-import calendarapp.model.event.SingleEvent;
-
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;

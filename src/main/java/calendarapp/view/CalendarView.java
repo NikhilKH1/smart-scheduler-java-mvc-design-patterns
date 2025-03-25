@@ -1,7 +1,8 @@
 package calendarapp.view;
 
-import calendarapp.model.event.CalendarEvent;
+import calendarapp.model.event.ICalendarEvent;
 
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
@@ -21,12 +22,12 @@ public class CalendarView implements ICalendarView {
    * @param events the list of calendar events to display
    */
   @Override
-  public void displayEvents(List<CalendarEvent> events) {
+  public void displayEvents(List<ICalendarEvent> events) {
     if (events.isEmpty()) {
       System.out.println("No events found.");
       return;
     }
-    for (CalendarEvent event : events) {
+    for (ICalendarEvent event : events) {
       System.out.println(formatEventDetails(event));
     }
   }
@@ -37,12 +38,15 @@ public class CalendarView implements ICalendarView {
    * @param event the event to format
    * @return a formatted string representing the event
    */
-  private String formatEventDetails(CalendarEvent event) {
+  private String formatEventDetails(ICalendarEvent event) {
     StringBuilder sb = new StringBuilder();
 
+    ZonedDateTime start = ZonedDateTime.from(event.getStartDateTime());
+    ZonedDateTime end = ZonedDateTime.from(event.getEndDateTime());
+
     sb.append("- ").append(event.getSubject())
-            .append(": ").append(event.getStartDateTime().format(FORMATTER))
-            .append(" to ").append(event.getEndDateTime().format(FORMATTER));
+            .append(": ").append(start.format(FORMATTER))
+            .append(" to ").append(end.format(FORMATTER));
 
     if (event.getDescription() != null && !event.getDescription().isEmpty()) {
       sb.append(" | Description: ").append(event.getDescription());

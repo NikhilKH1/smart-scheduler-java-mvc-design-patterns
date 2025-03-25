@@ -4,7 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 import calendarapp.model.ICalendarModel;
-import calendarapp.model.event.CalendarEvent;
+import calendarapp.model.event.ICalendarEvent;
 import calendarapp.view.ICalendarView;
 
 /**
@@ -22,7 +22,7 @@ public class QueryByDateCommand implements ICalendarModelCommand {
    */
   @Override
   public boolean execute(ICalendarModel model, ICalendarView view) {
-    List<CalendarEvent> events = model.getEventsOnDate(queryDate);
+    List<ICalendarEvent> events = model.getEventsOnDate(queryDate);
     if (events.isEmpty()) {
       view.displayMessage("No events found on " + queryDate);
     } else {

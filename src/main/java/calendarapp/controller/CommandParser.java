@@ -182,8 +182,8 @@ public class CommandParser {
   }
 
   private ICommand parseExportCommand(List<String> tokens) {
-    if (tokens.size() != 3 || !"cal".equalsIgnoreCase(tokens.get(1))) {
-      throw new IllegalArgumentException("Invalid export format. Usage: export cal <file.csv>");
+    if (tokens.size() != 3 || !"calendar".equalsIgnoreCase(tokens.get(1))) {
+      throw new IllegalArgumentException("Invalid export format. Usage: export calendar <file.csv>");
     }
     String fileName = tokens.get(2);
     if (!fileName.toLowerCase().endsWith(".csv")) {
@@ -194,6 +194,7 @@ public class CommandParser {
     }
     return new ExportCalendarCommand(calendarManager.getActiveCalendar(), fileName);
   }
+
 
   private ICommand parsePrintCommand(List<String> tokens) {
     if (tokens.size() < 3 || !"events".equalsIgnoreCase(tokens.get(1))) {
@@ -257,21 +258,30 @@ public class CommandParser {
 
     if (tokens.size() == 5) {
       String newValue = stripQuotes(tokens.get(4));
+
       if (isRecurringProperty) {
-        ZonedDateTime newRepeatUntil = parseDateTime(newValue);
-        return new EditRecurringEventCommand(property, eventName, newRepeatUntil.toString());
+        if (property.equals("repeatuntil")) {
+          ZonedDateTime newRepeatUntil = parseDateTime(newValue);
+          return new EditRecurringEventCommand(property, eventName, newRepeatUntil);
+        } else {
+          return new EditRecurringEventCommand(property, eventName, newValue);  // repeattimes or repeatingdays
+        }
       } else {
         return new EditEventCommand(property, eventName, newValue);
       }
+
     } else if (tokens.size() == 8) {
       if (!"from".equalsIgnoreCase(tokens.get(4)) || !"with".equalsIgnoreCase(tokens.get(6))) {
         throw new IllegalArgumentException("Invalid edit events command format");
       }
+
       ZonedDateTime filterDateTime = parseDateTime(tokens.get(5));
       String newValue = stripQuotes(tokens.get(7));
+
       return isRecurringProperty
               ? new EditRecurringEventCommand(property, eventName, newValue)
               : new EditEventCommand(property, eventName, filterDateTime, newValue);
+
     } else {
       throw new IllegalArgumentException("Invalid edit events command format");
     }
@@ -308,7 +318,9 @@ public class CommandParser {
 
     RecurringResult recurring = parseRecurringSection(tokens, index);
     index = recurring.getIndex();
-    if (recurring.isRecurring() && timing.getEnd().isAfter(timing.getStart().plusHours(24))) {
+    if (recurring.isRecurring() &&
+            ((ZonedDateTime) timing.getEnd())
+                    .isAfter(((ZonedDateTime) timing.getStart()).plusHours(24))) {
       throw new IllegalArgumentException("Recurring event must end within 24 hours of the start time.");
     }
 
@@ -329,6 +341,7 @@ public class CommandParser {
             recurring.getRepeatUntil()
     );
   }
+
   private EventTimingResult parseEventTiming(List<String> tokens, int index) {
     EventTimingResult result = new EventTimingResult();
     String keyword = tokens.get(index).toLowerCase();
@@ -338,18 +351,22 @@ public class CommandParser {
       if (index < tokens.size() && "to".equalsIgnoreCase(tokens.get(index))) {
         index++;
         result.end = parseDateTime(tokens.get(index++));
-        if (result.end.isBefore(result.start)) {
+        if (((ZonedDateTime)result.end).isBefore((ZonedDateTime)result.start)) {
           throw new IllegalArgumentException("End date must be after start date");
         }
         result.isAllDay = false;
       } else {
-        result.end = result.start.toLocalDate().atTime(23, 59, 59).atZone(result.start.getZone());
+        result.end = ((ZonedDateTime)result.start).toLocalDate()
+                .atTime(23, 59, 59)
+                .atZone(((ZonedDateTime)result.start).getZone());
         result.isAllDay = true;
       }
     } else if ("on".equals(keyword)) {
       index++;
       result.start = parseDateTime(tokens.get(index++));
-      result.end = result.start.toLocalDate().atTime(23, 59, 59).atZone(result.start.getZone());
+      result.end = ((ZonedDateTime)result.start).toLocalDate()
+              .atTime(23, 59, 59)
+              .atZone(((ZonedDateTime)result.start).getZone());
       result.isAllDay = true;
     } else {
       throw new IllegalArgumentException("Expected 'from' or 'on' after event name");
@@ -357,6 +374,7 @@ public class CommandParser {
     result.index = index;
     return result;
   }
+
 
   private RecurringResult parseRecurringSection(List<String> tokens, int index) {
     RecurringResult result = new RecurringResult();

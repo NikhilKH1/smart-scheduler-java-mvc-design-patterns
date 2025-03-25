@@ -1,10 +1,9 @@
 package calendarapp.model.event;
 
 import java.time.DayOfWeek;
-import java.time.LocalDate;
-import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.time.temporal.Temporal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,16 +14,16 @@ public class RecurringEvent extends AbstractCalendarEvent {
 
   private final String weekdays;
   private final int repeatCount;
-  private final ZonedDateTime repeatUntil;
+  private final Temporal repeatUntil;
 
   public RecurringEvent withUpdatedTimezone(ZoneId newZone) {
     return new RecurringEvent(
             this.subject,
-            this.startDateTime.withZoneSameInstant(newZone),
-            this.endDateTime.withZoneSameInstant(newZone),
+            ZonedDateTime.from(this.startDateTime).withZoneSameInstant(newZone),
+            ZonedDateTime.from(this.endDateTime).withZoneSameInstant(newZone),
             this.weekdays,
             this.repeatCount,
-            this.repeatUntil != null ? this.repeatUntil.withZoneSameInstant(newZone) : null,
+            (this.repeatUntil != null) ? ZonedDateTime.from(this.repeatUntil).withZoneSameInstant(newZone) : null,
             this.description,
             this.location,
             this.isPublic,
@@ -34,20 +33,9 @@ public class RecurringEvent extends AbstractCalendarEvent {
 
   /**
    * Constructs a recurring event.
-   *
-   * @param subject       the event subject
-   * @param startDateTime event start time
-   * @param endDateTime   event end time
-   * @param weekdays      days of the week on which the event repeats
-   * @param repeatCount   number of repetitions
-   * @param repeatUntil   repeat-until date
-   * @param description   event description
-   * @param location      event location
-   * @param isPublic      visibility flag
-   * @param isAllDay      flag for all-day event
    */
-  public RecurringEvent(String subject, ZonedDateTime startDateTime, ZonedDateTime endDateTime,
-                        String weekdays, int repeatCount, ZonedDateTime repeatUntil,
+  public RecurringEvent(String subject, Temporal startDateTime, Temporal endDateTime,
+                        String weekdays, int repeatCount, Temporal repeatUntil,
                         String description, String location, boolean isPublic, boolean isAllDay) {
     this.subject = subject;
     this.startDateTime = startDateTime;
@@ -61,7 +49,6 @@ public class RecurringEvent extends AbstractCalendarEvent {
     this.isAllDay = isAllDay;
   }
 
-
   public String getWeekdays() {
     return weekdays;
   }
@@ -70,15 +57,12 @@ public class RecurringEvent extends AbstractCalendarEvent {
     return repeatCount;
   }
 
-  public ZonedDateTime getRepeatUntil() {
+  public Temporal getRepeatUntil() {
     return repeatUntil;
   }
 
   /**
    * Generates a list of SingleEvent occurrences from the recurring rule.
-   *
-   * @param seriesId Unique identifier for the series.
-   * @return List of SingleEvent occurrences.
    */
   public List<SingleEvent> generateOccurrences(String seriesId) {
     List<SingleEvent> occurrences = new ArrayList<>();
@@ -86,8 +70,10 @@ public class RecurringEvent extends AbstractCalendarEvent {
       return occurrences;
     }
 
-    ZonedDateTime currentStart = startDateTime;
-    ZonedDateTime currentEnd = endDateTime;
+    ZonedDateTime currentStart = ZonedDateTime.from(startDateTime);
+    ZonedDateTime currentEnd = ZonedDateTime.from(endDateTime);
+    ZonedDateTime repeatUntilZoned = (repeatUntil != null) ? ZonedDateTime.from(repeatUntil) : null;
+
     int created = 0;
 
     while (true) {
@@ -104,7 +90,7 @@ public class RecurringEvent extends AbstractCalendarEvent {
       currentStart = currentStart.plusDays(1);
       currentEnd = currentEnd.plusDays(1);
 
-      if (repeatUntil != null && currentStart.isAfter(repeatUntil)) {
+      if (repeatUntilZoned != null && currentStart.isAfter(repeatUntilZoned)) {
         break;
       }
     }
@@ -134,45 +120,87 @@ public class RecurringEvent extends AbstractCalendarEvent {
 
   /**
    * Returns a new RecurringEvent updated with the specified property.
-   *
-   * @param property The property to update.
-   * @param newValue The new value for the property.
-   * @return A new RecurringEvent instance with the updated property.
    */
   public RecurringEvent withUpdatedProperty(String property, String newValue) {
-    String updatedWeekdays = weekdays;
-    int updatedRepeatCount = repeatCount;
-    ZonedDateTime updatedRepeatUntil = repeatUntil;
-    String updatedDescription = description;
-    String updatedLocation = location;
+    String updatedWeekdays = this.weekdays;
+    int updatedRepeatCount = this.repeatCount;
+    Temporal updatedRepeatUntil = this.repeatUntil;
+    String updatedDescription = this.description;
+    String updatedLocation = this.location;
+    String updatedSubject = this.subject;
+    Temporal updatedStart = this.startDateTime;
+    Temporal updatedEnd = this.endDateTime;
+    boolean updatedIsPublic = this.isPublic;
+    boolean updatedIsAllDay = this.isAllDay;
 
     switch (property.toLowerCase().trim()) {
       case "repeattimes":
-        updatedRepeatCount = Integer.parseInt(newValue);
-        if (updatedRepeatCount <= 0) {
-          throw new IllegalArgumentException("Repeat count must be a positive number.");
+        try {
+          updatedRepeatCount = Integer.parseInt(newValue);
+          if (updatedRepeatCount <= 0) {
+            throw new IllegalArgumentException("Repeat count must be positive.");
+          }
+        } catch (NumberFormatException e) {
+          throw new IllegalArgumentException("Invalid number for repeattimes: " + newValue);
         }
         break;
+
       case "repeatuntil":
         updatedRepeatUntil = ZonedDateTime.parse(newValue);
         break;
+
       case "repeatingdays":
-        updatedWeekdays = newValue.toUpperCase();
+        updatedWeekdays = newValue.trim().toUpperCase();
         break;
+
       case "description":
         updatedDescription = newValue;
         break;
+
       case "location":
         updatedLocation = newValue;
         break;
+
+      case "subject":
+        updatedSubject = newValue;
+        break;
+
+      case "startdatetime":
+        updatedStart = ZonedDateTime.parse(newValue);
+        break;
+
+      case "enddatetime":
+        updatedEnd = ZonedDateTime.parse(newValue);
+        break;
+
+      case "public":
+        updatedIsPublic = true;
+        break;
+
+      case "private":
+        updatedIsPublic = false;
+        break;
+
       default:
-        throw new IllegalArgumentException("Unsupported recurring property: " + property);
+        throw new IllegalArgumentException("Unknown recurring event property: " + property);
     }
 
-    return new RecurringEvent(subject, startDateTime, endDateTime,
-            updatedWeekdays, updatedRepeatCount, updatedRepeatUntil,
-            updatedDescription, updatedLocation, isPublic, isAllDay);
+    return new RecurringEvent(
+            updatedSubject,
+            updatedStart,
+            updatedEnd,
+            updatedWeekdays,
+            updatedRepeatCount,
+            updatedRepeatUntil,
+            updatedDescription,
+            updatedLocation,
+            updatedIsPublic,
+            updatedIsAllDay
+    );
   }
 
-
 }
+
+//return new RecurringEvent(subject, startDateTime, endDateTime,
+//            updatedWeekdays, updatedRepeatCount, updatedRepeatUntil,
+//            updatedDescription, updatedLocation, isPublic, isAllDay);

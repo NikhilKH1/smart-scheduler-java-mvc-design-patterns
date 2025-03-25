@@ -1,16 +1,16 @@
 package calendarapp.model.event;
 
-import java.time.ZonedDateTime;
+import java.time.temporal.Temporal;
 
 /**
  * This abstract class provides a common implementation for calendar events.
  * It holds properties such as subject, start and end date/time, description, location,
  * and flags for public and all-day events.
  */
-public abstract class AbstractCalendarEvent implements CalendarEvent {
+public abstract class AbstractCalendarEvent implements ICalendarEvent {
   protected String subject;
-  protected ZonedDateTime startDateTime;
-  protected ZonedDateTime endDateTime;
+  protected Temporal startDateTime;
+  protected Temporal endDateTime;
   protected String description;
   protected String location;
   protected boolean isPublic;
@@ -32,7 +32,7 @@ public abstract class AbstractCalendarEvent implements CalendarEvent {
    * @return the event start date and time
    */
   @Override
-  public ZonedDateTime getStartDateTime() {
+  public Temporal getStartDateTime() {
     return startDateTime;
   }
 
@@ -42,7 +42,7 @@ public abstract class AbstractCalendarEvent implements CalendarEvent {
    * @return the event end date and time
    */
   @Override
-  public ZonedDateTime getEndDateTime() {
+  public Temporal getEndDateTime() {
     return endDateTime;
   }
 
@@ -84,16 +84,5 @@ public abstract class AbstractCalendarEvent implements CalendarEvent {
   @Override
   public boolean isAllDay() {
     return isAllDay;
-  }
-
-  /**
-   * Returns a basic string representation of the event (used for debugging/logging).
-   * The full display logic is handled separately in CalendarView.
-   *
-   * @return a string representation of the event
-   */
-  @Override
-  public String toString() {
-    return subject + " (" + startDateTime + " - " + endDateTime + ")";
   }
 }
