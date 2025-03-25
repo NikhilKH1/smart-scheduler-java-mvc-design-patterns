@@ -182,7 +182,7 @@ public class CommandParser {
   }
 
   private ICommand parseExportCommand(List<String> tokens) {
-    if (tokens.size() != 3 || !"calendar".equalsIgnoreCase(tokens.get(1))) {
+    if (tokens.size() != 3 || !"cal".equalsIgnoreCase(tokens.get(1))) {
       throw new IllegalArgumentException("Invalid export format. Usage: export calendar <filePath.csv>");
     }
 
