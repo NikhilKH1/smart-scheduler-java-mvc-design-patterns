@@ -9,26 +9,13 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-/**
- * Utility class to export calendar events to a CSV file format.
- */
-public class CSVExporter {
+public class CSVExporter implements IExporter {
 
   private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("MM/dd/yyyy");
   private static final DateTimeFormatter TIME_FORMAT = DateTimeFormatter.ofPattern("HH:mm");
 
-  /**
-   * Exports the provided calendar events to a CSV file.
-   * The CSV file will contain:
-   * - Subject, Start Date, Start Time, End Date, End Time, All Day Event, Description, Location,
-   * Private
-   *
-   * @param events   the list of calendar events to export
-   * @param filePath the desired file path for the CSV file
-   * @return the absolute file path of the generated CSV file
-   * @throws IOException if an error occurs during file writing
-   */
-  public static String exportToCSV(List<ICalendarEvent> events, String filePath) throws IOException {
+  @Override
+  public String export(List<ICalendarEvent> events, String filePath) throws IOException {
     if (filePath == null || filePath.trim().isEmpty()) {
       throw new IllegalArgumentException("File path must not be null or empty.");
     }
@@ -59,17 +46,10 @@ public class CSVExporter {
     return file.getAbsolutePath();
   }
 
-  /**
-   * Formats a single event into a CSV row.
-   *
-   * @param event the event to format
-   * @return the formatted CSV string
-   */
-  private static String formatEvent(ICalendarEvent event) {
+  private String formatEvent(ICalendarEvent event) {
     String subject = event.getSubject();
     boolean isPrivate = !event.isPublic();
 
-    // Cast to ZonedDateTime for formatting
     ZonedDateTime startDateTime = (ZonedDateTime) event.getStartDateTime();
     ZonedDateTime endDateTime = (ZonedDateTime) event.getEndDateTime();
 
@@ -78,10 +58,8 @@ public class CSVExporter {
 
     boolean isAllDay = event.isAllDay() || endDateTime == null;
 
-    String endDate = (endDateTime != null) ? endDateTime.format(DATE_FORMAT)
-            : startDate;
-    String endTime = isAllDay ? "" : (endDateTime != null
-            ? endDateTime.format(TIME_FORMAT) : "");
+    String endDate = (endDateTime != null) ? endDateTime.format(DATE_FORMAT) : startDate;
+    String endTime = isAllDay ? "" : (endDateTime != null ? endDateTime.format(TIME_FORMAT) : "");
 
     String allDayVal = isAllDay ? "TRUE" : "FALSE";
     String privateVal = isPrivate ? "TRUE" : "FALSE";
@@ -99,14 +77,7 @@ public class CSVExporter {
             escapeCSV(privateVal);
   }
 
-
-  /**
-   * Escapes CSV values containing commas, quotes, or newlines.
-   *
-   * @param value the CSV value to escape
-   * @return the escaped CSV value
-   */
-  private static String escapeCSV(String value) {
+  private String escapeCSV(String value) {
     if (value == null || value.isEmpty()) {
       return "";
     }

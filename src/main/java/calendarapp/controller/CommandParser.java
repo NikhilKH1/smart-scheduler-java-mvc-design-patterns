@@ -182,17 +182,16 @@ public class CommandParser {
   }
 
   private ICommand parseExportCommand(List<String> tokens) {
-    if (tokens.size() != 3 || !"calendar".equalsIgnoreCase(tokens.get(1))) {
-      throw new IllegalArgumentException("Invalid export format. Usage: export calendar <file.csv>");
+    if (tokens.size() != 3 || !"cal".equalsIgnoreCase(tokens.get(1))) {
+      throw new IllegalArgumentException("Invalid export format. Usage: export calendar <filePath.csv>");
     }
+
     String fileName = tokens.get(2);
+
     if (!fileName.toLowerCase().endsWith(".csv")) {
       throw new IllegalArgumentException("Exported file must have a .csv extension");
     }
-    if (calendarManager.getActiveCalendar() == null) {
-      throw new IllegalArgumentException("No active calendar selected. Use 'use calendar --name <calName>' first.");
-    }
-    return new ExportCalendarCommand(calendarManager.getActiveCalendar(), fileName);
+    return new ExportCalendarCommand(fileName);
   }
 
 

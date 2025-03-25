@@ -7,10 +7,6 @@ import calendarapp.model.ICalendarManager;
 import calendarapp.model.ICalendarModel;
 import calendarapp.view.ICalendarView;
 
-/**
- * This class processes user commands by parsing input strings, interacting with the calendar model,
- * and updating the calendar view with the results.
- */
 public class CalendarController implements ICalendarController {
   private final ICalendarManager calendarManager;
   private final ICalendarView view;
@@ -30,10 +26,9 @@ public class CalendarController implements ICalendarController {
         view.displayError("Command parsing returned null");
         return false;
       }
-      boolean success;
+
       if (cmd instanceof ICalendarManagerCommand) {
-        success = ((ICalendarManagerCommand) cmd).execute(calendarManager, view);
-        return success;
+        return ((ICalendarManagerCommand) cmd).execute(calendarManager, view);
       }
 
       if (cmd instanceof ICalendarModelCommand) {
@@ -42,16 +37,7 @@ public class CalendarController implements ICalendarController {
           view.displayError("No active calendar selected. Use 'use calendar --name <calName>' first.");
           return false;
         }
-        success = ((ICalendarModelCommand) cmd).execute(activeCalendar, view);
-
-        if (success) {
-          if (activeCalendar.getEvents().isEmpty()) {
-            view.displayMessage("No events found in calendar: " + activeCalendar.getName());
-          } else {
-            view.displayEvents(activeCalendar.getEvents());
-          }
-        }
-        return success;
+        return ((ICalendarModelCommand) cmd).execute(activeCalendar, view);
       }
 
       view.displayError("Unsupported command type.");

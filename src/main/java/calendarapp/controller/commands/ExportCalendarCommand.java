@@ -1,56 +1,36 @@
 package calendarapp.controller.commands;
 
 import calendarapp.model.ICalendarModel;
-import calendarapp.utils.CSVExporter;
+import calendarapp.utils.ExporterFactory;
+import calendarapp.utils.IExporter;
 import calendarapp.view.ICalendarView;
 
 import java.io.IOException;
 
 /**
- * Command to export calendar events to a CSV file.
+ * Command to export a calendar to a file using a supported exporter (CSV, PDF, etc).
  */
 public class ExportCalendarCommand implements ICalendarModelCommand {
-  private final ICalendarModel model;
-  private final String fileName;
 
-  /**
-   * Constructs an ExportCalendarCommand.
-   *
-   * @param model    the calendar model from which events are exported
-   * @param fileName the name of the output CSV file
-   */
-  public ExportCalendarCommand(ICalendarModel model, String fileName) {
-    if (model == null || fileName == null || fileName.trim().isEmpty()) {
-      throw new IllegalArgumentException("Model and file name must not be null or empty.");
-    }
-    this.model = model;
-    this.fileName = fileName;
+  private final String filePath;
+
+  public ExportCalendarCommand(String filePath) {
+    this.filePath = filePath;
   }
-  /**
-   * Executes the export operation.
-   *
-   * @return the path of the exported CSV file
-   * @throws IOException if an error occurs during file writing
-   */
+
   @Override
   public boolean execute(ICalendarModel model, ICalendarView view) {
     try {
-      String filePath = CSVExporter.exportToCSV(model.getEvents(), fileName);
-      view.displayMessage("Calendar exported successfully to: " + filePath);
+      IExporter exporter = ExporterFactory.getExporter(filePath);
+      String outputPath = exporter.export(model.getEvents(), filePath);
+      view.displayMessage("Calendar exported to: " + outputPath);
       return true;
     } catch (IOException e) {
-      view.displayError("Error exporting calendar: " + e.getMessage());
+      view.displayError("Failed to export calendar: " + e.getMessage());
+      return false;
+    } catch (IllegalArgumentException e) {
+      view.displayError("Export Error: " + e.getMessage());
       return false;
     }
-  }
-
-
-  /**
-   * Gets the file name for the export.
-   *
-   * @return the file name of the exported CSV
-   */
-  public String getFileName() {
-    return fileName;
   }
 }
