@@ -1,96 +1,92 @@
 package calendarapp;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.Scanner;
-
 import calendarapp.controller.CalendarController;
-import calendarapp.controller.CommandParser;
 import calendarapp.controller.ICalendarController;
+import calendarapp.controller.CommandParser;
+import calendarapp.io.ConsoleCommandSource;
+import calendarapp.io.FileCommandSource;
+import calendarapp.io.ICommandSource;
 import calendarapp.model.CalendarManager;
 import calendarapp.model.ICalendarManager;
 import calendarapp.view.CalendarView;
 import calendarapp.view.ICalendarView;
 
-/**
- * Main class for running the calendar application.
- * The application can run in interactive mode or headless mode.
- */
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+
 public class CalendarApp {
 
-  /**
-   * The main entry point of the application.
-   * Depending on the command-line arguments, the application runs in interactive mode or
-   * headless mode.
-   *
-   * @param args command-line arguments; use "--mode interactive" for interactive mode or
-   *             "--mode headless commandsfile" for headless mode
-   */
   public static void main(String[] args) {
+    // Instantiate using interfaces
     ICalendarManager manager = new CalendarManager();
     ICalendarView view = new CalendarView();
     CommandParser parser = new CommandParser(manager);
-    CalendarController controller = new CalendarController(manager, view, parser);
+    ICalendarController controller = new CalendarController(manager, view, parser);
 
-    if (args.length >= 2 && args[0].equalsIgnoreCase("--mode")) {
-      String mode = args[1].toLowerCase();
-      if (mode.equals("interactive")) {
-        runInteractiveMode(controller, view);
-      } else if (mode.equals("headless") && args.length == 3) {
-        runHeadlessMode(controller, view, args[2]);
+    ICommandSource commandSource = null;
+    try {
+      if (args.length >= 2 && args[0].equalsIgnoreCase("--mode")) {
+        String mode = args[1].toLowerCase();
+        if (mode.equals("interactive")) {
+          commandSource = new ConsoleCommandSource();
+        } else if (mode.equals("headless") && args.length == 3) {
+          commandSource = new FileCommandSource(args[2]);
+          runHeadlessMode(controller, view, commandSource);
+          return;  // Terminate after headless mode execution.
+        } else {
+          System.err.println("Usage: --mode interactive OR --mode headless <commands-file>");
+          System.exit(1);
+        }
       } else {
-        System.err.println("Usage: --mode interactive OR --mode headless <commands-file>");
-        System.exit(1);
+        // Default to console mode
+        commandSource = new ConsoleCommandSource();
       }
-    } else {
-      runInteractiveMode(controller, view);
+      runInteractiveMode(controller, view, commandSource);
+    } catch (IOException e) {
+      System.err.println("Error initializing command source: " + e.getMessage());
+      System.exit(1);
+    } finally {
+      if (commandSource != null) {
+        commandSource.close();
+      }
     }
   }
 
-  public static void runInteractiveMode(ICalendarController controller, ICalendarView view) {
-    Scanner scanner = new Scanner(System.in);
+  public static void runInteractiveMode(ICalendarController controller, ICalendarView view, ICommandSource commandSource) {
     System.out.println("Enter commands (type 'exit' to quit):");
-    while (true) {
-      System.out.print("> ");
-      String command = scanner.nextLine();
-      if (command.equalsIgnoreCase("exit")) {
+    String command;
+    while ((command = commandSource.getNextCommand()) != null) {
+      if (command.trim().equalsIgnoreCase("exit")) {
         break;
       }
       controller.processCommand(command);
     }
-    scanner.close();
   }
 
-  public static void runHeadlessMode(ICalendarController controller, ICalendarView view, String fileName) {
-    try (BufferedReader reader = new BufferedReader(new FileReader(fileName))) {
-      String command;
-      while ((command = reader.readLine()) != null) {
-        String trimmed = command.trim();
-        if (trimmed.isEmpty()) {
-          continue;
-        }
-
-        if (trimmed.equalsIgnoreCase("exit")) {
-          System.out.println("Exit command encountered. Terminating headless mode.");
-          break;
-        }
-
-        try {
-          boolean success = controller.processCommand(trimmed);
-          if (!success) {
-            System.err.println("Error executing command: '" + trimmed + "'. Command failed.");
-            System.exit(1);
-          }
-        } catch (Exception e) {
-          System.err.println("Error executing command: '" + trimmed + "'");
-          System.err.println("Reason: " + e.getMessage());
+  public static void runHeadlessMode(ICalendarController controller, ICalendarView view, ICommandSource commandSource) {
+    // In headless mode, any error should be displayed and the process terminated.
+    String command;
+    while ((command = commandSource.getNextCommand()) != null) {
+      String trimmed = command.trim();
+      if (trimmed.isEmpty()) {
+        continue;
+      }
+      if (trimmed.equalsIgnoreCase("exit")) {
+        System.out.println("Exit command encountered. Terminating headless mode.");
+        System.exit(0);
+      }
+      try {
+        boolean success = controller.processCommand(trimmed);
+        if (!success) {
+          System.err.println("Error executing command: '" + trimmed + "'. Command failed.");
           System.exit(1);
         }
+      } catch (Exception e) {
+        System.err.println("Error executing command: '" + trimmed + "'");
+        System.err.println("Reason: " + e.getMessage());
+        System.exit(1);
       }
-    } catch (IOException e) {
-      System.err.println("Error reading commands file: " + e.getMessage());
-      System.exit(1);
     }
   }
 }
