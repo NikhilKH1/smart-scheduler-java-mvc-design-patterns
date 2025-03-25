@@ -313,10 +313,10 @@ public class CommandParser {
     }
     String eventName = stripQuotes(tokens.get(index++));
 
-    EventTimingResult timing = parseEventTiming(tokens, index);
+    ParsedEventTiming timing = parseEventTiming(tokens, index);
     index = timing.getIndex();
 
-    RecurringResult recurring = parseRecurringSection(tokens, index);
+    ParsedRecurringEvent recurring = parseRecurringSection(tokens, index);
     index = recurring.getIndex();
     if (recurring.isRecurring() &&
             ((ZonedDateTime) timing.getEnd())
@@ -324,7 +324,7 @@ public class CommandParser {
       throw new IllegalArgumentException("Recurring event must end within 24 hours of the start time.");
     }
 
-    PropertiesResult props = parseProperties(tokens, index);
+    ParsedEventProperties props = parseProperties(tokens, index);
 
     return new CreateEventCommand(
             eventName,
@@ -342,8 +342,8 @@ public class CommandParser {
     );
   }
 
-  private EventTimingResult parseEventTiming(List<String> tokens, int index) {
-    EventTimingResult result = new EventTimingResult();
+  private ParsedEventTiming parseEventTiming(List<String> tokens, int index) {
+    ParsedEventTiming result = new ParsedEventTiming();
     String keyword = tokens.get(index).toLowerCase();
     if ("from".equals(keyword)) {
       index++;
@@ -376,8 +376,8 @@ public class CommandParser {
   }
 
 
-  private RecurringResult parseRecurringSection(List<String> tokens, int index) {
-    RecurringResult result = new RecurringResult();
+  private ParsedRecurringEvent parseRecurringSection(List<String> tokens, int index) {
+    ParsedRecurringEvent result = new ParsedRecurringEvent();
     if (index < tokens.size() && "repeats".equalsIgnoreCase(tokens.get(index))) {
       result.isRecurring = true;
       index++;
@@ -405,8 +405,8 @@ public class CommandParser {
     return result;
   }
 
-  private PropertiesResult parseProperties(List<String> tokens, int index) {
-    PropertiesResult result = new PropertiesResult();
+  private ParsedEventProperties parseProperties(List<String> tokens, int index) {
+    ParsedEventProperties result = new ParsedEventProperties();
     while (index < tokens.size()) {
       String token = tokens.get(index++).toLowerCase();
       switch (token) {

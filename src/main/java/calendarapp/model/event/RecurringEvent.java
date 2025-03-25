@@ -17,18 +17,13 @@ public class RecurringEvent extends AbstractCalendarEvent {
   private final Temporal repeatUntil;
 
   public RecurringEvent withUpdatedTimezone(ZoneId newZone) {
-    return new RecurringEvent(
-            this.subject,
+    return new RecurringEvent(this.subject,
             ZonedDateTime.from(this.startDateTime).withZoneSameInstant(newZone),
-            ZonedDateTime.from(this.endDateTime).withZoneSameInstant(newZone),
-            this.weekdays,
+            ZonedDateTime.from(this.endDateTime).withZoneSameInstant(newZone), this.weekdays,
             this.repeatCount,
-            (this.repeatUntil != null) ? ZonedDateTime.from(this.repeatUntil).withZoneSameInstant(newZone) : null,
-            this.description,
-            this.location,
-            this.isPublic,
-            this.isAllDay
-    );
+            (this.repeatUntil != null) ? ZonedDateTime.from(this.repeatUntil).
+                    withZoneSameInstant(newZone) : null, this.description, this.location,
+            this.isPublic, this.isAllDay);
   }
 
   /**
@@ -185,22 +180,9 @@ public class RecurringEvent extends AbstractCalendarEvent {
         throw new IllegalArgumentException("Unknown recurring event property: " + property);
     }
 
-    return new RecurringEvent(
-            updatedSubject,
-            updatedStart,
-            updatedEnd,
-            updatedWeekdays,
-            updatedRepeatCount,
-            updatedRepeatUntil,
-            updatedDescription,
-            updatedLocation,
-            updatedIsPublic,
-            updatedIsAllDay
-    );
+    return new RecurringEvent(updatedSubject, updatedStart, updatedEnd, updatedWeekdays,
+            updatedRepeatCount, updatedRepeatUntil, updatedDescription,
+            updatedLocation, updatedIsPublic, updatedIsAllDay);
   }
 
 }
-
-//return new RecurringEvent(subject, startDateTime, endDateTime,
-//            updatedWeekdays, updatedRepeatCount, updatedRepeatUntil,
-//            updatedDescription, updatedLocation, isPublic, isAllDay);

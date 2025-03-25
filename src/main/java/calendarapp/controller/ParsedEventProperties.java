@@ -6,7 +6,7 @@ package calendarapp.controller;
  * visibility (public or not), and an index value for identifying
  * the event in a list or sequence.
  */
-public class PropertiesResult {
+public class ParsedEventProperties {
 
   protected String description;
   protected String location;
@@ -17,7 +17,7 @@ public class PropertiesResult {
    * Default constructor for initializing the PropertiesResult instance.
    * Initializes the description, location, isPublic, and index with default values.
    */
-  public PropertiesResult() {
+  public ParsedEventProperties() {
     this.description = description;
     this.location = location;
     this.isPublic = isPublic;

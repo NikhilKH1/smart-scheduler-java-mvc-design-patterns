@@ -8,7 +8,7 @@ import java.time.temporal.Temporal;
  * the weekdays on which it occurs, the repeat count, the repeat until date,
  * and an index value for identifying the recurring event.
  */
-public class RecurringResult {
+public class ParsedRecurringEvent {
 
   protected boolean isRecurring = false;
   protected String weekdays = "";
@@ -20,7 +20,7 @@ public class RecurringResult {
    * Default constructor for initializing the RecurringResult instance.
    * Initializes the fields for isRecurring, weekdays, repeatCount, repeatUntil, and index.
    */
-  public RecurringResult() {
+  public ParsedRecurringEvent() {
     this.isRecurring = false;
     this.weekdays = "";
     this.repeatCount = 0;

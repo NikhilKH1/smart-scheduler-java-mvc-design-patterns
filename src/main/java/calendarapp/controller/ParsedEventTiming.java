@@ -8,7 +8,7 @@ import java.time.temporal.Temporal;
  * whether the event is all-day, and an index value for identifying
  * the event in a list or sequence.
  */
-public class EventTimingResult {
+public class ParsedEventTiming {
 
   Temporal start;
   Temporal end;
@@ -18,7 +18,7 @@ public class EventTimingResult {
   /**
    * Default constructor initializing fields to null/default.
    */
-  public EventTimingResult() {
+  public ParsedEventTiming() {
     this.start = null;
     this.end = null;
     this.isAllDay = false;
