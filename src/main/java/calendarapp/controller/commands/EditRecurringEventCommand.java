@@ -5,11 +5,10 @@ import calendarapp.view.ICalendarView;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.time.format.DateTimeParseException;
 import java.time.temporal.Temporal;
 
 /**
- * Command to edit a recurring event's property like repeating days, repeat count, or until date.
+ * Command to edit a recurring event's property such as repeating days, repeat count, or until date.
  */
 public class EditRecurringEventCommand implements ICalendarModelCommand {
 
@@ -18,6 +17,13 @@ public class EditRecurringEventCommand implements ICalendarModelCommand {
   private final String newValue;
   private final Temporal temporalValue;
 
+  /**
+   * Constructs an EditRecurringEventCommand for properties that require a string value.
+   *
+   * @param property the property to be modified
+   * @param eventName the name of the event
+   * @param newValue the new value for the property
+   */
   public EditRecurringEventCommand(String property, String eventName, String newValue) {
     this.property = property;
     this.eventName = eventName;
@@ -25,6 +31,13 @@ public class EditRecurringEventCommand implements ICalendarModelCommand {
     this.temporalValue = null;
   }
 
+  /**
+   * Constructs an EditRecurringEventCommand for properties that require a temporal value.
+   *
+   * @param property the property to be modified
+   * @param eventName the name of the event
+   * @param temporalValue the new temporal value for the property
+   */
   public EditRecurringEventCommand(String property, String eventName, Temporal temporalValue) {
     this.property = property;
     this.eventName = eventName;
@@ -32,19 +45,21 @@ public class EditRecurringEventCommand implements ICalendarModelCommand {
     this.newValue = null;
   }
 
+  /**
+   * Executes the command to edit a recurring event in the calendar.
+   *
+   * @param model the calendar model where the event exists
+   * @param view the view used to display messages
+   * @return true if the event was successfully modified, false otherwise
+   */
   @Override
   public boolean execute(ICalendarModel model, ICalendarView view) {
     boolean success = false;
     try {
-
       if (property.equalsIgnoreCase("repeatuntil") && temporalValue != null) {
         ZonedDateTime zonedDateTime = convertToZonedDateTime(temporalValue, model.getTimezone());
         success = model.editRecurringEvent(eventName, property, zonedDateTime.toString());
-      } else if (property.equalsIgnoreCase("repeattimes") || property.equalsIgnoreCase("repeatingdays")) {
-        // Send directly as string value
-        success = model.editRecurringEvent(eventName, property, newValue);
       } else {
-        // Fallback for other fields like description/location
         success = model.editRecurringEvent(eventName, property, newValue);
       }
     } catch (Exception e) {
@@ -60,7 +75,13 @@ public class EditRecurringEventCommand implements ICalendarModelCommand {
     return success;
   }
 
-
+  /**
+   * Converts a temporal value to a ZonedDateTime based on the given timezone.
+   *
+   * @param temporal the temporal value to convert
+   * @param zoneId the timezone to apply
+   * @return the converted ZonedDateTime
+   */
   private ZonedDateTime convertToZonedDateTime(Temporal temporal, ZoneId zoneId) {
     if (temporal instanceof ZonedDateTime) {
       return (ZonedDateTime) temporal;

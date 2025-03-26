@@ -14,47 +14,47 @@ public interface ICalendarEvent {
    *
    * @return the subject of the event
    */
-  String getSubject();
+  public String getSubject();
 
   /**
    * Returns the start date and time of the event.
    *
    * @return the start date and time as Temporal
    */
-  Temporal getStartDateTime();
+  public Temporal getStartDateTime();
 
   /**
    * Returns the end date and time of the event.
    *
    * @return the end date and time as Temporal
    */
-  Temporal getEndDateTime();
+  public Temporal getEndDateTime();
 
   /**
    * Returns the description of the event.
    *
    * @return the event description
    */
-  String getDescription();
+  public String getDescription();
 
   /**
    * Returns the location of the event.
    *
    * @return the event location
    */
-  String getLocation();
+  public String getLocation();
 
   /**
    * Indicates whether the event lasts all day.
    *
    * @return true if the event is an all-day event, false otherwise
    */
-  boolean isAllDay();
+  public boolean isAllDay();
 
   /**
    * Indicates whether the event is public.
    *
    * @return true if the event is public, false otherwise
    */
-  boolean isPublic();
+  public boolean isPublic();
 }

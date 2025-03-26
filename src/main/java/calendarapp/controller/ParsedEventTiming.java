@@ -28,7 +28,7 @@ public class ParsedEventTiming {
   /**
    * Sets the start time.
    *
-   * @param start the start time as a {@link Temporal} object
+   * @param start the start time as a Temporal object
    */
   public void setStart(Temporal start) {
     this.start = start;
@@ -37,7 +37,7 @@ public class ParsedEventTiming {
   /**
    * Sets the end time.
    *
-   * @param end the end time as a {@link Temporal} object
+   * @param end the end time as a Temporal object
    */
   public void setEnd(Temporal end) {
     this.end = end;
@@ -64,7 +64,7 @@ public class ParsedEventTiming {
   /**
    * Gets the start time.
    *
-   * @return the start time as a {@link Temporal}
+   * @return the start time as a Temporal
    */
   public Temporal getStart() {
     return start;
@@ -73,21 +73,25 @@ public class ParsedEventTiming {
   /**
    * Gets the end time.
    *
-   * @return the end time as a {@link Temporal}
+   * @return the end time as a Temporal
    */
   public Temporal getEnd() {
     return end;
   }
 
   /**
-   * Returns whether it's all day.
+   * Checks whether the event is an all-day event.
+   *
+   * @return true if the event is an all-day event, false otherwise.
    */
   public boolean isAllDay() {
     return isAllDay;
   }
 
   /**
-   * Gets index.
+   * Gets the index of the event.
+   *
+   * @return the index of the event, used to identify the event in a list or sequence.
    */
   public int getIndex() {
     return index;

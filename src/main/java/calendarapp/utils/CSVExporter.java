@@ -9,11 +9,25 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
+/**
+ * The CSVExporter class implements the IExporter interface to export calendar events to a CSV file.
+ * The exported CSV file contains the event's subject, start and end date/times,
+ * description, location, privacy status, and whether the event is all-day or not.
+ */
 public class CSVExporter implements IExporter {
 
   private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("MM/dd/yyyy");
   private static final DateTimeFormatter TIME_FORMAT = DateTimeFormatter.ofPattern("HH:mm");
 
+  /**
+   * Exports the list of calendar events to a CSV file.
+   *
+   * @param events   the list of calendar events to be exported
+   * @param filePath the path of the CSV file to be created
+   * @return the absolute path of the created CSV file
+   * @throws IOException              if an error occurs while writing to the file
+   * @throws IllegalArgumentException if the file path is invalid or the file extension is not .csv
+   */
   @Override
   public String export(List<ICalendarEvent> events, String filePath) throws IOException {
     if (filePath == null || filePath.trim().isEmpty()) {
@@ -46,6 +60,12 @@ public class CSVExporter implements IExporter {
     return file.getAbsolutePath();
   }
 
+  /**
+   * Formats a single calendar event as a CSV-compatible string.
+   *
+   * @param event the calendar event to be formatted
+   * @return the event as a CSV string
+   */
   private String formatEvent(ICalendarEvent event) {
     String subject = event.getSubject();
     boolean isPrivate = !event.isPublic();
@@ -66,17 +86,17 @@ public class CSVExporter implements IExporter {
     String description = event.getDescription() != null ? event.getDescription() : "";
     String location = event.getLocation() != null ? event.getLocation() : "";
 
-    return escapeCSV(subject) + "," +
-            escapeCSV(startDate) + "," +
-            escapeCSV(startTime) + "," +
-            escapeCSV(endDate) + "," +
-            escapeCSV(endTime) + "," +
-            escapeCSV(allDayVal) + "," +
-            escapeCSV(description) + "," +
-            escapeCSV(location) + "," +
-            escapeCSV(privateVal);
+    return escapeCSV(subject) + "," + escapeCSV(startDate) + "," + escapeCSV(startTime) + "," +
+            escapeCSV(endDate) + "," + escapeCSV(endTime) + "," + escapeCSV(allDayVal) + "," +
+            escapeCSV(description) + "," + escapeCSV(location) + "," + escapeCSV(privateVal);
   }
 
+  /**
+   * Escapes a string for CSV formatting by adding quotes around it and escaping internal quotes.
+   *
+   * @param value the string to be escaped
+   * @return the escaped string
+   */
   private String escapeCSV(String value) {
     if (value == null || value.isEmpty()) {
       return "";

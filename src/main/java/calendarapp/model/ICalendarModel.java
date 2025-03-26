@@ -22,7 +22,7 @@ public interface ICalendarModel {
    *                    false otherwise
    * @return true if the event was added successfully, false otherwise
    */
-  boolean addEvent(ICalendarEvent event, boolean autoDecline);
+  public boolean addEvent(ICalendarEvent event, boolean autoDecline);
 
   /**
    * Adds a recurring event to the model.
@@ -32,14 +32,14 @@ public interface ICalendarModel {
    *                       false otherwise
    * @return true if the recurring event was added successfully, false otherwise
    */
-  boolean addRecurringEvent(RecurringEvent recurringEvent, boolean autoDecline);
+  public boolean addRecurringEvent(RecurringEvent recurringEvent, boolean autoDecline);
 
   /**
    * Retrieves all calendar events.
    *
    * @return a list of all calendar events in the model
    */
-  List<ICalendarEvent> getEvents();
+  public List<ICalendarEvent> getEvents();
 
   /**
    * Retrieves calendar events that occur on a specific date.
@@ -47,7 +47,7 @@ public interface ICalendarModel {
    * @param date the date to query for events
    * @return a list of calendar events on the specified date
    */
-  List<ICalendarEvent> getEventsOnDate(Temporal date);
+  public List<ICalendarEvent> getEventsOnDate(Temporal date);
 
   /**
    * Retrieves calendar events that occur between the specified start and end date/time.
@@ -56,7 +56,7 @@ public interface ICalendarModel {
    * @param end   the end date/time of the query range
    * @return a list of calendar events that fall within the specified range
    */
-  List<ICalendarEvent> getEventsBetween(Temporal start, Temporal end);
+  public List<ICalendarEvent> getEventsBetween(Temporal start, Temporal end);
 
   /**
    * Checks if the calendar is busy at the specified date and time.
@@ -64,7 +64,7 @@ public interface ICalendarModel {
    * @param dateTime the date and time to check for an event
    * @return true if there is an event occurring at the given date/time, false otherwise
    */
-  boolean isBusyAt(Temporal dateTime);
+  public boolean isBusyAt(Temporal dateTime);
 
   /**
    * Edits an existing calendar event by replacing it with a new event.
@@ -73,7 +73,7 @@ public interface ICalendarModel {
    * @param newEvent the new event with updated details
    * @return true if the event was updated successfully, false if a conflict occurred
    */
-  boolean editEvent(ICalendarEvent oldEvent, ICalendarEvent newEvent);
+  public boolean editEvent(ICalendarEvent oldEvent, ICalendarEvent newEvent);
 
   /**
    * Edits a recurring event by updating one of its properties.
@@ -84,7 +84,7 @@ public interface ICalendarModel {
    * @param newValue  the new value for the specified property
    * @return true if the recurring event was updated successfully, false otherwise
    */
-  boolean editRecurringEvent(String eventName, String property, String newValue);
+  public boolean editRecurringEvent(String eventName, String property, String newValue);
 
   /**
    * Edits a single event by its original start and end time.
@@ -96,7 +96,7 @@ public interface ICalendarModel {
    * @param newValue      the new value for the property
    * @return true if successfully edited
    */
-  boolean editSingleEvent(String property, String eventName, Temporal originalStart,
+  public boolean editSingleEvent(String property, String eventName, Temporal originalStart,
                           Temporal originalEnd, String newValue);
 
   /**
@@ -108,7 +108,7 @@ public interface ICalendarModel {
    * @param newValue      the new value for the property
    * @return true if successfully edited
    */
-  boolean editEventsFrom(String property, String eventName, Temporal fromDateTime,
+  public boolean editEventsFrom(String property, String eventName, Temporal fromDateTime,
                          String newValue);
 
   /**
@@ -119,20 +119,20 @@ public interface ICalendarModel {
    * @param newValue  the new value
    * @return true if successfully edited
    */
-  boolean editEventsAll(String property, String eventName, String newValue);
+  public boolean editEventsAll(String property, String eventName, String newValue);
 
   /**
    * Gets the calendar name.
    *
    * @return the calendar name
    */
-  String getName();
+  public String getName();
 
   /**
    * Gets the timezone of the calendar.
    *
    * @return the timezone
    */
-  ZoneId getTimezone();
+  public ZoneId getTimezone();
 
 }

@@ -5,8 +5,14 @@ import org.junit.Test;
 import java.time.LocalDateTime;
 import java.time.temporal.Temporal;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
+/**
+ * JUnit test class for ParsedEventTiming.
+ */
 public class ParsedEventTimingTest {
 
   private ParsedEventTiming timing;
@@ -29,8 +35,6 @@ public class ParsedEventTimingTest {
     Temporal start = LocalDateTime.of(2025, 5, 10, 14, 30);
     timing.setStart(start);
     assertEquals("Start time should be set correctly", start, timing.getStart());
-
-    // Edge case: Setting to null
     timing.setStart(null);
     assertNull("Start time should be null after setting null", timing.getStart());
   }
@@ -40,8 +44,6 @@ public class ParsedEventTimingTest {
     Temporal end = LocalDateTime.of(2025, 5, 10, 16, 0);
     timing.setEnd(end);
     assertEquals("End time should be set correctly", end, timing.getEnd());
-
-    // Edge case: Setting to null
     timing.setEnd(null);
     assertNull("End time should be null after setting null", timing.getEnd());
   }
@@ -60,11 +62,9 @@ public class ParsedEventTimingTest {
     timing.setIndex(5);
     assertEquals("Index should be set to 5", 5, timing.getIndex());
 
-    // Edge case: Negative index
     timing.setIndex(-3);
     assertEquals("Index should be set to -3", -3, timing.getIndex());
 
-    // Edge case: Zero index
     timing.setIndex(0);
     assertEquals("Index should be set to 0", 0, timing.getIndex());
   }

@@ -27,7 +27,6 @@ public class CalendarViewTest {
 
   private CalendarView calendarView;
 
-  // A dummy implementation of ICalendarEvent for testing purposes.
   private static class DummyCalendarEvent implements ICalendarEvent {
     private final String subject;
     private final ZonedDateTime startDateTime;
@@ -37,8 +36,9 @@ public class CalendarViewTest {
     private final boolean isPublic;
     private final boolean isAllDay;
 
-    public DummyCalendarEvent(String subject, ZonedDateTime startDateTime, ZonedDateTime endDateTime,
-                              String description, String location, boolean isPublic, boolean isAllDay) {
+    public DummyCalendarEvent(String subject, ZonedDateTime startDateTime,
+                              ZonedDateTime endDateTime, String description, String location,
+                              boolean isPublic, boolean isAllDay) {
       this.subject = subject;
       this.startDateTime = startDateTime;
       this.endDateTime = endDateTime;
@@ -106,7 +106,6 @@ public class CalendarViewTest {
   @Test
   public void testDisplayError() {
     calendarView.displayError("Error occurred");
-    // Error messages go to System.err.
     assertEquals("Error occurred" + System.lineSeparator(), errContent.toString());
   }
 
@@ -119,31 +118,22 @@ public class CalendarViewTest {
 
   @Test
   public void testDisplayEventsWithData() {
-    // Clear any previous output.
     outContent.reset();
-    // Prepare a dummy event.
     ZoneId zone = ZoneId.of("UTC");
-    ZonedDateTime start = ZonedDateTime.of(2025, 6, 1, 9, 0, 0, 0, zone);
-    ZonedDateTime end = ZonedDateTime.of(2025, 6, 1, 10, 0, 0, 0, zone);
-    DummyCalendarEvent event = new DummyCalendarEvent(
-            "Meeting",
-            start,
-            end,
-            "Discuss project",
-            "Conference Room",
-            true,
-            false
+    ZonedDateTime start = ZonedDateTime.of(2025, 6, 1, 9, 0,
+            0, 0, zone);
+    ZonedDateTime end = ZonedDateTime.of(2025, 6, 1, 10, 0,
+            0, 0, zone);
+    DummyCalendarEvent event = new DummyCalendarEvent("Meeting", start, end,
+            "Discuss project", "Conference Room", true, false
     );
     List<ICalendarEvent> events = new ArrayList<>();
     events.add(event);
     calendarView.displayEvents(events);
 
-    // Build expected output.
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm z");
-    String expected = "- Meeting: " + start.format(formatter)
-            + " to " + end.format(formatter)
-            + " | Description: Discuss project"
-            + " | Location: Conference Room"
+    String expected = "- Meeting: " + start.format(formatter) + " to " + end.format(formatter)
+            + " | Description: Discuss project" + " | Location: Conference Room"
             + " | Public" + System.lineSeparator();
     assertEquals(expected, outContent.toString());
   }

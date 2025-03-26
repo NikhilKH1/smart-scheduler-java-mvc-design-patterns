@@ -2,7 +2,6 @@ package calendarapp.controller.commands;
 
 import java.time.ZonedDateTime;
 import java.time.temporal.Temporal;
-import java.time.temporal.TemporalAccessor;
 import java.time.ZoneId;
 
 import calendarapp.model.ICalendarModel;
@@ -15,6 +14,15 @@ public class BusyQueryCommand implements ICalendarModelCommand {
   private final Temporal queryTime;
 
   /**
+   * Constructs a BusyQueryCommand with the given query time.
+   *
+   * @param queryTime the date and time at which to check for calendar conflicts
+   */
+  public BusyQueryCommand(Temporal queryTime) {
+    this.queryTime = queryTime;
+  }
+
+  /**
    * Executes the busy query command by checking if the calendar has a conflict
    * at the specified query time, and displaying the result using the view.
    *
@@ -24,12 +32,10 @@ public class BusyQueryCommand implements ICalendarModelCommand {
    */
   @Override
   public boolean execute(ICalendarModel model, ICalendarView view) {
-    // Safely convert to ZonedDateTime (assuming model uses ZonedDateTime internally)
     ZonedDateTime zonedQueryTime;
     if (queryTime instanceof ZonedDateTime) {
       zonedQueryTime = (ZonedDateTime) queryTime;
     } else {
-      // Fallback: Use model's timezone
       ZoneId zone = model.getTimezone();
       zonedQueryTime = ZonedDateTime.from(queryTime).withZoneSameInstant(zone);
     }
@@ -41,15 +47,6 @@ public class BusyQueryCommand implements ICalendarModelCommand {
       view.displayMessage("Available at " + zonedQueryTime);
     }
     return true;
-  }
-
-  /**
-   * Constructs a BusyQueryCommand with the given query time.
-   *
-   * @param queryTime the date and time at which to check for calendar conflicts
-   */
-  public BusyQueryCommand(Temporal queryTime) {
-    this.queryTime = queryTime;
   }
 
   /**

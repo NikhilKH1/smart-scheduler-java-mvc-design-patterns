@@ -3,7 +3,6 @@ package calendarapp.model;
 import calendarapp.model.event.ICalendarEvent;
 
 import java.time.ZonedDateTime;
-import java.time.chrono.ChronoZonedDateTime;
 import java.time.temporal.Temporal;
 
 /**

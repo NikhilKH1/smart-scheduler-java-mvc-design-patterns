@@ -6,21 +6,29 @@ import calendarapp.io.ICommandSource;
 import calendarapp.model.CalendarManager;
 import calendarapp.model.ICalendarManager;
 import calendarapp.model.event.ICalendarEvent;
-import calendarapp.model.event.ICalendarEvent;
-import calendarapp.view.CalendarView;
 import calendarapp.view.ICalendarView;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintStream;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
+
+/**
+ * JUnit tests for the CalendarApp class.
+ */
 public class CalendarAppTest {
 
   private SecurityManager originalSecurityManager;
@@ -29,7 +37,6 @@ public class CalendarAppTest {
   private CommandParser parser;
   private ICalendarController controller;
 
-  // Custom SecurityManager to catch System.exit calls
   private static class NoExitSecurityManager extends SecurityManager {
     private Integer status;
 
@@ -39,7 +46,6 @@ public class CalendarAppTest {
 
     @Override
     public void checkPermission(java.security.Permission perm) {
-      // Allow everything.
     }
 
     @Override
@@ -51,7 +57,6 @@ public class CalendarAppTest {
 
   @Before
   public void setUp() {
-    // Save original SecurityManager and install our own.
     originalSecurityManager = System.getSecurityManager();
     System.setSecurityManager(new NoExitSecurityManager());
 
@@ -63,7 +68,6 @@ public class CalendarAppTest {
 
   @After
   public void tearDown() {
-    // Restore original SecurityManager
     System.setSecurityManager(originalSecurityManager);
   }
 
@@ -84,13 +88,9 @@ public class CalendarAppTest {
 
     @Override
     public void close() {
-      // Nothing to close.
     }
   }
 
-  /**
-   * Test interactive mode with "exit" command only.
-   */
   @Test
   public void testInteractiveModeExitImmediately() {
     Queue<String> commands = new LinkedList<>();
@@ -100,10 +100,6 @@ public class CalendarAppTest {
     CalendarApp.runInteractiveMode(controller, view, testSource);
   }
 
-  /**
-   * Test headless mode that processes commands and then exits.
-   * This test expects System.exit(0) when "exit" is encountered.
-   */
   @Test
   public void testHeadlessModeExitSuccessfully() {
     Queue<String> commands = new LinkedList<>();
@@ -119,9 +115,6 @@ public class CalendarAppTest {
     }
   }
 
-  /**
-   * Test headless mode error: if a command fails (returns false), then System.exit(1) should be called.
-   */
   @Test
   public void testHeadlessModeErrorExit() {
     Queue<String> commands = new LinkedList<>();
@@ -137,12 +130,10 @@ public class CalendarAppTest {
     }
   }
 
-  /**
-   * Test duplicate event creation.
-   */
   @Test
   public void testAddDuplicateSingleEvent() {
-    controller.processCommand("create calendar --name TestCal --timezone Europe/Paris");
+    controller.processCommand("create calendar --name TestCal "
+            + "--timezone Europe/Paris");
     controller.processCommand("use calendar --name TestCal");
 
     boolean firstResult = controller.processCommand(
@@ -156,9 +147,6 @@ public class CalendarAppTest {
     assertFalse(secondResult);
   }
 
-  /**
-   * Test headless mode by processing commands from a file.
-   */
   @Test
   public void testRunHeadlessModeProcessesFileAndPrintsEvents() throws IOException {
     File tempFile = File.createTempFile("testCommands", ".txt");

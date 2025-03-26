@@ -11,14 +11,23 @@ import calendarapp.model.ICalendarManager;
 import calendarapp.view.CalendarView;
 import calendarapp.view.ICalendarView;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
 
+/**
+ * The main class to run the Calendar Application.
+ * It initializes the calendar manager, view, command parser, and controller,
+ * and provides functionality to run the application in either interactive or headless mode.
+ */
 public class CalendarApp {
 
+  /**
+   * The entry point for the Calendar Application.
+   * It processes the command-line arguments to determine the mode (interactive or headless)
+   * and sets up the corresponding command source (console or file).
+   *
+   * @param args Command-line arguments specifying the mode and file for headless mode
+   */
   public static void main(String[] args) {
-    // Instantiate using interfaces
     ICalendarManager manager = new CalendarManager();
     ICalendarView view = new CalendarView();
     CommandParser parser = new CommandParser(manager);
@@ -33,13 +42,12 @@ public class CalendarApp {
         } else if (mode.equals("headless") && args.length == 3) {
           commandSource = new FileCommandSource(args[2]);
           runHeadlessMode(controller, view, commandSource);
-          return;  // Terminate after headless mode execution.
+          return;
         } else {
           System.err.println("Usage: --mode interactive OR --mode headless <commands-file>");
           System.exit(1);
         }
       } else {
-        // Default to console mode
         commandSource = new ConsoleCommandSource();
       }
       runInteractiveMode(controller, view, commandSource);
@@ -53,7 +61,17 @@ public class CalendarApp {
     }
   }
 
-  public static void runInteractiveMode(ICalendarController controller, ICalendarView view, ICommandSource commandSource) {
+  /**
+   * Runs the application in interactive mode, where the user can type commands
+   * and interact with the calendar system via the console.
+   * The user can type 'exit' to quit the interactive session.
+   *
+   * @param controller The controller responsible for processing commands
+   * @param view The view that displays events and messages
+   * @param commandSource The command source (console) for reading commands
+   */
+  public static void runInteractiveMode(ICalendarController controller, ICalendarView view,
+                                        ICommandSource commandSource) {
     System.out.println("Enter commands (type 'exit' to quit):");
     String command;
     while ((command = commandSource.getNextCommand()) != null) {
@@ -64,8 +82,17 @@ public class CalendarApp {
     }
   }
 
-  public static void runHeadlessMode(ICalendarController controller, ICalendarView view, ICommandSource commandSource) {
-    // In headless mode, any error should be displayed and the process terminated.
+  /**
+   * Runs the application in headless mode, where commands are read from a file,
+   * and the results are processed and executed without user interaction.
+   * The program exits if the 'exit' command is encountered or if an error occurs.
+   *
+   * @param controller The controller responsible for processing commands
+   * @param view The view that displays events and messages
+   * @param commandSource The command source (file) for reading commands
+   */
+  public static void runHeadlessMode(ICalendarController controller, ICalendarView view,
+                                     ICommandSource commandSource) {
     String command;
     while ((command = commandSource.getNextCommand()) != null) {
       String trimmed = command.trim();

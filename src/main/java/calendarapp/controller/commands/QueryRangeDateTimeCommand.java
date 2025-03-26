@@ -15,6 +15,17 @@ public class QueryRangeDateTimeCommand implements ICalendarModelCommand {
   private final Temporal endDateTime;
 
   /**
+   * Constructs a QueryRangeDateTimeCommand with the specified start and end date/time.
+   *
+   * @param startDateTime the beginning of the query range
+   * @param endDateTime   the end of the query range
+   */
+  public QueryRangeDateTimeCommand(Temporal startDateTime, Temporal endDateTime) {
+    this.startDateTime = startDateTime;
+    this.endDateTime = endDateTime;
+  }
+
+  /**
    * Processes a query range command. It retrieves events between the specified start and
    * end date-time and displays them in the view.
    *
@@ -32,17 +43,6 @@ public class QueryRangeDateTimeCommand implements ICalendarModelCommand {
       view.displayEvents(events);
     }
     return true;
-  }
-
-  /**
-   * Constructs a QueryRangeDateTimeCommand with the specified start and end date/time.
-   *
-   * @param startDateTime the beginning of the query range
-   * @param endDateTime   the end of the query range
-   */
-  public QueryRangeDateTimeCommand(Temporal startDateTime, Temporal endDateTime) {
-    this.startDateTime = startDateTime;
-    this.endDateTime = endDateTime;
   }
 
   /**

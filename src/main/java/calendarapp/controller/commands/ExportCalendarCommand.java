@@ -14,10 +14,22 @@ public class ExportCalendarCommand implements ICalendarModelCommand {
 
   private final String filePath;
 
+  /**
+   * Constructs an ExportCalendarCommand with the specified file path.
+   *
+   * @param filePath the destination file path for the exported calendar
+   */
   public ExportCalendarCommand(String filePath) {
     this.filePath = filePath;
   }
 
+  /**
+   * Executes the command to export calendar events to the specified file.
+   *
+   * @param model the calendar model containing events to export
+   * @param view  the view used to display messages
+   * @return true if the export is successful, false otherwise
+   */
   @Override
   public boolean execute(ICalendarModel model, ICalendarView view) {
     try {
