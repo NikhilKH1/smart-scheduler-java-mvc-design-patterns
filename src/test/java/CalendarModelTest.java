@@ -14,11 +14,15 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.Temporal;
 import java.time.zone.ZoneRulesException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -1797,6 +1801,26 @@ public class CalendarModelTest {
       assertEquals(ZoneId.of("Europe/Paris"),
               ZonedDateTime.from(ev.getStartDateTime()).getZone());
     }
+  }
+
+  @Test
+  public void testEventRemovalFromList() {
+    CalendarModel calendar = new CalendarModel("Test Calendar", ZoneId.of("UTC"));
+    SingleEvent event1 = new SingleEvent("Meeting", ZonedDateTime.now(),
+            ZonedDateTime.now().plusHours(1), "Team Meeting", "Room 1",
+            true, false, "series1");
+    SingleEvent event2 = new SingleEvent("Workshop",
+            ZonedDateTime.now().plusDays(1), ZonedDateTime.now().plusDays(1).plusHours(2),
+            "Tech Workshop", "Room 2", false, false,
+            "series2");
+
+    calendar.addEvent(event1, true);
+    calendar.addEvent(event2, true);
+
+    calendar.updateTimezone(ZoneId.of("America/New_York"));
+
+    List<ICalendarEvent> events = calendar.getEvents();
+    assertEquals(2, events.size());
   }
 
 }

@@ -18,7 +18,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * JUnit test class for CalendarManager class.
@@ -623,4 +625,75 @@ public class CalendarManagerTest {
     assertTrue("Expected copyEventsBetween to return true from dummy implementation",
             result);
   }
+
+  @Test
+  public void testValidCalendarCreation() {
+    boolean result = manager.addCalendar("WorkCal", ZoneId.of("America/New_York"));
+    assertTrue(result);
+    assertNotNull(manager.getCalendar("WorkCal"));
+  }
+
+  @Test
+  public void testDuplicateCalendarCreationFails() {
+    manager.addCalendar("WorkCal", ZoneId.of("America/New_York"));
+    boolean result = manager.addCalendar("WorkCal", ZoneId.of("America/New_York"));
+    assertFalse(result);
+  }
+
+  @Test
+  public void testInvalidTimezoneFails() {
+    try {
+      manager.addCalendar("ErrCal", ZoneId.of("Invalid/Timezone"));
+      fail("Expected an exception for invalid timezone");
+    } catch (Exception e) {
+      assertTrue(e instanceof RuntimeException);
+      assertTrue(e.getMessage().contains("Invalid"));
+    }
+  }
+
+  @Test
+  public void testEditNonexistentCalendar() {
+    Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+      manager.editCalendar("NonExistentCal", "name", "NewCal");
+    });
+
+    assertEquals("Calendar not found: NonExistentCal", exception.getMessage());
+  }
+
+  @Test
+  public void testEditCalendarInvalidProperty() {
+    manager.addCalendar("OfficeCal", ZoneId.of("America/New_York"));
+
+    Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+      manager.editCalendar("OfficeCal", "invalidProp", "value");
+    });
+
+    assertEquals("Unsupported property: invalidProp", exception.getMessage());
+  }
+
+  @Test
+  public void testUseNonexistentCalendarFails() {
+    boolean result = manager.useCalendar("UnknownCal");
+
+    assertFalse("Expected failure when trying to use a non-existent calendar", result);
+    assertNull("No calendar should be active if the requested one does not exist",
+            manager.getActiveCalendar());
+  }
+
+  @Test
+  public void testSwitchingActiveCalendar() {
+    manager.addCalendar("WorkCal", ZoneId.of("America/New_York"));
+    manager.addCalendar("PersonalCal", ZoneId.of("Europe/London"));
+
+    boolean firstUse = manager.useCalendar("WorkCal");
+    boolean secondUse = manager.useCalendar("PersonalCal");
+
+    assertTrue("Expected to switch from 'WorkCal' to 'PersonalCal'", secondUse);
+    assertEquals("Active calendar should now be 'PersonalCal'", "PersonalCal",
+            manager.getActiveCalendar().getName());
+  }
+
+
+
+
 }
