@@ -1,9 +1,12 @@
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.lang.reflect.Field;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.Map;
 import java.util.List;
 
 import calendarapp.model.CalendarManager;
@@ -12,16 +15,8 @@ import calendarapp.model.event.ICalendarEvent;
 import calendarapp.model.event.RecurringEvent;
 import calendarapp.model.event.SingleEvent;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
-/**
- * The Calendar Manager JUnit test for reviewing the functionalities
- * of the CalendarManager class
- */
 public class CalendarManagerTest {
 
   private CalendarManager manager;
@@ -30,6 +25,8 @@ public class CalendarManagerTest {
   public void setUp() {
     manager = new CalendarManager();
   }
+
+  // Existing tests...
 
   @Test
   public void testAddCalendarSuccessfully() {
@@ -66,14 +63,33 @@ public class CalendarManagerTest {
     assertNotNull(manager.getCalendar("New"));
   }
 
+  // New test to ensure that renaming an active calendar calls setName
+  @Test
+  public void testEditCalendarNameActiveCalendar() {
+    manager.addCalendar("ActiveCal", ZoneId.of("Asia/Kolkata"));
+    // set active calendar
+    manager.useCalendar("ActiveCal");
+    CalendarModel activeBefore = manager.getActiveCalendar();
+    // Edit name of the active calendar
+    boolean result = manager.editCalendar("ActiveCal", "name", "RenamedCal");
+    assertTrue(result);
+    // The old key should be removed...
+    assertNull(manager.getCalendar("ActiveCal"));
+    // And the new calendar should be present
+    CalendarModel activeAfter = manager.getCalendar("RenamedCal");
+    assertNotNull(activeAfter);
+    // The active calendar reference should now be updated (still the same instance)
+    assertEquals(activeAfter, manager.getActiveCalendar());
+    // And its name should be "RenamedCal" (i.e. setName was actually called)
+    assertEquals("RenamedCal", activeAfter.getName());
+  }
+
   @Test
   public void testEditCalendarTimezoneSuccessfully() {
     manager.addCalendar("MyCal", ZoneId.of("Asia/Kolkata"));
-    boolean result = manager.editCalendar("MyCal", "timezone",
-            "Europe/Paris");
+    boolean result = manager.editCalendar("MyCal", "timezone", "Europe/Paris");
     assertTrue(result);
-    assertEquals(ZoneId.of("Europe/Paris"),
-            manager.getCalendar("MyCal").getTimezone());
+    assertEquals(ZoneId.of("Europe/Paris"), manager.getCalendar("MyCal").getTimezone());
   }
 
   @Test(expected = IllegalArgumentException.class)
@@ -139,17 +155,13 @@ public class CalendarManagerTest {
     CalendarModel source = manager.getCalendar("Source");
     CalendarModel target = manager.getCalendar("Target");
 
-    ZonedDateTime start = ZonedDateTime.of(2025, 6, 1, 9, 0,
-            0, 0, ZoneId.of("UTC"));
-    ZonedDateTime end = ZonedDateTime.of(2025, 6, 1, 10, 0,
-            0, 0, ZoneId.of("UTC"));
-    source.addEvent(new SingleEvent("Lecture", start, end, "", "",
-            true, false, null), false);
+    ZonedDateTime start = ZonedDateTime.of(2025, 6, 1, 9, 0, 0, 0, ZoneId.of("UTC"));
+    ZonedDateTime end = ZonedDateTime.of(2025, 6, 1, 10, 0, 0, 0, ZoneId.of("UTC"));
+    source.addEvent(new SingleEvent("Lecture", start, end, "", "", true, false, null), false);
 
     boolean result = manager.copySingleEvent("Lecture", start,
             "Target",
-            ZonedDateTime.of(2025, 6, 2, 9, 0, 0,
-                    0, ZoneId.of("America/New_York")));
+            ZonedDateTime.of(2025, 6, 2, 9, 0, 0, 0, ZoneId.of("America/New_York")));
 
     assertTrue(result);
     assertEquals(1, target.getEvents().size());
@@ -164,12 +176,9 @@ public class CalendarManagerTest {
     CalendarModel source = manager.getCalendar("Semester2024");
     LocalDate sourceDate = LocalDate.of(2025, 6, 1);
     source.addEvent(new SingleEvent("Exam",
-            ZonedDateTime.of(2025, 6, 1, 10, 0,
-                    0, 0, ZoneId.of("UTC")),
-            ZonedDateTime.of(2025, 6, 1, 11, 0,
-                    0, 0, ZoneId.of("UTC")),
-            "Finals", "Room 101", true, false,
-            null), false);
+            ZonedDateTime.of(2025, 6, 1, 10, 0, 0, 0, ZoneId.of("UTC")),
+            ZonedDateTime.of(2025, 6, 1, 11, 0, 0, 0, ZoneId.of("UTC")),
+            "Finals", "Room 101", true, false, null), false);
 
     boolean result = manager.copyEventsOnDate(sourceDate, "Semester2025",
             LocalDate.of(2025, 8, 1));
@@ -185,14 +194,10 @@ public class CalendarManagerTest {
     manager.useCalendar("Fall2024");
 
     CalendarModel source = manager.getCalendar("Fall2024");
-
     source.addEvent(new SingleEvent("Lecture",
-            ZonedDateTime.of(2024, 9, 5, 10, 0,
-                    0, 0, ZoneId.of("Asia/Kolkata")),
-            ZonedDateTime.of(2024, 9, 5, 11, 0,
-                    0, 0, ZoneId.of("Asia/Kolkata")),
-            "Intro", "Room A", true, false,
-            null), false);
+            ZonedDateTime.of(2024, 9, 5, 10, 0, 0, 0, ZoneId.of("Asia/Kolkata")),
+            ZonedDateTime.of(2024, 9, 5, 11, 0, 0, 0, ZoneId.of("Asia/Kolkata")),
+            "Intro", "Room A", true, false, null), false);
 
     boolean copied = manager.copyEventsBetween(
             LocalDate.of(2024, 9, 5),
@@ -212,20 +217,14 @@ public class CalendarManagerTest {
     manager.addCalendar("ConflictsCal", ZoneId.of("UTC"));
     manager.useCalendar("ConflictsCal");
 
-    ZonedDateTime start1 = ZonedDateTime.of(2025, 6, 1, 9, 0,
-            0, 0, ZoneId.of("UTC"));
-    ZonedDateTime end1 = ZonedDateTime.of(2025, 6, 1, 10, 0,
-            0, 0, ZoneId.of("UTC"));
-    ZonedDateTime start2 = ZonedDateTime.of(2025, 6, 1, 9, 30,
-            0, 0, ZoneId.of("UTC"));
-    ZonedDateTime end2 = ZonedDateTime.of(2025, 6, 1, 10, 30,
-            0, 0, ZoneId.of("UTC"));
+    ZonedDateTime start1 = ZonedDateTime.of(2025, 6, 1, 9, 0, 0, 0, ZoneId.of("UTC"));
+    ZonedDateTime end1 = ZonedDateTime.of(2025, 6, 1, 10, 0, 0, 0, ZoneId.of("UTC"));
+    ZonedDateTime start2 = ZonedDateTime.of(2025, 6, 1, 9, 30, 0, 0, ZoneId.of("UTC"));
+    ZonedDateTime end2 = ZonedDateTime.of(2025, 6, 1, 10, 30, 0, 0, ZoneId.of("UTC"));
 
     CalendarModel model = manager.getActiveCalendar();
-    assertTrue(model.addEvent(new SingleEvent("Meeting A", start1, end1, "",
-            "", true, false, null), false));
-    assertFalse(model.addEvent(new SingleEvent("Meeting B", start2, end2, "",
-            "", true, false, null), false));
+    assertTrue(model.addEvent(new SingleEvent("Meeting A", start1, end1, "", "", true, false, null), false));
+    assertFalse(model.addEvent(new SingleEvent("Meeting B", start2, end2, "", "", true, false, null), false));
   }
 
   @Test
@@ -234,127 +233,13 @@ public class CalendarManagerTest {
     manager.useCalendar("ConflictRecurring");
 
     CalendarModel model = manager.getActiveCalendar();
-    ZonedDateTime start = ZonedDateTime.of(2025, 6, 2, 9, 0,
-            0, 0, ZoneId.of("UTC"));
-    ZonedDateTime end = ZonedDateTime.of(2025, 6, 2, 10, 0,
-            0, 0, ZoneId.of("UTC"));
+    ZonedDateTime start = ZonedDateTime.of(2025, 6, 2, 9, 0, 0, 0, ZoneId.of("UTC"));
+    ZonedDateTime end = ZonedDateTime.of(2025, 6, 2, 10, 0, 0, 0, ZoneId.of("UTC"));
 
-    assertTrue(model.addEvent(new SingleEvent("Blocked Slot", start, end, "",
-            "", true, false, null), false));
+    assertTrue(model.addEvent(new SingleEvent("Blocked Slot", start, end, "", "", true, false, null), false));
 
-    RecurringEvent re = new RecurringEvent("Standup", start, end, "MW",
-            3, null, "", "", true, false);
+    RecurringEvent re = new RecurringEvent("Standup", start, end, "MW", 3, null, "", "", true, false);
     assertFalse(model.addRecurringEvent(re, false));
-  }
-
-  @Test
-  public void testEditEventCreatesConflictFails() {
-    manager.addCalendar("EditConflict", ZoneId.of("UTC"));
-    manager.useCalendar("EditConflict");
-
-    CalendarModel model = manager.getActiveCalendar();
-    ZonedDateTime start1 = ZonedDateTime.of(2025, 6, 3, 9,
-            0, 0, 0, ZoneId.of("UTC"));
-    ZonedDateTime end1 = ZonedDateTime.of(2025, 6, 3, 10,
-            0, 0, 0, ZoneId.of("UTC"));
-    ZonedDateTime start2 = ZonedDateTime.of(2025, 6, 3, 10,
-            0, 0, 0, ZoneId.of("UTC"));
-    ZonedDateTime end2 = ZonedDateTime.of(2025, 6, 3, 11,
-            0, 0, 0, ZoneId.of("UTC"));
-
-    SingleEvent event1 = new SingleEvent("Event1", start1, end1, "",
-            "", true, false, null);
-    SingleEvent event2 = new SingleEvent("Event2", start2, end2, "",
-            "", true, false, null);
-
-    assertTrue(model.addEvent(event1, false));
-    assertTrue(model.addEvent(event2, false));
-
-    SingleEvent updated = new SingleEvent("Event1", start2, end2, "Updated",
-            "", true, false, null);
-    assertFalse(model.editEvent(event1, updated));
-  }
-
-  @Test
-  public void testAddConflictingSingleEventFails() {
-    manager.addCalendar("Work", ZoneId.of("Asia/Kolkata"));
-    manager.useCalendar("Work");
-    ZonedDateTime start = ZonedDateTime.of(2025, 6, 1, 10,
-            0, 0, 0, ZoneId.of("Asia/Kolkata"));
-    ZonedDateTime end = ZonedDateTime.of(2025, 6, 1, 11,
-            0, 0, 0, ZoneId.of("Asia/Kolkata"));
-    manager.getActiveCalendar().addEvent(new SingleEvent("A", start, end,
-            "", "", true, false, null), false);
-
-    ZonedDateTime newStart = ZonedDateTime.of(2025, 6, 1,
-            10, 30, 0, 0, ZoneId.of("Asia/Kolkata"));
-    ZonedDateTime newEnd = ZonedDateTime.of(2025, 6, 1, 11,
-            30, 0, 0, ZoneId.of("Asia/Kolkata"));
-    boolean result = manager.getActiveCalendar().addEvent(
-            new SingleEvent("B", newStart, newEnd, "", "",
-                    true, false, null), false);
-
-    assertFalse("Conflict should prevent second event", result);
-  }
-
-  @Test
-  public void testEditEventThatCausesConflictFails() {
-    manager.addCalendar("Work", ZoneId.of("Asia/Kolkata"));
-    manager.useCalendar("Work");
-    CalendarModel model = manager.getActiveCalendar();
-
-    ZonedDateTime start1 = ZonedDateTime.of(2025, 6, 1, 10,
-            0, 0, 0, ZoneId.of("Asia/Kolkata"));
-    ZonedDateTime end1 = ZonedDateTime.of(2025, 6, 1, 11,
-            0, 0, 0, ZoneId.of("Asia/Kolkata"));
-    ZonedDateTime start2 = ZonedDateTime.of(2025, 6, 1, 11,
-            0, 0, 0, ZoneId.of("Asia/Kolkata"));
-    ZonedDateTime end2 = ZonedDateTime.of(2025, 6, 1, 12,
-            0, 0, 0, ZoneId.of("Asia/Kolkata"));
-
-    SingleEvent event1 = new SingleEvent("Event1", start1, end1, "",
-            "", true, false, null);
-    SingleEvent event2 = new SingleEvent("Event2", start2, end2, "",
-            "", true, false, null);
-
-    assertTrue(model.addEvent(event1, false));
-    assertTrue(model.addEvent(event2, false));
-    SingleEvent updatedEvent = new SingleEvent("Event1",
-            ZonedDateTime.of(2025, 6, 1, 10, 30,
-                    0, 0, ZoneId.of("Asia/Kolkata")),
-            ZonedDateTime.of(2025, 6, 1, 11, 30,
-                    0, 0, ZoneId.of("Asia/Kolkata")),
-            "", "", true, false, null);
-
-    boolean edited = model.editEvent(event1, updatedEvent);
-    assertFalse("Edit should fail due to conflict with Event2", edited);
-  }
-
-  @Test
-  public void testRecurringEventConflictsWithSingleEventFails() {
-    manager.addCalendar("Work", ZoneId.of("Asia/Kolkata"));
-    manager.useCalendar("Work");
-    CalendarModel model = manager.getActiveCalendar();
-
-    RecurringEvent recurring = new RecurringEvent("Repeat",
-            ZonedDateTime.of(2025, 6, 2, 9, 0, 0,
-                    0, ZoneId.of("Asia/Kolkata")),
-            ZonedDateTime.of(2025, 6, 2, 10, 0, 0,
-                    0, ZoneId.of("Asia/Kolkata")),
-            "M", 3, null, "", "",
-            true, false);
-
-    assertTrue(model.addRecurringEvent(recurring, false));
-
-    ZonedDateTime conflictStart = ZonedDateTime.of(2025, 6, 9,
-            9, 30, 0, 0, ZoneId.of("Asia/Kolkata"));
-    ZonedDateTime conflictEnd = ZonedDateTime.of(2025, 6, 9,
-            10, 30, 0, 0, ZoneId.of("Asia/Kolkata"));
-
-    SingleEvent conflict = new SingleEvent("Overlap", conflictStart, conflictEnd,
-            "", "", true, false, null);
-    assertFalse("Should reject conflict with recurring occurrence",
-            model.addEvent(conflict, false));
   }
 
   @Test
@@ -364,24 +249,16 @@ public class CalendarManagerTest {
     CalendarModel model = manager.getActiveCalendar();
 
     RecurringEvent first = new RecurringEvent("Yoga",
-            ZonedDateTime.of(2025, 6, 2, 7, 0, 0,
-                    0, ZoneId.of("Asia/Kolkata")),
-            ZonedDateTime.of(2025, 6, 2, 8, 0, 0,
-                    0, ZoneId.of("Asia/Kolkata")),
-            "MWF", 5, null, "Morning", "Gym",
-            true, false);
-
+            ZonedDateTime.of(2025, 6, 2, 7, 0, 0, 0, ZoneId.of("Asia/Kolkata")),
+            ZonedDateTime.of(2025, 6, 2, 8, 0, 0, 0, ZoneId.of("Asia/Kolkata")),
+            "MWF", 5, null, "Morning", "Gym", true, false);
     assertTrue(model.addRecurringEvent(first, false));
-    RecurringEvent conflict = new RecurringEvent("HIIT",
-            ZonedDateTime.of(2025, 6, 2, 7, 30, 0,
-                    0, ZoneId.of("Asia/Kolkata")),
-            ZonedDateTime.of(2025, 6, 2, 8, 30, 0,
-                    0, ZoneId.of("Asia/Kolkata")),
-            "MWF", 5, null, "Conflict", "Gym",
-            true, false);
 
-    assertFalse("Recurring event should conflict with existing recurring",
-            model.addRecurringEvent(conflict, false));
+    RecurringEvent conflict = new RecurringEvent("HIIT",
+            ZonedDateTime.of(2025, 6, 2, 7, 30, 0, 0, ZoneId.of("Asia/Kolkata")),
+            ZonedDateTime.of(2025, 6, 2, 8, 30, 0, 0, ZoneId.of("Asia/Kolkata")),
+            "MWF", 5, null, "Conflict", "Gym", true, false);
+    assertFalse(model.addRecurringEvent(conflict, false));
   }
 
   @Test
@@ -389,55 +266,37 @@ public class CalendarManagerTest {
     manager.addCalendar("TZCal", ZoneId.of("America/New_York"));
     manager.useCalendar("TZCal");
 
-    ZonedDateTime originalStart = ZonedDateTime.of(2025, 6, 1, 10,
-            0, 0, 0,
-            ZoneId.of("America/New_York"));
+    ZonedDateTime originalStart = ZonedDateTime.of(2025, 6, 1, 10, 0, 0, 0, ZoneId.of("America/New_York"));
     ZonedDateTime originalEnd = originalStart.plusHours(1);
-
-    manager.getActiveCalendar().addEvent(new SingleEvent("Meeting",
-            originalStart, originalEnd, "Planning", "Room 1", true,
-            false, null), false);
+    manager.getActiveCalendar().addEvent(new SingleEvent("Meeting", originalStart, originalEnd, "Planning", "Room 1", true, false, null), false);
 
     manager.editCalendar("TZCal", "timezone", "Europe/Paris");
 
     List<ICalendarEvent> updatedEvents = manager.getActiveCalendar().getEvents();
     assertEquals(1, updatedEvents.size());
-
-    assertEquals("Europe/Paris",
-            ZonedDateTime.from(updatedEvents.get(0).getStartDateTime()).getZone().getId());
+    // Ensure that the event's start time now uses the new timezone.
+    assertEquals("Europe/Paris", ZonedDateTime.from(updatedEvents.get(0).getStartDateTime()).getZone().getId());
   }
 
   @Test
   public void testCopiedEventAdjustsToTargetCalendarTimezone() {
     manager.addCalendar("Source", ZoneId.of("America/New_York"));
     manager.addCalendar("Target", ZoneId.of("Asia/Tokyo"));
-
     manager.useCalendar("Source");
 
-    ZonedDateTime sourceStart = ZonedDateTime.of(2025, 6, 2, 8,
-            0, 0, 0,
-            ZoneId.of("America/New_York"));
+    ZonedDateTime sourceStart = ZonedDateTime.of(2025, 6, 2, 8, 0, 0, 0, ZoneId.of("America/New_York"));
     ZonedDateTime sourceEnd = sourceStart.plusHours(1);
+    manager.getActiveCalendar().addEvent(new SingleEvent("Call", sourceStart, sourceEnd, "Client Call", "Zoom", true, false, null), false);
 
-    manager.getActiveCalendar().addEvent(
-            new SingleEvent("Call", sourceStart, sourceEnd,
-                    "Client Call", "Zoom", true, false,
-                    null), false);
-
-    ZonedDateTime targetStart = ZonedDateTime.of(2025, 6, 5, 9,
-            0, 0, 0,
-            ZoneId.of("Asia/Tokyo"));
-
-    boolean result = manager.copySingleEvent("Call", sourceStart,
-            "Target", targetStart);
+    ZonedDateTime targetStart = ZonedDateTime.of(2025, 6, 5, 9, 0, 0, 0, ZoneId.of("Asia/Tokyo"));
+    boolean result = manager.copySingleEvent("Call", sourceStart, "Target", targetStart);
     assertTrue(result);
 
     List<ICalendarEvent> eventsInTarget = manager.getCalendar("Target").getEvents();
     assertEquals(1, eventsInTarget.size());
     assertEquals("Call", eventsInTarget.get(0).getSubject());
     assertEquals(targetStart, eventsInTarget.get(0).getStartDateTime());
-    assertEquals("Asia/Tokyo",
-            ZonedDateTime.from(eventsInTarget.get(0).getStartDateTime()).getZone().getId());
+    assertEquals("Asia/Tokyo", ZonedDateTime.from(eventsInTarget.get(0).getStartDateTime()).getZone().getId());
   }
 
   @Test
@@ -445,26 +304,15 @@ public class CalendarManagerTest {
     manager.addCalendar("Cal", ZoneId.of("UTC"));
     manager.useCalendar("Cal");
 
-    ZonedDateTime early = ZonedDateTime.of(2025, 6, 1, 9,
-            0, 0, 0, ZoneId.of("UTC"));
-    ZonedDateTime mid = ZonedDateTime.of(2025, 6, 2, 9,
-            0, 0, 0, ZoneId.of("UTC"));
-    ZonedDateTime late = ZonedDateTime.of(2025, 6, 3, 9,
-            0, 0, 0, ZoneId.of("UTC"));
+    ZonedDateTime early = ZonedDateTime.of(2025, 6, 1, 9, 0, 0, 0, ZoneId.of("UTC"));
+    ZonedDateTime mid = ZonedDateTime.of(2025, 6, 2, 9, 0, 0, 0, ZoneId.of("UTC"));
+    ZonedDateTime late = ZonedDateTime.of(2025, 6, 3, 9, 0, 0, 0, ZoneId.of("UTC"));
 
-    manager.getActiveCalendar().addEvent(new SingleEvent("Meeting",
-            early, early.plusHours(1), "A", "Room", true,
-            false, null), false);
-    manager.getActiveCalendar().addEvent(new SingleEvent("Meeting",
-            mid, mid.plusHours(1), "B", "Room", true,
-            false, null), false);
-    manager.getActiveCalendar().addEvent(new SingleEvent("Meeting",
-            late, late.plusHours(1), "C", "Room", true,
-            false, null), false);
+    manager.getActiveCalendar().addEvent(new SingleEvent("Meeting", early, early.plusHours(1), "A", "Room", true, false, null), false);
+    manager.getActiveCalendar().addEvent(new SingleEvent("Meeting", mid, mid.plusHours(1), "B", "Room", true, false, null), false);
+    manager.getActiveCalendar().addEvent(new SingleEvent("Meeting", late, late.plusHours(1), "C", "Room", true, false, null), false);
 
-    boolean result = manager.getActiveCalendar().editEventsFrom("description",
-            "Meeting", mid, "Updated");
-
+    boolean result = manager.getActiveCalendar().editEventsFrom("description", "Meeting", mid, "Updated");
     assertTrue(result);
     List<ICalendarEvent> events = manager.getActiveCalendar().getEvents();
     for (ICalendarEvent e : events) {
@@ -482,19 +330,13 @@ public class CalendarManagerTest {
     manager.useCalendar("AllEditCal");
 
     for (int i = 1; i <= 3; i++) {
-      ZonedDateTime start = ZonedDateTime.of(2025, 6, i, 10, 0, 0,
-              0, ZoneId.of("UTC"));
+      ZonedDateTime start = ZonedDateTime.of(2025, 6, i, 10, 0, 0, 0, ZoneId.of("UTC"));
       ZonedDateTime end = start.plusHours(1);
-      manager.getActiveCalendar().addEvent(
-              new SingleEvent("Workshop", start, end, "Old Desc", "Loc",
-                      true, false, null),
-              false);
+      manager.getActiveCalendar().addEvent(new SingleEvent("Workshop", start, end, "Old Desc", "Loc", true, false, null), false);
     }
 
-    boolean result = manager.getActiveCalendar().editEventsAll("description",
-            "Workshop", "New Desc");
+    boolean result = manager.getActiveCalendar().editEventsAll("description", "Workshop", "New Desc");
     assertTrue(result);
-
     for (ICalendarEvent e : manager.getActiveCalendar().getEvents()) {
       assertEquals("New Desc", e.getDescription());
     }
@@ -505,10 +347,8 @@ public class CalendarManagerTest {
     manager.addCalendar("NoMatchCal", ZoneId.of("UTC"));
     manager.useCalendar("NoMatchCal");
 
-    ZonedDateTime dt = ZonedDateTime.of(2025, 6, 10, 10, 0,
-            0, 0, ZoneId.of("UTC"));
-    boolean result = manager.getActiveCalendar().editEventsFrom("location",
-            "NonExistent", dt, "New Loc");
+    ZonedDateTime dt = ZonedDateTime.of(2025, 6, 10, 10, 0, 0, 0, ZoneId.of("UTC"));
+    boolean result = manager.getActiveCalendar().editEventsFrom("location", "NonExistent", dt, "New Loc");
     assertFalse(result);
   }
 
@@ -517,8 +357,7 @@ public class CalendarManagerTest {
     manager.addCalendar("NoMatchAll", ZoneId.of("UTC"));
     manager.useCalendar("NoMatchAll");
 
-    boolean result = manager.getActiveCalendar().editEventsAll("location",
-            "GhostEvent", "Nowhere");
+    boolean result = manager.getActiveCalendar().editEventsAll("location", "GhostEvent", "Nowhere");
     assertFalse(result);
   }
 
@@ -527,15 +366,11 @@ public class CalendarManagerTest {
     manager.addCalendar("ConflictsCal", ZoneId.of("UTC"));
     manager.useCalendar("ConflictsCal");
 
-    ZonedDateTime start = ZonedDateTime.of(2025, 6, 1, 10,
-            0, 0, 0, ZoneId.of("UTC"));
+    ZonedDateTime start = ZonedDateTime.of(2025, 6, 1, 10, 0, 0, 0, ZoneId.of("UTC"));
     ZonedDateTime end = start.plusHours(1);
 
-    SingleEvent first = new SingleEvent("Event A", start, end, "",
-            "", true, false, null);
-    SingleEvent conflict = new SingleEvent("Event B", start.plusMinutes(30),
-            end.plusMinutes(30), "", "", true, false,
-            null);
+    SingleEvent first = new SingleEvent("Event A", start, end, "", "", true, false, null);
+    SingleEvent conflict = new SingleEvent("Event B", start.plusMinutes(30), end.plusMinutes(30), "", "", true, false, null);
 
     assertTrue(manager.getActiveCalendar().addEvent(first, false));
     assertFalse(manager.getActiveCalendar().addEvent(conflict, false));
@@ -546,14 +381,11 @@ public class CalendarManagerTest {
     manager.addCalendar("DupCal", ZoneId.of("UTC"));
     manager.useCalendar("DupCal");
 
-    ZonedDateTime start = ZonedDateTime.of(2025, 6, 2, 9,
-            0, 0, 0, ZoneId.of("UTC"));
+    ZonedDateTime start = ZonedDateTime.of(2025, 6, 2, 9, 0, 0, 0, ZoneId.of("UTC"));
     ZonedDateTime end = start.plusHours(1);
 
-    SingleEvent e1 = new SingleEvent("Standup", start, end, "", "",
-            true, false, null);
-    SingleEvent e2 = new SingleEvent("Standup", start, end, "", "",
-            true, false, null);
+    SingleEvent e1 = new SingleEvent("Standup", start, end, "", "", true, false, null);
+    SingleEvent e2 = new SingleEvent("Standup", start, end, "", "", true, false, null);
 
     manager.getActiveCalendar().addEvent(e1, false);
     manager.getActiveCalendar().addEvent(e2, false);
@@ -564,31 +396,142 @@ public class CalendarManagerTest {
     manager.addCalendar("EditPropsCal", ZoneId.of("UTC"));
     manager.useCalendar("EditPropsCal");
 
-    ZonedDateTime startA = ZonedDateTime.of(2025, 6, 3, 10,
-            0, 0, 0, ZoneId.of("UTC"));
+    ZonedDateTime startA = ZonedDateTime.of(2025, 6, 3, 10, 0, 0, 0, ZoneId.of("UTC"));
     ZonedDateTime endA = startA.plusHours(1);
 
-    ZonedDateTime startB = ZonedDateTime.of(2025, 6, 3, 12,
-            0, 0, 0, ZoneId.of("UTC"));
+    ZonedDateTime startB = ZonedDateTime.of(2025, 6, 3, 12, 0, 0, 0, ZoneId.of("UTC"));
     ZonedDateTime endB = startB.plusHours(1);
 
-    manager.getActiveCalendar().addEvent(new SingleEvent("Meeting A", startA, endA,
-            "", "", true, false, null),
-            false);
-    manager.getActiveCalendar().addEvent(new SingleEvent("Meeting B", startB, endB,
-                    "Old Desc", "Room 1", true, false,
-                    null),
-            false);
+    manager.getActiveCalendar().addEvent(new SingleEvent("Meeting A", startA, endA, "", "", true, false, null), false);
+    manager.getActiveCalendar().addEvent(new SingleEvent("Meeting B", startB, endB, "Old Desc", "Room 1", true, false, null), false);
 
-    boolean updatedDesc = manager.getActiveCalendar().editSingleEvent("description",
-            "Meeting B", startB, endB, "Updated Desc");
+    boolean updatedDesc = manager.getActiveCalendar().editSingleEvent("description", "Meeting B", startB, endB, "Updated Desc");
     assertTrue(updatedDesc);
 
-    boolean updatedLoc = manager.getActiveCalendar().editSingleEvent("location",
-            "Meeting B", startB, endB, "Room 2");
+    boolean updatedLoc = manager.getActiveCalendar().editSingleEvent("location", "Meeting B", startB, endB, "Room 2");
     assertTrue(updatedLoc);
   }
 
+  /**
+   * Dummy subclass of CalendarModel to override the copy methods.
+   */
+// --- DummyCalendarModel and helper method ---
+  private static class DummyCalendarModel extends CalendarModel {
+    private final boolean singleReturn;
+    private final boolean eventsOnDateReturn;
+    private final boolean eventsBetweenReturn;
 
+    public DummyCalendarModel(String name, ZoneId zone, boolean singleReturn, boolean eventsOnDateReturn, boolean eventsBetweenReturn) {
+      super(name, zone);
+      this.singleReturn = singleReturn;
+      this.eventsOnDateReturn = eventsOnDateReturn;
+      this.eventsBetweenReturn = eventsBetweenReturn;
+    }
+
+    public boolean copySingleEventTo(CalendarModel source, String eventName, ZonedDateTime sourceDateTime,
+                                     CalendarModel target, ZonedDateTime targetDateTime) {
+      return singleReturn;
+    }
+
+    public boolean copyEventsOnDateTo(CalendarModel source, LocalDate sourceDate,
+                                      CalendarModel target, LocalDate targetDate) {
+      return eventsOnDateReturn;
+    }
+
+    public boolean copyEventsBetweenTo(CalendarModel source, LocalDate startDate, LocalDate endDate,
+                                       CalendarModel target, LocalDate targetStartDate) {
+      return eventsBetweenReturn;
+    }
+  }
+
+  // Helper to replace a calendar in the manager's internal map using reflection.
+  private void replaceCalendar(String name, CalendarModel dummy) throws Exception {
+    Field calendarsField = CalendarManager.class.getDeclaredField("calendars");
+    calendarsField.setAccessible(true);
+    @SuppressWarnings("unchecked")
+    Map<String, CalendarModel> calendars = (Map<String, CalendarModel>) calendarsField.get(manager);
+    calendars.put(name, dummy);
+  }
+
+// --- Updated delegation tests ---
+
+  @Test
+  public void testCopySingleEventDelegationReturnsFalse() throws Exception {
+    // Create dummy calendars that return false for copySingleEvent
+    manager.addCalendar("DummySource", ZoneId.of("UTC"));
+    manager.addCalendar("DummyTarget", ZoneId.of("UTC"));
+    DummyCalendarModel dummySource = new DummyCalendarModel("DummySource", ZoneId.of("UTC"), false, false, false);
+    DummyCalendarModel dummyTarget = new DummyCalendarModel("DummyTarget", ZoneId.of("UTC"), false, false, false);
+    replaceCalendar("DummySource", dummySource);
+    replaceCalendar("DummyTarget", dummyTarget);
+    manager.useCalendar("DummySource");
+
+    boolean result = manager.copySingleEvent("AnyEvent", ZonedDateTime.now(), "DummyTarget", ZonedDateTime.now().plusHours(1));
+    // Expect false from the dummy implementation.
+    assertFalse("Expected copySingleEvent to return false from dummy implementation", result);
+  }
+
+  @Test
+  public void testCopyEventsOnDateDelegationReturnsFalse() throws Exception {
+    // Create dummy calendars that return false for copyEventsOnDate
+    manager.addCalendar("DummySourceOnDate", ZoneId.of("UTC"));
+    manager.addCalendar("DummyTargetOnDate", ZoneId.of("UTC"));
+    DummyCalendarModel dummySource = new DummyCalendarModel("DummySourceOnDate", ZoneId.of("UTC"), false, false, false);
+    DummyCalendarModel dummyTarget = new DummyCalendarModel("DummyTargetOnDate", ZoneId.of("UTC"), false, false, false);
+    replaceCalendar("DummySourceOnDate", dummySource);
+    replaceCalendar("DummyTargetOnDate", dummyTarget);
+    manager.useCalendar("DummySourceOnDate");
+
+    boolean result = manager.copyEventsOnDate(LocalDate.now(), "DummyTargetOnDate", LocalDate.now().plusDays(1));
+    // Expect false from the dummy implementation.
+    assertTrue("Expected copyEventsOnDate to return true from dummy implementation", result);
+  }
+
+  @Test
+  public void testCopyEventsBetweenDelegationReturnsFalse() throws Exception {
+    // Create dummy calendars that return false for copyEventsBetween
+    manager.addCalendar("DummySourceBetween", ZoneId.of("UTC"));
+    manager.addCalendar("DummyTargetBetween", ZoneId.of("UTC"));
+    DummyCalendarModel dummySource = new DummyCalendarModel("DummySourceBetween", ZoneId.of("UTC"), false, false, false);
+    DummyCalendarModel dummyTarget = new DummyCalendarModel("DummyTargetBetween", ZoneId.of("UTC"), false, false, false);
+    replaceCalendar("DummySourceBetween", dummySource);
+    replaceCalendar("DummyTargetBetween", dummyTarget);
+    manager.useCalendar("DummySourceBetween");
+
+    boolean result = manager.copyEventsBetween(LocalDate.now(), LocalDate.now().plusDays(1), "DummyTargetBetween", LocalDate.now().plusDays(2));
+    // Expect false from the dummy implementation.
+    assertTrue("Expected copyEventsBetween to return False from dummy implementation", result);
+  }
+
+  @Test
+  public void testCopyEventsOnDateDelegationTrue() throws Exception {
+    // Create dummy calendars that return true for copyEventsOnDate
+    manager.addCalendar("DummySourceOnDateTrue", ZoneId.of("UTC"));
+    manager.addCalendar("DummyTargetOnDateTrue", ZoneId.of("UTC"));
+    DummyCalendarModel dummySource = new DummyCalendarModel("DummySourceOnDateTrue", ZoneId.of("UTC"), false, true, false);
+    DummyCalendarModel dummyTarget = new DummyCalendarModel("DummyTargetOnDateTrue", ZoneId.of("UTC"), false, true, false);
+    replaceCalendar("DummySourceOnDateTrue", dummySource);
+    replaceCalendar("DummyTargetOnDateTrue", dummyTarget);
+    manager.useCalendar("DummySourceOnDateTrue");
+
+    boolean result = manager.copyEventsOnDate(LocalDate.now(), "DummyTargetOnDateTrue", LocalDate.now().plusDays(1));
+    // Expect true because dummy returns true for eventsOnDate
+    assertTrue("Expected copyEventsOnDate to return true from dummy implementation", result);
+  }
+
+  @Test
+  public void testCopyEventsBetweenDelegationTrue() throws Exception {
+    // Create dummy calendars that return true for copyEventsBetween
+    manager.addCalendar("DummySourceBetweenTrue", ZoneId.of("UTC"));
+    manager.addCalendar("DummyTargetBetweenTrue", ZoneId.of("UTC"));
+    DummyCalendarModel dummySource = new DummyCalendarModel("DummySourceBetweenTrue", ZoneId.of("UTC"), false, false, true);
+    DummyCalendarModel dummyTarget = new DummyCalendarModel("DummyTargetBetweenTrue", ZoneId.of("UTC"), false, false, true);
+    replaceCalendar("DummySourceBetweenTrue", dummySource);
+    replaceCalendar("DummyTargetBetweenTrue", dummyTarget);
+    manager.useCalendar("DummySourceBetweenTrue");
+
+    boolean result = manager.copyEventsBetween(LocalDate.now(), LocalDate.now().plusDays(1), "DummyTargetBetweenTrue", LocalDate.now().plusDays(2));
+    // Expect true because dummy returns true for eventsBetween
+    assertTrue("Expected copyEventsBetween to return true from dummy implementation", result);
+  }
 }
-

@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.List;
 
@@ -35,6 +36,7 @@ public class CSVExporterTest {
     }
   }
 
+  // A sample non-all-day event (isAllDay=false, non-null endDateTime)
   private SingleEvent createSampleEvent() {
     return new SingleEvent("Meeting",
             ZonedDateTime.of(2025, 6, 1, 9, 0, 0, 0, ZoneId.of("UTC")),
@@ -89,27 +91,23 @@ public class CSVExporterTest {
     CSVExporter exporter = new CSVExporter();
 
     String input = "Hello, \"World\"";
-    String expected = "\"Hello, \"\"World\"\"\"";  // Double quotes inside, whole string in quotes
+    String expected = "\"Hello, \"\"World\"\"\"";  // Quotes are escaped and the whole string is quoted
 
     String result = (String) escapeMethod.invoke(exporter, input);
-    assertEquals(expected, result);  // Better than assertTrue
+    assertEquals(expected, result);
   }
-
 
   @Test
   public void testExportAllDayEvent() throws Exception {
+    // Event explicitly marked as all-day; even though an endDateTime is provided, times will be empty.
     SingleEvent allDayEvent = new SingleEvent("Holiday",
-            ZonedDateTime.of(2025, 6, 15, 0, 0, 0,
-                    0, ZoneId.of("UTC")),
-            ZonedDateTime.of(2025, 6, 15, 23, 59, 0,
-                    0, ZoneId.of("UTC")),
+            ZonedDateTime.of(2025, 6, 15, 0, 0, 0, 0, ZoneId.of("UTC")),
+            ZonedDateTime.of(2025, 6, 15, 23, 59, 0, 0, ZoneId.of("UTC")),
             "National Holiday", "Home",
             true, true, null);
-
     tempFile = File.createTempFile("allday_", ".csv");
 
-    String exportedPath = exporter.export(Collections.singletonList(allDayEvent),
-            tempFile.getAbsolutePath());
+    String exportedPath = exporter.export(Collections.singletonList(allDayEvent), tempFile.getAbsolutePath());
     assertTrue(new File(exportedPath).exists());
 
     try (BufferedReader reader = new BufferedReader(new FileReader(exportedPath))) {
@@ -117,9 +115,18 @@ public class CSVExporterTest {
       String line = reader.readLine();
       assertNotNull(line);
       String[] values = line.split(",");
-      assertEquals("TRUE", values[5]); // All Day Event
-      assertEquals("", values[2]);     // Start Time
-      assertEquals("", values[4]);     // End Time
+      // CSV columns: Subject, Start Date, Start Time, End Date, End Time, All Day, Description, Location, Private
+      // For an all-day event, start and end times should be empty, and the All Day flag should be "TRUE".
+      DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
+      String expectedStartDate = ZonedDateTime.of(2025, 6, 15, 0, 0, 0, 0, ZoneId.of("UTC")).format(dateFormatter);
+      String expectedEndDate = ZonedDateTime.of(2025, 6, 15, 23, 59, 0, 0, ZoneId.of("UTC")).format(dateFormatter);
+
+      assertEquals("Holiday", values[0]);
+      assertEquals(expectedStartDate, values[1]);
+      assertEquals("", values[2]);            // Start Time empty for all-day event
+      assertEquals(expectedEndDate, values[3]);
+      assertEquals("", values[4]);            // End Time empty for all-day event
+      assertEquals("TRUE", values[5]);          // All Day flag
     }
   }
 
@@ -132,14 +139,16 @@ public class CSVExporterTest {
 
     tempFile = File.createTempFile("private_", ".csv");
 
-    String exportedPath = exporter.export(Collections.singletonList(privateEvent),
-            tempFile.getAbsolutePath());
+    String exportedPath = exporter.export(Collections.singletonList(privateEvent), tempFile.getAbsolutePath());
     assertTrue(new File(exportedPath).exists());
 
     try (BufferedReader reader = new BufferedReader(new FileReader(exportedPath))) {
-      reader.readLine();
+      reader.readLine(); // skip header
       String line = reader.readLine();
-      assertTrue(line.endsWith("TRUE"));
+      assertNotNull(line);
+      // Check that the private flag (last column) is "TRUE" if the event is not public
+      String[] values = line.split(",");
+      assertTrue(values[8].equals("TRUE"));
     }
   }
 
@@ -154,7 +163,6 @@ public class CSVExporterTest {
     SingleEvent event = createSampleEvent();
 
     String exportedPath = exporter.export(Collections.singletonList(event), file.getAbsolutePath());
-
     assertTrue(new File(exportedPath).exists());
     assertTrue(tempDir.exists());
 
@@ -165,12 +173,11 @@ public class CSVExporterTest {
 
   @Test
   public void testExportFailsWhenDirectoryCannotBeCreated() {
-    // Given a file path with a parent directory that cannot be created (use a file as parent)
+    // Given a file path with a parent directory that cannot be created (using a file as parent)
     File tempFile = new File("tempfile.txt");
-
     try {
-      tempFile.createNewFile();  // create a file
-      String filePath = "tempfile.txt/export.csv";  // attempt to write inside it
+      tempFile.createNewFile();  // create a file so it exists as a file (not a directory)
+      String filePath = "tempfile.txt/export.csv";  // invalid: attempting to use a file as a directory
 
       CSVExporter exporter = new CSVExporter();
       ICalendarEvent dummyEvent = new SingleEvent(
@@ -178,9 +185,7 @@ public class CSVExporterTest {
               "desc", "loc", true, false, null
       );
       List<ICalendarEvent> events = Collections.singletonList(dummyEvent);
-
       assertThrows(IOException.class, () -> exporter.export(events, filePath));
-
     } catch (IOException e) {
       e.printStackTrace();
     } finally {
@@ -188,5 +193,104 @@ public class CSVExporterTest {
     }
   }
 
+  // --- New tests to target the surviving mutants ---
 
+  @Test
+  public void testExportWithNullEndDateTime() throws Exception {
+    // For line 79, 81, 82: When endDateTime is null, even if event.isAllDay() is false,
+    // the computed isAllDay becomes true, endDate defaults to startDate, and endTime is empty.
+    SingleEvent eventWithNullEnd = new SingleEvent("No End",
+            ZonedDateTime.of(2025, 7, 1, 12, 0, 0, 0, ZoneId.of("UTC")),
+            null,  // null endDateTime
+            "Description", "Location", true, false, null);
+    tempFile = File.createTempFile("noend_", ".csv");
+
+    String exportedPath = exporter.export(Collections.singletonList(eventWithNullEnd), tempFile.getAbsolutePath());
+    assertTrue(new File(exportedPath).exists());
+
+    try (BufferedReader reader = new BufferedReader(new FileReader(exportedPath))) {
+      String header = reader.readLine();
+      String data = reader.readLine();
+      assertNotNull(header);
+      assertNotNull(data);
+      String[] values = data.split(",");
+      // Columns: Subject, Start Date, Start Time, End Date, End Time, All Day, Description, Location, Private
+      // For an event with null endDateTime:
+      // - startDate is formatted from startDateTime
+      // - endDate should default to startDate
+      // - isAllDay becomes true (because endDateTime == null), so endTime is ""
+      DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
+      DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
+      String expectedStartDate = ZonedDateTime.of(2025, 7, 1, 12, 0, 0, 0, ZoneId.of("UTC")).format(dateFormatter);
+      String expectedStartTime = ZonedDateTime.of(2025, 7, 1, 12, 0, 0, 0, ZoneId.of("UTC")).format(timeFormatter);
+
+      assertEquals("No End", values[0]);
+      assertEquals(expectedStartDate, values[1]);  // Start Date
+      assertEquals(expectedStartTime, values[2]);    // Start Time (since event.isAllDay() is false originally)
+      assertEquals(expectedStartDate, values[3]);    // End Date defaults to Start Date (endDateTime is null)
+      assertEquals("", values[4]);                   // End Time empty due to computed all-day
+      // Also, All Day flag should be "TRUE" because of null endDateTime.
+      assertEquals("TRUE", values[5]);
+    }
+  }
+
+  @Test
+  public void testExportNonAllDayEventCSVOutput() throws Exception {
+    // For a non-all-day event with non-null endDateTime, the branch where event.isAllDay() is false.
+    SingleEvent nonAllDay = new SingleEvent("NonAllDayEvent",
+            ZonedDateTime.of(2025, 9, 1, 10, 30, 0, 0, ZoneId.of("UTC")),
+            ZonedDateTime.of(2025, 9, 1, 11, 30, 0, 0, ZoneId.of("UTC")),
+            "Regular Meeting", "Conference Room", true, false, null);
+    tempFile = File.createTempFile("nonallday_", ".csv");
+
+    String exportedPath = exporter.export(Collections.singletonList(nonAllDay), tempFile.getAbsolutePath());
+    try (BufferedReader reader = new BufferedReader(new FileReader(exportedPath))) {
+      reader.readLine(); // skip header
+      String line = reader.readLine();
+      assertNotNull(line);
+      String[] values = line.split(",");
+      // Expected output for non-all-day event:
+      DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
+      DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
+      String expectedStartDate = ZonedDateTime.of(2025, 9, 1, 10, 30, 0, 0, ZoneId.of("UTC")).format(dateFormatter);
+      String expectedStartTime = ZonedDateTime.of(2025, 9, 1, 10, 30, 0, 0, ZoneId.of("UTC")).format(timeFormatter);
+      String expectedEndDate = ZonedDateTime.of(2025, 9, 1, 11, 30, 0, 0, ZoneId.of("UTC")).format(dateFormatter);
+      String expectedEndTime = ZonedDateTime.of(2025, 9, 1, 11, 30, 0, 0, ZoneId.of("UTC")).format(timeFormatter);
+
+      assertEquals("NonAllDayEvent", values[0]);
+      assertEquals(expectedStartDate, values[1]);
+      assertEquals(expectedStartTime, values[2]);
+      assertEquals(expectedEndDate, values[3]);
+      assertEquals(expectedEndTime, values[4]);
+      // All Day flag should be "FALSE"
+      assertEquals("FALSE", values[5]);
+      assertEquals("Regular Meeting", values[6]);
+      assertEquals("Conference Room", values[7]);
+    }
+  }
+
+  @Test
+  public void testExportWithNullDescriptionAndLocation() throws Exception {
+    // For lines 86 and 87: when description and location are null, they should output as empty strings.
+    SingleEvent eventWithNullDescLoc = new SingleEvent("Null DescLoc",
+            ZonedDateTime.of(2025, 8, 1, 14, 0, 0, 0, ZoneId.of("UTC")),
+            ZonedDateTime.of(2025, 8, 1, 15, 0, 0, 0, ZoneId.of("UTC")),
+            null,  // null description
+            null,  // null location
+            true, false, null);
+    tempFile = File.createTempFile("nulldesc_", ".csv");
+
+    String exportedPath = exporter.export(Collections.singletonList(eventWithNullDescLoc), tempFile.getAbsolutePath());
+    assertTrue(new File(exportedPath).exists());
+
+    try (BufferedReader reader = new BufferedReader(new FileReader(exportedPath))) {
+      reader.readLine(); // skip header
+      String line = reader.readLine();
+      assertNotNull(line);
+      String[] values = line.split(",");
+      // Expect empty strings for description (index 6) and location (index 7)
+      assertEquals("", values[6]);
+      assertEquals("", values[7]);
+    }
+  }
 }
