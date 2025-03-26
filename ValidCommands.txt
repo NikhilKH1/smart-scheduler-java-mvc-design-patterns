@@ -27,7 +27,7 @@ create event "Nikhil's Birthday" from 2025-04-11T10:00 to 2025-04-11T12:00
 print events on 2025-04-06
 print events from 2025-04-09T10:00 to 2025-04-12T11:00
 show status on 2025-04-11T11:00
-show status on 2025-04-14T21:00
+show status on 2025-04-13T21:00
 create calendar --name NewCal --timezone America/New_York
 copy event "Nikhil's Birthday" on 2025-04-11T10:00 --target NewCal to 2025-04-11T09:00
 copy events on 2025-04-07 --target NewCal to 2025-04-10

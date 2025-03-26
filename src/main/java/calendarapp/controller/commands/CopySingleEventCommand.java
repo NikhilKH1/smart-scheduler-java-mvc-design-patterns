@@ -54,7 +54,8 @@ public class CopySingleEventCommand implements ICalendarManagerCommand {
     if (success) {
       view.displayMessage("Event '" + eventName + "' copied to calendar: " + targetCalendarName);
     } else {
-      view.displayError("Failed to copy event. It may not exist or conflicts with another event.");
+      view.displayError("Failed to copy event. It may not exist or conflicts with "
+              + "another event.");
     }
 
     return success;

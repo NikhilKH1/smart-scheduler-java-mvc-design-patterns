@@ -127,7 +127,6 @@ public class CalendarModel implements ICalendarModel {
     recurringMap.putAll(updatedRecurringMap);
   }
 
-
   /**
    * Copies a single event from the source calendar to the target calendar with timezone adjustment.
    *
@@ -161,7 +160,6 @@ public class CalendarModel implements ICalendarModel {
     }
     return false;
   }
-
 
   /**
    * Copies all events on a specific date from the source calendar to the target calendar.
@@ -211,7 +209,6 @@ public class CalendarModel implements ICalendarModel {
     }
     return allCopied;
   }
-
 
   /**
    * Copies all events within a specific date range from the source calendar to the target calendar.
