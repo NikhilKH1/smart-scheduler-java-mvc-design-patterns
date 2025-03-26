@@ -26,8 +26,6 @@ public class CalendarManagerTest {
     manager = new CalendarManager();
   }
 
-  // Existing tests...
-
   @Test
   public void testAddCalendarSuccessfully() {
     boolean added = manager.addCalendar("Work", ZoneId.of("Asia/Kolkata"));
@@ -531,7 +529,6 @@ public class CalendarManagerTest {
     manager.useCalendar("DummySourceBetweenTrue");
 
     boolean result = manager.copyEventsBetween(LocalDate.now(), LocalDate.now().plusDays(1), "DummyTargetBetweenTrue", LocalDate.now().plusDays(2));
-    // Expect true because dummy returns true for eventsBetween
     assertTrue("Expected copyEventsBetween to return true from dummy implementation", result);
   }
 }

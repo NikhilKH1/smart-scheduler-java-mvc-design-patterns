@@ -25,7 +25,6 @@ public class ConsoleCommandSourceTest {
 
   @Before
   public void setUp() {
-    // Setup System.in with sample input
     String input = "command1\ncommand2\n";
     ByteArrayInputStream testIn = new ByteArrayInputStream(input.getBytes());
     System.setIn(testIn);
@@ -61,25 +60,18 @@ public class ConsoleCommandSourceTest {
       commandSource.getNextCommand();
       fail("Expected exception when reading after close");
     } catch (IllegalStateException | NoSuchElementException e) {
-      // Expected exception caught.
     }
   }
 
   @Test
   public void testPromptPrinted() {
-    // Redirect System.out to capture the prompt
     ByteArrayOutputStream outContent = new ByteArrayOutputStream();
     System.setOut(new PrintStream(outContent));
 
-    // Prepare input for a single command
     String input = "dummyCommand\n";
     System.setIn(new ByteArrayInputStream(input.getBytes()));
     ConsoleCommandSource localCommandSource = new ConsoleCommandSource();
-
-    // Invoke getNextCommand which should print the prompt
     localCommandSource.getNextCommand();
-
-    // Assert that the output contains the prompt "> "
     String printedOutput = outContent.toString();
     assertTrue("Prompt not printed as expected", printedOutput.contains("> "));
 

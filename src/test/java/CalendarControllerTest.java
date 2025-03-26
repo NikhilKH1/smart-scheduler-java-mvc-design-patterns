@@ -484,7 +484,8 @@ public class CalendarControllerTest {
   public void testQueryRangeCommandAlwaysTrue() {
     controller.processCommand("create event \"RangeTest\" from 2025-06-01T09:00 to "
             + "2025-06-01T10:00");
-    boolean result = controller.processCommand("print events from 2025-06-01T08:00 to 2025-06-01T11:00");
+    boolean result = controller.processCommand("print events from 2025-06-01T08:00 "
+            + "to 2025-06-01T11:00");
 
     assertTrue(result);
     assertTrue(view.getLastMessage().contains("Events from")
@@ -662,7 +663,8 @@ public class CalendarControllerTest {
 
   @Test
   public void testCreateCalendarAnDUse() {
-    boolean created = controller.processCommand("create calendar --name Work --timezone UTC");
+    boolean created = controller.
+            processCommand("create calendar --name Work --timezone UTC");
     assertTrue("Calendar creation should succeed", created);
     assertEquals("Calendar created: Work (UTC)", view.getLastMessage());
 
@@ -676,7 +678,8 @@ public class CalendarControllerTest {
     controller.processCommand("create calendar --name Default --timezone UTC");
     controller.processCommand("use calendar --name Default");
 
-    boolean result = controller.processCommand("create event \"Team Sync\" from 2025-06-10T09:00 to 2025-06-10T10:00");
+    boolean result = controller.processCommand("create event \"Team Sync\" "
+            + "from 2025-06-10T09:00 to 2025-06-10T10:00");
 
     assertTrue("Event creation should succeed", result);
     assertEquals("Event created successfully", view.getLastMessage());
@@ -686,20 +689,23 @@ public class CalendarControllerTest {
   public void testPrintEventsOnDate() {
     controller.processCommand("create calendar --name Default --timezone UTC");
     controller.processCommand("use calendar --name Default");
-    controller.processCommand("create event \"Meeting\" from 2025-06-01T10:00 to 2025-06-01T11:00");
+    controller.processCommand
+            ("create event \"Meeting\" from 2025-06-01T10:00 to 2025-06-01T11:00");
 
     boolean result = controller.processCommand("print events on 2025-06-01");
 
     assertTrue("Query by date should succeed", result);
     assertTrue("Message should confirm events on that date",
-            view.getLastMessage().contains("Displaying") || view.getLastMessage().contains("Events on"));
+            view.getLastMessage().
+                    contains("Displaying") || view.getLastMessage().contains("Events on"));
   }
 
   @Test
   public void testBusyQuery() {
     controller.processCommand("create calendar --name Default --timezone UTC");
     controller.processCommand("use calendar --name Default");
-    controller.processCommand("create event \"Meeting\" from 2025-06-01T10:00 to 2025-06-01T11:00");
+    controller.processCommand
+            ("create event \"Meeting\" from 2025-06-01T10:00 to 2025-06-01T11:00");
 
     boolean result = controller.processCommand("show status on 2025-06-01T10:30");
 
@@ -711,10 +717,12 @@ public class CalendarControllerTest {
   public void testEditEventDescription() {
     controller.processCommand("create calendar --name Default --timezone UTC");
     controller.processCommand("use calendar --name Default");
-    controller.processCommand("create event \"Daily Brief\" from 2025-06-01T08:00 to 2025-06-01T09:00");
+    controller.processCommand
+            ("create event \"Daily Brief\" from 2025-06-01T08:00 to 2025-06-01T09:00");
 
     boolean result = controller.processCommand(
-            "edit event description \"Daily Brief\" from 2025-06-01T08:00 to 2025-06-01T09:00 with \"Updated Description\"");
+            "edit event description \"Daily Brief\" from 2025-06-01T08:00 "
+                    + "to 2025-06-01T09:00 with \"Updated Description\"");
 
     assertTrue("Editing description should succeed", result);
     assertEquals("Event(s) edited successfully", view.getLastMessage());
