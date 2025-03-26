@@ -1,6 +1,7 @@
 package calendarapp.controller.commands;
 
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.Temporal;
 import java.time.ZoneId;
 
@@ -42,9 +43,11 @@ public class BusyQueryCommand implements ICalendarModelCommand {
 
     boolean busy = model.isBusyAt(zonedQueryTime);
     if (busy) {
-      view.displayMessage("Busy at " + zonedQueryTime);
+      DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm");
+      view.displayMessage("Busy at " + zonedQueryTime.format(formatter));
     } else {
-      view.displayMessage("Available at " + zonedQueryTime);
+      DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm");
+      view.displayMessage("Available at " + zonedQueryTime.format(formatter));
     }
     return true;
   }

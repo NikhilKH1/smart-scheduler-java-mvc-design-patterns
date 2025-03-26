@@ -10,7 +10,7 @@ This project is an enhanced version of a calendar application that allows users 
 2. **Created a new package for io**
 * **Justification**: Previously, input handling was tightly coupled with the terminal scanner. This change modularizes input handling, making it more adaptable.
 
-### Multiple Calendar Support
+#### Multiple Calendar Support
 
 3. **Created `CalendarManager` and `ICalendarManager`**
 * **Justification**: Manages multiple calendars, allowing users to switch between them efficiently.
@@ -21,7 +21,7 @@ This project is an enhanced version of a calendar application that allows users 
 5. **Separated calendar-level and event-level command interfaces**
 * **Justification**: Improves modularity and distinguishes between commands acting on calendars and those acting on events.
 
-### Timezone Support
+#### Timezone Support
 
 6. **Created an `Exporter` interface**
 * **Justification**: Enables support for multiple export formats such as PDF and TXT in the future.
