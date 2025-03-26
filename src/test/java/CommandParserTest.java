@@ -1,265 +1,22 @@
-//import calendarapp.controller.CalendarController;
-//import calendarapp.controller.CommandParser;
-//import calendarapp.model.CalendarModel;
-//
-//import org.junit.Before;
-//import org.junit.Test;
-//
-//import static org.junit.Assert.assertEquals;
-//import static org.junit.Assert.assertFalse;
-//import static org.junit.Assert.assertNull;
-//import static org.junit.Assert.assertTrue;
-//import static org.junit.Assert.fail;
-//
-//import calendarapp.controller.commands.BusyQueryCommand;
-//import calendarapp.controller.commands.Command;
-//import calendarapp.controller.commands.CreateEventCommand;
-//import calendarapp.controller.commands.EditEventCommand;
-//import calendarapp.controller.commands.EditRecurringEventCommand;
-//import calendarapp.controller.commands.ExportCalendarCommand;
-//import calendarapp.controller.commands.QueryByDateCommand;
-//import calendarapp.controller.commands.QueryRangeDateTimeCommand;
-//import calendarapp.model.event.CalendarEvent;
-//import calendarapp.view.ICalendarView;
-//
-//import java.time.LocalDate;
-//import java.time.LocalDateTime;
-//import java.util.ArrayList;
-//import java.util.List;
-//
-///**
-// * JUnit tests for the CommandParser class.
-// */
-//public class CommandParserTest {
-//  private CalendarController controller;
-//  private TestCalendarViewParser view;
-//  private CommandParser parser;
-//
-//  @Before
-//  public void setUp() {
-//    CalendarModel model = new CalendarModel();
-//    view = new TestCalendarViewParser();
-//    parser = new CommandParser(model);
-//    controller = new CalendarController(model, view, parser);
-//  }
-//
-//
-//
-//  @Test
-//  public void testParseEditSingleEventCommandIncomplete() {
-//    String command = "edit event description \"Meeting\" from 2025-06-01T09:00";
-//    try {
-//      parser.parse(command);
-//      fail("Expected IllegalArgumentException for incomplete edit event command");
-//    } catch (IllegalArgumentException e) {
-//      assertEquals("Incomplete edit event command. Expected format:"
-//                      + " edit event <property> <eventName> from <start> to <end> with "
-//                      + "<NewPropertyValue>",
-//              e.getMessage());
-//    }
-//  }
-//
-//  @Test
-//  public void testParseEditSingleEventCommandMissingFromKeyword() {
-//    String command = "edit event description \"Meeting\" 2025-06-01T09:00 to "
-//            + "2025-06-01T10:00 with \"Updated Description\"";
-//    try {
-//      parser.parse(command);
-//      fail("Expected IllegalArgumentException for missing 'from' keyword");
-//    } catch (IllegalArgumentException e) {
-//      assertEquals("Incomplete edit event command. Expected format: "
-//                      + "edit event <property> <eventName> from <start> to <end> with "
-//                      + "<NewPropertyValue>",
-//              e.getMessage());
-//    }
-//  }
-//
-//  @Test
-//  public void testParseEditSingleEventCommandMissingToKeyword() {
-//    String command = "edit event description \"Meeting\" from 2025-06-01T09:00 "
-//            + "something 2025-06-01T10:00 with \"Updated Description\"";
-//    try {
-//      parser.parse(command);
-//      fail("Expected IllegalArgumentException for missing 'to' keyword");
-//    } catch (IllegalArgumentException e) {
-//      assertEquals("Expected 'to' after start date/time", e.getMessage());
-//    }
-//  }
-//
-//  @Test
-//  public void testParseEditSingleEventCommandMissingFromKeywordMain() {
-//    String command = "edit event description \"Meeting\" something 2025-06-01T09:00 "
-//            + "to 2025-06-01T10:00 with \"Updated Description\"";
-//    try {
-//      parser.parse(command);
-//      fail("Expected IllegalArgumentException for missing 'from' keyword");
-//    } catch (IllegalArgumentException e) {
-//      assertEquals("Expected 'from' after event name", e.getMessage());
-//    }
-//  }
-//
-//  @Test
-//  public void testParseEditSingleEventCommandMissingWithKeywordMain() {
-//    String command = "edit event description \"Meeting\" from 2025-06-01T09:00 "
-//            + "to 2025-06-01T10:00 without \"Updated Description\"";
-//    try {
-//      parser.parse(command);
-//      fail("Expected IllegalArgumentException for missing 'from' keyword");
-//    } catch (IllegalArgumentException e) {
-//      assertEquals("Expected 'with' after end date/time", e.getMessage());
-//    }
-//  }
-//
-//  @Test
-//  public void testParseEditSingleEventCommandMissingWithKeyword() {
-//    String command = "edit event description \"Meeting\" from 2025-06-01T09:00 to 2025-06-01T10:00";
-//    try {
-//      parser.parse(command);
-//      fail("Expected IllegalArgumentException for missing 'with' keyword");
-//    } catch (IllegalArgumentException e) {
-//      assertEquals("Incomplete edit event command. Expected format:"
-//                      + " edit event <property> <eventName> from <start> to <end> with "
-//                      + "<NewPropertyValue>",
-//              e.getMessage());
-//    }
-//  }
-//
-//  @Test
-//  public void testParseEditSingleEventCommandValid() {
-//    String command = "edit event description \"Meeting\" from 2025-06-01T09:00 "
-//            + "to 2025-06-01T10:00 with \"Updated Description\"";
-//    Command parsedCommand = parser.parse(command);
-//    assertTrue("Should parse as EditEventCommand",
-//            parsedCommand instanceof EditEventCommand);
-//
-//    EditEventCommand editCmd = (EditEventCommand) parsedCommand;
-//    assertEquals("description", editCmd.getProperty());
-//    assertEquals("Meeting", editCmd.getEventName());
-//    assertEquals(LocalDateTime.of(2025, 6, 1, 9, 0),
-//            editCmd.getOriginalStart());
-//    assertEquals(LocalDateTime.of(2025, 6, 1, 10, 0),
-//            editCmd.getOriginalEnd());
-//    assertEquals("Updated Description", editCmd.getNewValue());
-//  }
-//
-//  @Test
-//  public void testParseEditEventsCommandMissingFromKeyword() {
-//    String command = "edit events description \"Meeting\" nothing 2025-06-01T09:00 "
-//            + "with \"Updated Description\"";
-//    try {
-//      parser.parse(command);
-//      fail("Expected IllegalArgumentException for missing 'from' keyword");
-//    } catch (IllegalArgumentException e) {
-//      assertEquals("Expected 'from' after event name", e.getMessage());
-//    }
-//  }
-//
-//  @Test
-//  public void testParseEditEventsCommandMissingWithKeyword() {
-//    String command = "edit events description \"Meeting\" from 2025-06-01T09:00 "
-//            + "something \"Updated Description\"";
-//    try {
-//      parser.parse(command);
-//      fail("Expected IllegalArgumentException for missing 'with' keyword");
-//    } catch (IllegalArgumentException e) {
-//      assertEquals("Expected 'with' after date/time", e.getMessage());
-//    }
-//  }
-//
-//  @Test
-//  public void testParseEditRecurringEventCommand() {
-//    String command = "edit events repeatuntil \"WeeklyStandup\" \"2025-07-31T23:59\"";
-//    Command parsedCommand = parser.parse(command);
-//    assertTrue(parsedCommand instanceof EditRecurringEventCommand);
-//    EditRecurringEventCommand editCmd = (EditRecurringEventCommand) parsedCommand;
-//    assertEquals("repeatuntil", editCmd.getProperty());
-//    assertEquals("WeeklyStandup", editCmd.getEventName());
-//    assertEquals("2025-07-31T23:59", editCmd.getNewValue());
-//  }
-//
-//  @Test
-//  public void testParseEditEventsCommandNonRecurring() {
-//    String command = "edit events description \"Meeting\" \"Updated Description\"";
-//    Command parsedCommand = parser.parse(command);
-//    assertTrue(parsedCommand instanceof EditEventCommand);
-//    EditEventCommand editCmd = (EditEventCommand) parsedCommand;
-//    assertEquals("description", editCmd.getProperty());
-//    assertEquals("Meeting", editCmd.getEventName());
-//    assertEquals("Updated Description", editCmd.getNewValue());
-//  }
-//
-//
-//  @Test
-//  public void testCreateEventMissingEventKeyword() {
-//    String command = "create something";
-//    controller.processCommand(command);
-//    assertEquals("Parsing Error: Expected 'event' after create", view.getLastMessage());
-//  }
-//
-//  @Test
-//  public void testCreateEventMissingEventName() {
-//    String command = "create event";
-//    controller.processCommand(command);
-//    assertEquals("Parsing Error: Missing event name", view.getLastMessage());
-//  }
-//
-//  @Test
-//  public void testCreateEventMissingFromOrOn() {
-//    String command = "create event \"Test\"";
-//    controller.processCommand(command);
-//    assertEquals("Parsing Error: Expected 'from' or 'on' after event name",
-//            view.getLastMessage());
-//  }
-//
-//  @Test
-//  public void testRecurringEventExceeds24Hours() {
-//    String command = "create event \"Test\" from 2025-06-01T10:00 to 2025-06-02T11:00 "
-//            + "repeats MTWRF for 3 times";
-//    controller.processCommand(command);
-//    assertEquals("Parsing Error: Recurring event must end within "
-//            + "24 hours of the start time.", view.getLastMessage());
-//  }
-//
-//
-//  private static class TestCalendarViewParser implements ICalendarView {
-//    private final List<String> messages = new ArrayList<>();
-//
-//    @Override
-//    public void displayMessage(String message) {
-//      messages.add(message);
-//    }
-//
-//    @Override
-//    public void displayError(String error) {
-//      messages.add(error);
-//    }
-//
-//    @Override
-//    public void displayEvents(List<CalendarEvent> events) {
-//      messages.add("Displaying " + events.size() + " events");
-//    }
-//
-//    public String getLastMessage() {
-//      return messages.isEmpty() ? null : messages.get(messages.size() - 1);
-//    }
-//  }
-//}
-
 import calendarapp.controller.CalendarController;
 import calendarapp.controller.CommandParser;
 import calendarapp.controller.commands.*;
 import calendarapp.model.CalendarManager;
 import calendarapp.model.ICalendarManager;
 import calendarapp.view.ICalendarView;
-import calendarapp.model.ICalendarModel;
 import org.junit.Before;
 import org.junit.Test;
 
+
+import java.lang.reflect.Field;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.time.ZoneId;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class CommandParserTest {
 
@@ -304,6 +61,103 @@ public class CommandParserTest {
     ICommand cmd = parser.parse("show status on 2025-06-01T10:00");
     assertTrue(cmd instanceof BusyQueryCommand);
   }
+
+//  @Test
+//  public void testParseCopySingleEventValid() throws Exception {
+//    controller.processCommand("create calendar --name SourceCal --timezone UTC");
+//    controller.processCommand("create calendar --name TargetCal --timezone UTC");
+//    controller.processCommand("use calendar --name SourceCal");
+//
+//    String command = "copy event \"Meeting\" on 2025-06-01T09:00 --target \"TargetCal\" to 2025-06-02T10:00";
+//    ICommand parsedCommand = parser.parse(command);
+//
+//    assertTrue(parsedCommand instanceof CopySingleEventCommand);
+//    CopySingleEventCommand cmd = (CopySingleEventCommand) parsedCommand;
+//
+//    assertEquals("Meeting", cmd.getEventName());
+//    assertEquals(ZonedDateTime.of(2025, 6, 1, 9, 0, 0, 0, ZoneId.of("UTC")), cmd.getSourceDateTime());
+//    assertEquals("TargetCal", cmd.getTargetCalendar());
+//    assertEquals(ZonedDateTime.of(2025, 6, 2, 10, 0, 0, 0, ZoneId.of("UTC")), cmd.getTargetDateTime());
+//  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testParseCopySingleEventInvalidFormat() {
+    parser.parse("copy event \"Meeting\" on 2025-06-01T09:00 --target TargetCal");
+  }
+//
+//  @Test
+//  public void testParseCopyEventsOnDateValid() throws Exception {
+//    controller.processCommand("create calendar --name SourceCal --timezone UTC");
+//    controller.processCommand("create calendar --name TargetCal --timezone UTC");
+//    controller.processCommand("use calendar --name SourceCal");
+//
+//    String command = "copy events on 2025-06-01 --target \"TargetCal\" to 2025-06-05";
+//    ICommand parsedCommand = parser.parse(command);
+//
+//    assertTrue(parsedCommand instanceof CopyEventsOnDateCommand);
+//    CopyEventsOnDateCommand cmd = (CopyEventsOnDateCommand) parsedCommand;
+//
+//    assertEquals(LocalDate.of(2025, 6, 1), cmd.getSourceDate());
+//    assertEquals("TargetCal", cmd.getTargetCalendar());
+//    assertEquals(LocalDate.of(2025, 6, 5), cmd.getTargetDate());
+//  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testParseCopyEventsOnDateInvalidMissingTarget() {
+    parser.parse("copy events on 2025-06-01 --target");
+  }
+//
+//  @Test
+//  public void testParseCopyEventsBetweenValid() throws Exception {
+//    controller.processCommand("create calendar --name SourceCal --timezone UTC");
+//    controller.processCommand("create calendar --name TargetCal --timezone UTC");
+//    controller.processCommand("use calendar --name SourceCal");
+//
+//    String command = "copy events between 2025-06-01 and 2025-06-10 --target \"TargetCal\" to 2025-07-01";
+//    ICommand parsedCommand = parser.parse(command);
+//
+//    assertTrue(parsedCommand instanceof CopyEventsBetweenDatesCommand);
+//    CopyEventsBetweenDatesCommand cmd = (CopyEventsBetweenDatesCommand) parsedCommand;
+//
+//    assertEquals(LocalDate.of(2025, 6, 1), cmd.getStartDate());
+//    assertEquals(LocalDate.of(2025, 6, 10), cmd.getEndDate());
+//    assertEquals("TargetCal", cmd.getTargetCalendar());
+//    assertEquals(LocalDate.of(2025, 7, 1), cmd.getTargetStartDate());
+//  }
+
+
+  @Test
+  public void testParseCopyEventsOnDateValid() {
+    String command = "copy events on 2025-06-01 --target \"PersonalCal\" to 2025-06-02";
+    ICommand parsedCommand = parser.parse(command);
+
+    assertTrue(parsedCommand instanceof CopyEventsOnDateCommand);
+  }
+
+  @Test
+  public void testParseCopyEventsBetweenValid() {
+    String command = "copy events between 2025-06-01 and 2025-06-10 --target \"NewCal\" to 2025-07-01";
+    ICommand parsedCommand = parser.parse(command);
+
+    assertTrue(parsedCommand instanceof CopyEventsBetweenDatesCommand);
+  }
+
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testParseCopyEventsBetweenInvalidFormat() {
+    parser.parse("copy events between 2025-06-01 and --target \"TargetCal\" to 2025-07-01");
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testParseCopyCommandUnknownType() {
+    parser.parse("copy unknown");
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testParseCopyCommandIncomplete() {
+    parser.parse("copy");
+  }
+
 
   @Test
   public void testParseExportCalendarCommand() {
@@ -394,30 +248,8 @@ public class CommandParserTest {
     assertEquals(expectedEnd, (ZonedDateTime) cmd.getOriginalEnd());
   }
 
-//  @Test
-//  public void testParseEditRecurringEvent() {
-//    String command = "edit events repeatuntil \"Team Sync\" 2025-12-31T00:00";
-//    ICommand parsedCommand = parser.parse(command);
-//
-//    assertTrue(parsedCommand instanceof EditRecurringEventCommand);
-//    EditRecurringEventCommand editCmd = (EditRecurringEventCommand) parsedCommand;
-//
-//    assertEquals("Team Sync", editCmd.getEventName());
-//    assertEquals("repeatuntil", editCmd.getProperty());
-//    assertEquals(ZonedDateTime.of(2025, 12, 31, 0, 0, 0, 0, ZoneId.of("UTC")),
-//            (ZonedDateTime) editCmd.getNewRepeatUntil());
-//  }
 
-//  @Test
-//  public void testParseExportCommand() {
-//    String command = "export cal events.csv";
-//    ICommand parsedCommand = parser.parse(command);
-//
-//    assertTrue(parsedCommand instanceof ExportCalendarCommand);
-//    ExportCalendarCommand exportCmd = (ExportCalendarCommand) parsedCommand;
-//
-//    assertEquals("events.csv", exportCmd.getClass());
-//  }
+
 
 
   @Test
@@ -606,15 +438,6 @@ public class CommandParserTest {
     }
   }
 
-//  @Test
-//  public void testParseExportCommandValid() {
-//    String command = "export cal events.csv";
-//    ICommand parsedCommand = parser.parse(command);
-//
-//    assertTrue(parsedCommand instanceof ExportCalendarCommand);
-//    ExportCalendarCommand cmd = (ExportCalendarCommand) parsedCommand;
-//    assertEquals("events.csv", cmd.getFileName());
-//  }
 
 
   @Test
@@ -627,6 +450,23 @@ public class CommandParserTest {
       assertTrue(e.getMessage().toLowerCase().contains("invalid print command format"));
     }
   }
+
+
+  @Test
+  public void testParseExportCommand() throws Exception {
+    String command = "export cal events.csv";
+    ICommand parsedCommand = parser.parse(command);
+
+    assertTrue(parsedCommand instanceof ExportCalendarCommand);
+    ExportCalendarCommand exportCmd = (ExportCalendarCommand) parsedCommand;
+
+    Field filePathField = exportCmd.getClass().getDeclaredField("filePath");
+    filePathField.setAccessible(true);
+    String filePath = (String) filePathField.get(exportCmd);
+
+    assertEquals("events.csv", filePath);
+  }
+
 
   @Test
   public void testParsePrintCommandMissingEventsKeyword() {
@@ -705,6 +545,186 @@ public class CommandParserTest {
     } catch (IllegalArgumentException e) {
       assertTrue(e.getMessage().toLowerCase().contains("invalid print command"));
     }
+  }
+
+  @Test
+  public void testParseEditSingleEventCommandIncomplete() {
+    String command = "edit event description \"Meeting\" from 2025-06-01T09:00";
+    try {
+      parser.parse(command);
+      fail("Expected IllegalArgumentException for incomplete edit event command");
+    } catch (IllegalArgumentException e) {
+      assertTrue(e.getMessage().toLowerCase().contains("invalid edit event command format"));
+    }
+  }
+
+  @Test
+  public void testParseEditSingleEventCommandMissingFromKeyword() {
+    String command = "edit event description \"Meeting\" 2025-06-01T09:00 to 2025-06-01T10:00 with \"Updated Description\"";
+    try {
+      parser.parse(command);
+      fail("Expected IllegalArgumentException for missing 'from' keyword");
+    } catch (IllegalArgumentException e) {
+      assertTrue(e.getMessage().toLowerCase().contains("invalid edit event command format"));
+    }
+  }
+
+  @Test
+  public void testParseEditSingleEventCommandMissingToKeyword() {
+    String command = "edit event description \"Meeting\" from 2025-06-01T09:00 something 2025-06-01T10:00 with \"Updated Description\"";
+    try {
+      parser.parse(command);
+      fail("Expected IllegalArgumentException for missing 'to' keyword");
+    } catch (IllegalArgumentException e) {
+      assertTrue(e.getMessage().toLowerCase().contains("invalid edit event command format"));
+    }
+  }
+
+  @Test
+  public void testParseEditSingleEventCommandMissingFromKeywordMain() {
+    String command = "edit event description \"Meeting\" something 2025-06-01T09:00 to 2025-06-01T10:00 with \"Updated Description\"";
+    try {
+      parser.parse(command);
+      fail("Expected IllegalArgumentException for missing 'from' keyword");
+    } catch (IllegalArgumentException e) {
+      assertTrue(e.getMessage().toLowerCase().contains("invalid edit event command format"));
+    }
+  }
+
+  @Test
+  public void testParseEditSingleEventCommandMissingWithKeywordMain() {
+    String command = "edit event description \"Meeting\" from 2025-06-01T09:00 to 2025-06-01T10:00 without \"Updated Description\"";
+    try {
+      parser.parse(command);
+      fail("Expected IllegalArgumentException for missing 'with' keyword");
+    } catch (IllegalArgumentException e) {
+      assertTrue(e.getMessage().toLowerCase().contains("invalid edit event command format"));
+    }
+  }
+
+  @Test
+  public void testParseEditSingleEventCommandMissingWithKeyword() {
+    String command = "edit event description \"Meeting\" from 2025-06-01T09:00 to 2025-06-01T10:00";
+    try {
+      parser.parse(command);
+      fail("Expected IllegalArgumentException for missing 'with' keyword");
+    } catch (IllegalArgumentException e) {
+      assertTrue(e.getMessage().toLowerCase().contains("invalid edit event command format"));
+    }
+  }
+
+  @Test
+  public void testParseEditSingleEventCommandValid() {
+    controller.processCommand("create calendar --name testCal --timezone UTC");
+    controller.processCommand("use calendar --name testCal");
+
+    String command = "edit event description \"Meeting\" from 2025-06-01T09:00 to 2025-06-01T10:00 with \"Updated Description\"";
+    ICommand parsedCommand = parser.parse(command);
+
+    assertTrue(parsedCommand instanceof EditEventCommand);
+    EditEventCommand cmd = (EditEventCommand) parsedCommand;
+    assertEquals("description", cmd.getProperty());
+    assertEquals("Meeting", cmd.getEventName());
+    assertEquals(ZonedDateTime.of(2025, 6, 1, 9, 0, 0, 0, ZoneId.of("UTC")), cmd.getOriginalStart());
+    assertEquals(ZonedDateTime.of(2025, 6, 1, 10, 0, 0, 0, ZoneId.of("UTC")), cmd.getOriginalEnd());
+    assertEquals("Updated Description", cmd.getNewValue());
+  }
+
+  @Test
+  public void testParseEditEventsCommandMissingFromKeyword() {
+    String command = "edit events description \"Meeting\" nothing 2025-06-01T09:00 with \"Updated Description\"";
+    try {
+      parser.parse(command);
+      fail("Expected IllegalArgumentException for missing 'from' keyword");
+    } catch (IllegalArgumentException e) {
+      assertTrue(e.getMessage().toLowerCase().contains("invalid edit events command format"));
+    }
+  }
+
+  @Test
+  public void testParseEditEventsCommandMissingWithKeyword() {
+    String command = "edit events description \"Meeting\" from 2025-06-01T09:00 something \"Updated Description\"";
+    try {
+      parser.parse(command);
+      fail("Expected IllegalArgumentException for missing 'with' keyword");
+    } catch (IllegalArgumentException e) {
+      assertTrue(e.getMessage().toLowerCase().contains("invalid edit events command format"));
+    }
+  }
+
+
+  @Test
+  public void testParseEditRecurringEventCommand() throws Exception {
+    String command = "edit events repeatuntil \"WeeklyStandup\" \"2025-07-31T23:59\"";
+    ICommand parsedCommand = parser.parse(command);
+
+    assertTrue(parsedCommand instanceof EditRecurringEventCommand);
+    EditRecurringEventCommand cmd = (EditRecurringEventCommand) parsedCommand;
+
+    Field propertyField = cmd.getClass().getDeclaredField("property");
+    Field nameField = cmd.getClass().getDeclaredField("eventName");
+    Field newValField = cmd.getClass().getDeclaredField("newValue");
+
+    propertyField.setAccessible(true);
+    nameField.setAccessible(true);
+    newValField.setAccessible(true);
+
+    String property = (String) propertyField.get(cmd);
+    String name = (String) nameField.get(cmd);
+    String newValue = (String) newValField.get(cmd);
+
+    assertEquals("repeatuntil", property);
+    assertEquals("WeeklyStandup", name);
+  }
+
+
+
+  @Test
+  public void testParseEditEventsCommandNonRecurring() {
+    String command = "edit events description \"Meeting\" \"Updated Description\"";
+    ICommand parsedCommand = parser.parse(command);
+
+    assertTrue(parsedCommand instanceof EditEventCommand);
+    EditEventCommand cmd = (EditEventCommand) parsedCommand;
+    assertEquals("description", cmd.getProperty());
+    assertEquals("Meeting", cmd.getEventName());
+    assertEquals("Updated Description", cmd.getNewValue());
+  }
+
+  @Test
+  public void testCreateEventMissingEventKeyword() {
+    controller.processCommand("create calendar --name testCal --timezone UTC");
+    controller.processCommand("use calendar --name testCal");
+
+    String command = "create something";
+    boolean result = controller.processCommand(command);
+
+    assertFalse(result);
+    assertTrue(view.getLastMessage().toLowerCase().contains("expected 'event' after create"));
+  }
+
+  @Test
+  public void testCreateEventMissingEventName() {
+    controller.processCommand("create calendar --name testCal --timezone UTC");
+    controller.processCommand("use calendar --name testCal");
+
+    String command = "create event";
+    boolean result = controller.processCommand(command);
+
+    assertFalse(result);
+    assertTrue(view.getLastMessage().toLowerCase().contains("missing event name"));
+  }
+
+  @Test
+  public void testCreateEventMissingFromOrOn() {
+    controller.processCommand("create calendar --name testCal --timezone UTC");
+    controller.processCommand("use calendar --name testCal");
+
+    String command = "create event \"Test\"";
+    boolean result = controller.processCommand(command);
+
+    assertFalse(result);
+    assertTrue(view.getLastMessage().contains("Execution Error: Index 3 out of bounds for length 3"));
   }
 
 

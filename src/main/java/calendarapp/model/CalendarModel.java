@@ -209,8 +209,6 @@ public class CalendarModel implements ICalendarModel {
         allCopied = false;
       }
     }
-
-    System.out.println("==== COPY COMPLETED: SUCCESS = " + allCopied + " ====\n");
     return allCopied;
   }
 
