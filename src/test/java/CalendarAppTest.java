@@ -98,6 +98,53 @@ public class CalendarAppTest {
   }
 
   @Test
+  public void testMainInvalidModeArgument() {
+    try {
+      CalendarApp.main(new String[]{"--mode", "invalidMode"});
+      fail("Expected System.exit due to invalid mode argument");
+    } catch (SecurityException e) {
+      assertTrue(e.getMessage().contains("Intercepted System.exit(1)"));
+    }
+  }
+
+  @Test
+  public void testMainHeadlessModeMissingFileArg() {
+    try {
+      CalendarApp.main(new String[]{"--mode", "headless"});
+      fail("Expected System.exit due to missing file argument");
+    } catch (SecurityException e) {
+      assertTrue(e.getMessage().contains("Intercepted System.exit(1)"));
+    }
+  }
+
+  @Test
+  public void testMainHeadlessModeFileNotFound() {
+    try {
+      CalendarApp.main(new String[]{"--mode", "headless", "nonexistentfile.txt"});
+      fail("Expected System.exit due to IOException (file not found)");
+    } catch (SecurityException e) {
+      assertTrue(e.getMessage().contains("Intercepted System.exit(1)"));
+    }
+  }
+
+
+  @Test
+  public void testPrintlnExecutedInInteractiveMode() {
+    Queue<String> commands = new LinkedList<>();
+    commands.add("exit");
+    ICommandSource testSource = new TestCommandSource(commands);
+
+    ByteArrayOutputStream outStream = new ByteArrayOutputStream();
+    System.setOut(new PrintStream(outStream));
+
+    CalendarApp.runInteractiveMode(controller, view, testSource);
+
+    String output = outStream.toString();
+    assertTrue(output.contains("Enter commands (type 'exit' to quit):"));
+  }
+
+
+  @Test
   public void testInteractiveModeProcessesNonExitCommand() {
     Queue<String> commands = new LinkedList<>();
     commands.add("create calendar --name TestCal --timezone UTC");
