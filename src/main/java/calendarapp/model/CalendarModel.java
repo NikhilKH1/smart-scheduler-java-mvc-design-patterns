@@ -328,7 +328,7 @@ public class CalendarModel implements ICalendarModel {
   @Override
   public List<ICalendarEvent> getEventsOnDate(Temporal date) {
     List<ICalendarEvent> result = new ArrayList<>();
-    LocalDate queryDate = LocalDate.from(date);  // Convert Temporal to LocalDate
+    LocalDate queryDate = LocalDate.from(date);
 
     for (ICalendarEvent event : events) {
       LocalDate eventStartDate = ZonedDateTime.from(event.getStartDateTime()).toLocalDate();
