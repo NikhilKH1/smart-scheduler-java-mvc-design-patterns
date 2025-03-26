@@ -1,5 +1,3 @@
-
-
 import calendarapp.controller.commands.CopySingleEventCommand;
 import calendarapp.model.CalendarModel;
 import calendarapp.model.ICalendarManager;
@@ -10,14 +8,20 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.temporal.Temporal;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
 
+/**
+ * JUnit tests for the CopySingleEventCommand class.
+ */
 public class CopySingleEventCommandTest {
 
   @Test
   public void testExecuteSuccess() {
-    ZonedDateTime sourceDateTime = ZonedDateTime.of(2025, 4, 1, 10, 0, 0, 0, ZoneId.of("UTC"));
-    ZonedDateTime targetDateTime = ZonedDateTime.of(2025, 4, 2, 11, 0, 0, 0, ZoneId.of("UTC"));
+    ZonedDateTime sourceDateTime = ZonedDateTime.of(2025, 4, 1,
+            10, 0, 0, 0, ZoneId.of("UTC"));
+    ZonedDateTime targetDateTime = ZonedDateTime.of(2025, 4, 2,
+            11, 0, 0, 0, ZoneId.of("UTC"));
 
     DummyCalendarModel sourceCalendar = new DummyCalendarModel(true);
     DummyCalendarModel targetCalendar = new DummyCalendarModel(true);

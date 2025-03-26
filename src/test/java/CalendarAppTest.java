@@ -105,7 +105,8 @@ public class CalendarAppTest {
 
     CalendarApp.runInteractiveMode(controller, view, testSource);
 
-    assertNull("Expected no more commands after 'exit' command", testSource.getNextCommand());
+    assertNull("Expected no more commands after 'exit' command",
+            testSource.getNextCommand());
   }
 
 

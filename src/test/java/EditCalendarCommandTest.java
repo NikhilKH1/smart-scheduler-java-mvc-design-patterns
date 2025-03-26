@@ -1,5 +1,3 @@
-
-
 import calendarapp.controller.commands.EditCalendarCommand;
 import calendarapp.model.ICalendarManager;
 import calendarapp.view.ICalendarView;
@@ -7,8 +5,13 @@ import org.junit.Test;
 
 import java.time.ZoneId;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
+
+/**
+ * JUnit tests for the EditCalendarCommand class.
+ */
 public class EditCalendarCommandTest {
 
   @Test(expected = IllegalArgumentException.class)
@@ -87,7 +90,8 @@ public class EditCalendarCommandTest {
       }
     };
 
-    EditCalendarCommand cmd = new EditCalendarCommand("MyCal", "timezone", "UTC");
+    EditCalendarCommand cmd = new EditCalendarCommand("MyCal",
+            "timezone", "UTC");
     boolean result = cmd.execute(manager, view);
 
     assertTrue(result);
@@ -140,7 +144,8 @@ public class EditCalendarCommandTest {
       }
     };
 
-    EditCalendarCommand cmd = new EditCalendarCommand("MyCal", "timezone", "UTC");
+    EditCalendarCommand cmd = new EditCalendarCommand("MyCal",
+            "timezone", "UTC");
     boolean result = cmd.execute(manager, view);
 
     assertFalse(result);
@@ -193,7 +198,8 @@ public class EditCalendarCommandTest {
       }
     };
 
-    EditCalendarCommand cmd = new EditCalendarCommand("MyCal", "timezone", "UTC");
+    EditCalendarCommand cmd = new EditCalendarCommand("MyCal",
+            "timezone", "UTC");
     boolean result = cmd.execute(manager, view);
 
     assertFalse(result);

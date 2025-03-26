@@ -10,8 +10,13 @@ import java.util.List;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import org.junit.Test;
-import static org.junit.Assert.*;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+/**
+ * JUnit tests for the EditRecurringEventCommand class.
+ */
 public class EditRecurringEventCommandTest {
 
   private class TestCalendarModel implements ICalendarModel {

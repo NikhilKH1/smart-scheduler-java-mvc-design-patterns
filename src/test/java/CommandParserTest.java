@@ -23,6 +23,9 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+/**
+ * JUnit tests for the CommandParser class.
+ */
 public class CommandParserTest {
 
   private CommandParser parser;

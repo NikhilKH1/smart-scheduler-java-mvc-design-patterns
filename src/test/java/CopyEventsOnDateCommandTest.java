@@ -9,14 +9,20 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.temporal.Temporal;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
 
+/**
+ * JUnit tests for the CopyEventsOnDateCommand class.
+ */
 public class CopyEventsOnDateCommandTest {
 
   @Test
   public void testExecuteSuccess() {
-    ZonedDateTime sourceDate = ZonedDateTime.of(2025, 4, 1, 0, 0, 0, 0, ZoneId.of("UTC"));
-    ZonedDateTime targetDate = ZonedDateTime.of(2025, 4, 2, 0, 0, 0, 0, ZoneId.of("UTC"));
+    ZonedDateTime sourceDate = ZonedDateTime.of(2025, 4, 1, 0,
+            0, 0, 0, ZoneId.of("UTC"));
+    ZonedDateTime targetDate = ZonedDateTime.of(2025, 4, 2, 0,
+            0, 0, 0, ZoneId.of("UTC"));
 
     DummyCalendarModel sourceCalendar = new DummyCalendarModel(true);
     DummyCalendarModel targetCalendar = new DummyCalendarModel(true);
@@ -65,7 +71,8 @@ public class CopyEventsOnDateCommandTest {
       }
     };
 
-    CopyEventsOnDateCommand cmd = new CopyEventsOnDateCommand(sourceDate, "TargetCal", targetDate);
+    CopyEventsOnDateCommand cmd = new CopyEventsOnDateCommand(sourceDate,
+            "TargetCal", targetDate);
     boolean result = cmd.execute(manager, view);
 
     assertTrue(result);

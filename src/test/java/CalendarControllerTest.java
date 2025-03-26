@@ -762,9 +762,6 @@ public class CalendarControllerTest {
     assertSame("Expected same view object injected", view, controller.getView());
   }
 
-
-
-
   private static class TestView implements ICalendarView {
     private final List<String> messages = new ArrayList<>();
 

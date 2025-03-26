@@ -14,15 +14,11 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.Temporal;
 import java.time.zone.ZoneRulesException;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 

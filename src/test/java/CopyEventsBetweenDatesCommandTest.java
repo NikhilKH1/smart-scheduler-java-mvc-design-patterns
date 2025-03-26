@@ -8,15 +8,23 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.temporal.Temporal;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
+
+/**
+ * JUnit tests for the CopyEventsBetweenDatesCommand class.
+ */
 public class CopyEventsBetweenDatesCommandTest {
 
   @Test
   public void testExecuteSuccess() {
-    ZonedDateTime startDate = ZonedDateTime.of(2025, 4, 1, 0, 0, 0, 0, ZoneId.of("UTC"));
-    ZonedDateTime endDate = ZonedDateTime.of(2025, 4, 3, 0, 0, 0, 0, ZoneId.of("UTC"));
-    ZonedDateTime targetStart = ZonedDateTime.of(2025, 4, 5, 0, 0, 0, 0, ZoneId.of("UTC"));
+    ZonedDateTime startDate = ZonedDateTime.of(2025, 4, 1,
+            0, 0, 0, 0, ZoneId.of("UTC"));
+    ZonedDateTime endDate = ZonedDateTime.of(2025, 4, 3,
+            0, 0, 0, 0, ZoneId.of("UTC"));
+    ZonedDateTime targetStart = ZonedDateTime.of(2025, 4, 5,
+            0, 0, 0, 0, ZoneId.of("UTC"));
 
     DummyCalendarModel source = new DummyCalendarModel(true);
     DummyCalendarModel target = new DummyCalendarModel(true);
@@ -65,7 +73,8 @@ public class CopyEventsBetweenDatesCommandTest {
       }
     };
 
-    CopyEventsBetweenDatesCommand cmd = new CopyEventsBetweenDatesCommand(startDate, endDate, "TargetCal", targetStart);
+    CopyEventsBetweenDatesCommand cmd = new CopyEventsBetweenDatesCommand(startDate, endDate,
+            "TargetCal", targetStart);
     boolean result = cmd.execute(manager, view);
 
     assertTrue(result);
@@ -122,7 +131,8 @@ public class CopyEventsBetweenDatesCommandTest {
     ZonedDateTime endDate = ZonedDateTime.now().plusDays(1);
     ZonedDateTime targetStart = ZonedDateTime.now().plusDays(2);
 
-    CopyEventsBetweenDatesCommand cmd = new CopyEventsBetweenDatesCommand(startDate, endDate, "Target", targetStart);
+    CopyEventsBetweenDatesCommand cmd = new CopyEventsBetweenDatesCommand(startDate, endDate,
+            "Target", targetStart);
     boolean result = cmd.execute(manager, view);
 
     assertFalse(result);
@@ -182,7 +192,8 @@ public class CopyEventsBetweenDatesCommandTest {
       }
     };
 
-    CopyEventsBetweenDatesCommand cmd = new CopyEventsBetweenDatesCommand(startDate, endDate, "Target", targetStart);
+    CopyEventsBetweenDatesCommand cmd = new CopyEventsBetweenDatesCommand(startDate, endDate,
+            "Target", targetStart);
     boolean result = cmd.execute(manager, view);
 
     assertFalse(result);
@@ -198,7 +209,8 @@ public class CopyEventsBetweenDatesCommandTest {
     }
 
     @Override
-    public boolean copyEventsBetweenTo(CalendarModel source, Temporal startDate, Temporal endDate, CalendarModel target, Temporal targetStartDate) {
+    public boolean copyEventsBetweenTo(CalendarModel source, Temporal startDate, Temporal endDate,
+                                       CalendarModel target, Temporal targetStartDate) {
       return shouldSucceed;
     }
   }

@@ -119,7 +119,6 @@ public class QueryRangeDateTimeCommandTest {
                                        Temporal targetStartDate) {
       return false;
     }
-    // Stub other methods if required
   }
 
   private class TestCalendarView implements ICalendarView {
@@ -183,7 +182,6 @@ public class QueryRangeDateTimeCommandTest {
     public boolean isPublic() {
       return false;
     }
-    // Stub other methods as needed
   }
 
   @Test
