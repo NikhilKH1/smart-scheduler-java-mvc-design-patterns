@@ -98,6 +98,56 @@ public class CalendarAppTest {
   }
 
   @Test
+  public void testInteractiveModeProcessesNonExitCommand() {
+    Queue<String> commands = new LinkedList<>();
+    commands.add("create calendar --name TestCal --timezone UTC");
+    commands.add("exit");
+    ICommandSource testSource = new CalendarAppTest.TestCommandSource(commands);
+
+    CalendarApp.runInteractiveMode(controller, view, testSource);
+
+    String lastMessage = ((TestCalendarView) view).getLastMessage();
+    assertTrue(lastMessage.contains("Calendar created: TestCal (UTC)"));
+  }
+
+
+  @Test
+  public void testHeadlessModeCommandFailsTriggersExit() {
+    Queue<String> commands = new LinkedList<>();
+    commands.add("use calendar --name NonExistent");
+    ICommandSource testSource = new CalendarAppTest.TestCommandSource(commands);
+
+    try {
+      CalendarApp.runHeadlessMode(controller, view, testSource);
+      fail("Expected SecurityException due to System.exit(1)");
+    } catch (SecurityException se) {
+      assertTrue(se.getMessage().contains("Intercepted System.exit(1)"));
+    }
+  }
+
+  @Test
+  public void testHeadlessModeThrowsExceptionTriggersExit() {
+    Queue<String> commands = new LinkedList<>();
+    commands.add("some command");
+    ICommandSource testSource = new CalendarAppTest.TestCommandSource(commands);
+
+    ICalendarController faultyController = new ICalendarController() {
+      @Override
+      public boolean processCommand(String command) {
+        throw new RuntimeException("Simulated failure");
+      }
+    };
+
+    try {
+      CalendarApp.runHeadlessMode(faultyController, view, testSource);
+      fail("Expected System.exit due to exception");
+    } catch (SecurityException se) {
+      assertTrue(se.getMessage().contains("Intercepted System.exit(1)"));
+    }
+  }
+
+
+  @Test
   public void testInteractiveModeExitImmediately() {
     Queue<String> commands = new LinkedList<>();
     commands.add("exit");
@@ -107,6 +157,102 @@ public class CalendarAppTest {
 
     assertNull("Expected no more commands after 'exit' command",
             testSource.getNextCommand());
+  }
+
+  @Test
+  public void testInteractiveModeWithMultipleCommands() {
+    Queue<String> commands = new LinkedList<>();
+    commands.add("create calendar --name Work --timezone UTC");
+    commands.add("exit");
+    ICommandSource testSource = new TestCommandSource(commands);
+
+    CalendarApp.runInteractiveMode(controller, view, testSource);
+
+    String lastMessage = ((TestCalendarView) view).getLastMessage();
+    assertTrue(lastMessage.contains("Calendar created: Work (UTC)"));
+  }
+
+  @Test
+  public void testInteractiveModeWithEmptyCommand() {
+    Queue<String> commands = new LinkedList<>();
+    commands.add("");
+    commands.add("exit");
+    ICommandSource testSource = new TestCommandSource(commands);
+
+    CalendarApp.runInteractiveMode(controller, view, testSource);
+
+    String lastMessage = ((TestCalendarView) view).getLastMessage();
+    assertTrue(lastMessage.toLowerCase().contains("parsing error"));
+  }
+
+  @Test
+  public void testHeadlessModeWithEmptyCommandIgnored() {
+    Queue<String> commands = new LinkedList<>();
+    commands.add("");
+    commands.add("exit");
+    ICommandSource testSource = new TestCommandSource(commands);
+
+    try {
+      CalendarApp.runHeadlessMode(controller, view, testSource);
+      fail("Expected System.exit");
+    } catch (SecurityException e) {
+      assertTrue(e.getMessage().contains("Intercepted System.exit(0)"));
+    }
+  }
+
+  @Test
+  public void testHeadlessModeInvalidCommandExitsWithError() {
+    Queue<String> commands = new LinkedList<>();
+    commands.add("this is invalid command");
+    ICommandSource testSource = new TestCommandSource(commands);
+
+    try {
+      CalendarApp.runHeadlessMode(controller, view, testSource);
+      fail("Expected System.exit due to invalid command");
+    } catch (SecurityException e) {
+      assertTrue(e.getMessage().contains("Intercepted System.exit(1)"));
+    }
+  }
+
+  @Test
+  public void testHeadlessModeExceptionInCommandExecution() {
+    Queue<String> commands = new LinkedList<>();
+    commands.add("create calendar");
+    ICommandSource testSource = new TestCommandSource(commands);
+
+    try {
+      CalendarApp.runHeadlessMode(controller, view, testSource);
+      fail("Expected System.exit due to exception");
+    } catch (SecurityException e) {
+      assertTrue(e.getMessage().contains("Intercepted System.exit(1)"));
+    }
+  }
+
+  @Test
+  public void testInteractiveModeExitsOnEOF() {
+    Queue<String> commands = new LinkedList<>();
+    ICommandSource testSource = new TestCommandSource(commands);
+
+    CalendarApp.runInteractiveMode(controller, view, testSource);
+
+    assertNull(testSource.getNextCommand());
+  }
+
+  @Test
+  public void testHeadlessModeMultipleCommands() {
+    Queue<String> commands = new LinkedList<>();
+    commands.add("create calendar --name Home --timezone UTC");
+    commands.add("use calendar --name Home");
+    commands.add("create event \"Dinner\" from 2025-06-01T19:00 to 2025-06-01T20:00");
+    commands.add("exit");
+    ICommandSource testSource = new TestCommandSource(commands);
+
+    try {
+      CalendarApp.runHeadlessMode(controller, view, testSource);
+      fail("Expected System.exit due to 'exit' command");
+    } catch (SecurityException e) {
+      assertTrue(e.getMessage().contains("Intercepted System.exit(0)"));
+    }
   }
 
 

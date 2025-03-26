@@ -5,6 +5,7 @@ import calendarapp.model.event.ICalendarEvent;
 import calendarapp.model.event.RecurringEvent;
 import calendarapp.model.event.SingleEvent;
 import calendarapp.view.ICalendarView;
+
 import org.junit.Before;
 import org.junit.Test;
 
@@ -36,6 +37,51 @@ public class CreateEventCommandTest {
     repeatUntil = ZonedDateTime.of(2025, 7, 15, 9,
             0, 0, 0, ZoneId.of("UTC"));
   }
+
+  @Test
+  public void testGettersForRecurringEventCommand() {
+    CreateEventCommand cmd = new CreateEventCommand(
+            "Yoga", start, end, true,
+            "Morning Yoga Session", "Park",
+            false, true, true,
+            "MWF", 5, repeatUntil);
+
+    assertEquals("Yoga", cmd.getEventName());
+    assertEquals(start, cmd.getStartDateTime());
+    assertEquals(end, cmd.getEndDateTime());
+    assertTrue(cmd.isAutoDecline());
+    assertEquals("Morning Yoga Session", cmd.getDescription());
+    assertEquals("Park", cmd.getLocation());
+    assertFalse(cmd.isPublic());
+    assertTrue(cmd.isAllDay());
+    assertTrue(cmd.isRecurring());
+    assertEquals("MWF", cmd.getWeekdays());
+    assertEquals(5, cmd.getRepeatCount());
+    assertEquals(repeatUntil, cmd.getRepeatUntil());
+  }
+
+  @Test
+  public void testGettersForSingleEventCommand() {
+    CreateEventCommand cmd = new CreateEventCommand(
+            "Dentist", start, end, false,
+            "Dental check-up", "Clinic",
+            true, false, false,
+            "", 0, null);
+
+    assertEquals("Dentist", cmd.getEventName());
+    assertEquals(start, cmd.getStartDateTime());
+    assertEquals(end, cmd.getEndDateTime());
+    assertFalse(cmd.isAutoDecline());
+    assertEquals("Dental check-up", cmd.getDescription());
+    assertEquals("Clinic", cmd.getLocation());
+    assertTrue(cmd.isPublic());
+    assertFalse(cmd.isAllDay());
+    assertFalse(cmd.isRecurring());
+    assertEquals("", cmd.getWeekdays());
+    assertEquals(0, cmd.getRepeatCount());
+    assertEquals(null, cmd.getRepeatUntil());
+  }
+
 
   @Test
   public void testExecuteSingleEventSuccess() {

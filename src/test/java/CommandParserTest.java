@@ -1,6 +1,17 @@
 import calendarapp.controller.CalendarController;
 import calendarapp.controller.CommandParser;
-import calendarapp.controller.commands.*;
+import calendarapp.controller.commands.BusyQueryCommand;
+import calendarapp.controller.commands.CopyEventsBetweenDatesCommand;
+import calendarapp.controller.commands.CopyEventsOnDateCommand;
+import calendarapp.controller.commands.CopySingleEventCommand;
+import calendarapp.controller.commands.CreateEventCommand;
+import calendarapp.controller.commands.EditCalendarCommand;
+import calendarapp.controller.commands.EditEventCommand;
+import calendarapp.controller.commands.EditRecurringEventCommand;
+import calendarapp.controller.commands.ExportCalendarCommand;
+import calendarapp.controller.commands.ICommand;
+import calendarapp.controller.commands.QueryByDateCommand;
+import calendarapp.controller.commands.QueryRangeDateTimeCommand;
 import calendarapp.model.CalendarManager;
 import calendarapp.model.CalendarModel;
 import calendarapp.model.ICalendarManager;
@@ -11,6 +22,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
@@ -804,6 +816,72 @@ public class CommandParserTest {
   public void testCreateEventInvalidKeyword() {
     String input = "create event \"Something\" at 2025-04-01T09:00";
     parser.parse(input);
+  }
+
+  @Test
+  public void testExportCalendarCommandExecutesSuccessfully() {
+    controller.processCommand("create calendar --name exportCal --timezone UTC");
+    controller.processCommand("use calendar --name exportCal");
+    controller.processCommand("create event \"Meeting\" "
+            + "from 2025-04-01T10:00 to 2025-04-01T11:00");
+    boolean result = controller.processCommand("export cal exportTest.csv");
+
+    assertTrue(result);
+    String msg = view.getLastMessage();
+    assertTrue(msg.contains("Calendar exported to"));
+  }
+
+  @Test
+  public void testExportCalendarCommandExecutionFailsWithIllegalArgument() {
+    controller.processCommand("create calendar --name illegalCal --timezone UTC");
+    controller.processCommand("use calendar --name illegalCal");
+
+    boolean result = controller.processCommand("export cal events.invalid");
+    assertFalse(result);
+    assertTrue(view.getLastMessage().
+            contains("Parsing Error: Exported file must have a .csv extension"));
+  }
+
+  @Test
+  public void testExportCalendarCommandHandlesIOException() {
+    ICalendarModel model = new CalendarModel("testCal", ZoneId.of("UTC"));
+    view.displayMessage("");
+    ExportCalendarCommand command = new ExportCalendarCommand("test.csv") {
+      @Override
+      public boolean execute(ICalendarModel m, ICalendarView v) {
+        try {
+          throw new IOException("Disk error");
+        } catch (IOException e) {
+          v.displayError("Failed to export calendar: " + e.getMessage());
+          return false;
+        }
+      }
+    };
+
+    boolean result = command.execute(model, view);
+    assertFalse(result);
+    assertTrue(view.getLastMessage().contains("Failed to export calendar: Disk error"));
+  }
+
+  @Test
+  public void testExportCalendarCommandHandlesIllegalArgumentException() {
+    ICalendarModel model = new CalendarModel("testCal", ZoneId.of("UTC"));
+    view.displayMessage("");
+    ExportCalendarCommand command = new ExportCalendarCommand("test.csv") {
+      @Override
+      public boolean execute(ICalendarModel m, ICalendarView v) {
+        try {
+          throw new IllegalArgumentException("Unsupported file format");
+        } catch (IllegalArgumentException e) {
+          v.displayError("Export Error: " + e.getMessage());
+          return false;
+        }
+      }
+    };
+
+    boolean result = command.execute(model, view);
+    assertFalse(result);
+    assertTrue(view.getLastMessage().contains("Export Error: Unsupported file format"));
   }
 
 
