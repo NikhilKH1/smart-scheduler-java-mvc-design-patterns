@@ -1,57 +1,44 @@
 import calendarapp.controller.commands.CopyEventsBetweenDatesCommand;
 import calendarapp.model.CalendarModel;
-import calendarapp.view.ICalendarView;
 import calendarapp.model.ICalendarManager;
+import calendarapp.view.ICalendarView;
 import org.junit.Test;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.time.temporal.Temporal;
 
 import static org.junit.Assert.*;
 
 public class CopyEventsBetweenDatesCommandTest {
 
   @Test
-  public void testCopyEventsBetweenDatesCommandConstructor() {
-    ZonedDateTime from = ZonedDateTime.parse("2025-04-01T10:00:00Z");
-    ZonedDateTime to = ZonedDateTime.parse("2025-04-05T10:00:00Z");
-    ZonedDateTime startInTarget = ZonedDateTime.parse("2025-04-10T09:00:00Z");
+  public void testExecuteSuccess() {
+    ZonedDateTime startDate = ZonedDateTime.of(2025, 4, 1, 0, 0, 0, 0, ZoneId.of("UTC"));
+    ZonedDateTime endDate = ZonedDateTime.of(2025, 4, 3, 0, 0, 0, 0, ZoneId.of("UTC"));
+    ZonedDateTime targetStart = ZonedDateTime.of(2025, 4, 5, 0, 0, 0, 0, ZoneId.of("UTC"));
 
-    CopyEventsBetweenDatesCommand cmd = new CopyEventsBetweenDatesCommand(
-            from, to, "TargetCal", startInTarget
-    );
-
-    assertNotNull(cmd); // just confirming instantiation works
-  }
-
-  @Test
-  public void testExecuteMethodWithMockedManager() {
-    ZonedDateTime from = ZonedDateTime.parse("2025-04-01T10:00:00Z");
-    ZonedDateTime to = ZonedDateTime.parse("2025-04-05T10:00:00Z");
-    ZonedDateTime startInTarget = ZonedDateTime.parse("2025-04-10T09:00:00Z");
-
-    CopyEventsBetweenDatesCommand cmd = new CopyEventsBetweenDatesCommand(
-            from, to, "TargetCal", startInTarget
-    );
+    DummyCalendarModel source = new DummyCalendarModel(true);
+    DummyCalendarModel target = new DummyCalendarModel(true);
 
     ICalendarManager manager = new ICalendarManager() {
+      @Override
+      public CalendarModel getActiveCalendar() {
+        return source;
+      }
+
+      @Override
+      public CalendarModel getCalendar(String name) {
+        return target;
+      }
+
       @Override
       public boolean useCalendar(String name) {
         return false;
       }
 
       @Override
-      public CalendarModel getCalendar(String name) {
-        return new CalendarModel("TargetCal", ZoneId.of("UTC")); // dummy
-      }
-
-      @Override
-      public CalendarModel getActiveCalendar() {
-        return new CalendarModel("SourceCal", ZoneId.of("UTC"));
-      }
-
-      @Override
-      public boolean addCalendar(String name, java.time.ZoneId timezone) {
+      public boolean addCalendar(String name, ZoneId zone) {
         return false;
       }
 
@@ -61,19 +48,158 @@ public class CopyEventsBetweenDatesCommandTest {
       }
     };
 
-    ICalendarView dummyView = new ICalendarView() {
+    StringBuilder out = new StringBuilder();
+    ICalendarView view = new ICalendarView() {
       @Override
-      public void displayEvents(java.util.List events) {}
+      public void displayMessage(String msg) {
+        out.append(msg);
+      }
 
       @Override
-      public void displayMessage(String msg) {}
+      public void displayError(String msg) {
+        out.append("ERROR: ").append(msg);
+      }
 
       @Override
-      public void displayError(String error) {}
+      public void displayEvents(java.util.List events) {
+      }
     };
 
-    cmd.execute(manager, dummyView);
-    // You can’t assert much unless the model behavior is real.
-    // This still covers the line & mutation for the call.
+    CopyEventsBetweenDatesCommand cmd = new CopyEventsBetweenDatesCommand(startDate, endDate, "TargetCal", targetStart);
+    boolean result = cmd.execute(manager, view);
+
+    assertTrue(result);
+    assertTrue(out.toString().contains("Events copied successfully to calendar: TargetCal"));
+  }
+
+  @Test
+  public void testExecuteFailureWhenNotCalendarModel() {
+    ICalendarManager manager = new ICalendarManager() {
+      @Override
+      public CalendarModel getActiveCalendar() {
+        return null;
+      }
+
+      @Override
+      public CalendarModel getCalendar(String name) {
+        return null;
+      }
+
+      @Override
+      public boolean useCalendar(String name) {
+        return false;
+      }
+
+      @Override
+      public boolean addCalendar(String name, ZoneId zone) {
+        return false;
+      }
+
+      @Override
+      public boolean editCalendar(String name, String property, String newValue) {
+        return false;
+      }
+    };
+
+    StringBuilder out = new StringBuilder();
+    ICalendarView view = new ICalendarView() {
+      @Override
+      public void displayMessage(String msg) {
+        out.append(msg);
+      }
+
+      @Override
+      public void displayError(String msg) {
+        out.append("ERROR: ").append(msg);
+      }
+
+      @Override
+      public void displayEvents(java.util.List events) {
+      }
+    };
+
+    ZonedDateTime startDate = ZonedDateTime.now();
+    ZonedDateTime endDate = ZonedDateTime.now().plusDays(1);
+    ZonedDateTime targetStart = ZonedDateTime.now().plusDays(2);
+
+    CopyEventsBetweenDatesCommand cmd = new CopyEventsBetweenDatesCommand(startDate, endDate, "Target", targetStart);
+    boolean result = cmd.execute(manager, view);
+
+    assertFalse(result);
+    assertTrue(out.toString().contains("Copy requires concrete CalendarModel"));
+  }
+
+  @Test
+  public void testExecuteFailureCopyConflicts() {
+    ZonedDateTime startDate = ZonedDateTime.now();
+    ZonedDateTime endDate = ZonedDateTime.now().plusDays(1);
+    ZonedDateTime targetStart = ZonedDateTime.now().plusDays(2);
+
+    DummyCalendarModel source = new DummyCalendarModel(false);
+    DummyCalendarModel target = new DummyCalendarModel(true);
+
+    ICalendarManager manager = new ICalendarManager() {
+      @Override
+      public CalendarModel getActiveCalendar() {
+        return source;
+      }
+
+      @Override
+      public CalendarModel getCalendar(String name) {
+        return target;
+      }
+
+      @Override
+      public boolean useCalendar(String name) {
+        return false;
+      }
+
+      @Override
+      public boolean addCalendar(String name, ZoneId zone) {
+        return false;
+      }
+
+      @Override
+      public boolean editCalendar(String name, String property, String newValue) {
+        return false;
+      }
+    };
+
+    StringBuilder out = new StringBuilder();
+    ICalendarView view = new ICalendarView() {
+      @Override
+      public void displayMessage(String msg) {
+        out.append(msg);
+      }
+
+      @Override
+      public void displayError(String msg) {
+        out.append("ERROR: ").append(msg);
+      }
+
+      @Override
+      public void displayEvents(java.util.List events) {
+      }
+    };
+
+    CopyEventsBetweenDatesCommand cmd = new CopyEventsBetweenDatesCommand(startDate, endDate, "Target", targetStart);
+    boolean result = cmd.execute(manager, view);
+
+    assertFalse(result);
+    assertTrue(out.toString().contains("Some or all events failed to copy due to conflicts"));
+  }
+
+  private static class DummyCalendarModel extends CalendarModel {
+    private final boolean shouldSucceed;
+
+    public DummyCalendarModel(boolean shouldSucceed) {
+      super("Dummy", ZoneId.of("UTC"));
+      this.shouldSucceed = shouldSucceed;
+    }
+
+    @Override
+    public boolean copyEventsBetweenTo(CalendarModel source, Temporal startDate, Temporal endDate, CalendarModel target, Temporal targetStartDate) {
+      return shouldSucceed;
+    }
   }
 }
