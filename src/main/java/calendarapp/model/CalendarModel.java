@@ -178,25 +178,39 @@ public class CalendarModel implements ICalendarModel {
     LocalDate sourceLocalDate = LocalDate.from(sourceDate);
     LocalDate targetLocalDate = LocalDate.from(targetDate);
 
+    ZoneId sourceZone = sourceCalendar.getTimezone();
+    ZoneId targetZone = targetCalendar.getTimezone();
+
     for (ICalendarEvent event : sourceCalendar.getEventsOnDate(sourceLocalDate)) {
-      long durationMinutes = Duration.between(
-              event.getStartDateTime(), event.getEndDateTime()).toMinutes();
+      ZonedDateTime sourceEventStart = ZonedDateTime.from(event.getStartDateTime());
+      ZonedDateTime sourceEventEnd = ZonedDateTime.from(event.getEndDateTime());
+
+      ZonedDateTime shiftedStart = sourceEventStart.withZoneSameInstant(targetZone);
+
+      long dayOffset = Duration.between(
+              sourceLocalDate.atStartOfDay(targetZone),
+              shiftedStart.toLocalDate().atStartOfDay(targetZone)
+      ).toDays();
 
       ZonedDateTime newStart = ZonedDateTime.of(
-              targetLocalDate, ZonedDateTime.from(event.getStartDateTime()).toLocalTime(),
-              targetCalendar.getTimezone());
-
+              targetLocalDate.plusDays(dayOffset),
+              shiftedStart.toLocalTime(),
+              targetZone
+      );
+      long durationMinutes = Duration.between(sourceEventStart, sourceEventEnd).toMinutes();
       ZonedDateTime newEnd = newStart.plusMinutes(durationMinutes);
       ICalendarEvent copiedEvent = new SingleEvent(
               event.getSubject(), newStart, newEnd,
               event.getDescription(), event.getLocation(),
               event.isPublic(), event.isAllDay(), null
       );
-
-      if (!targetCalendar.addEvent(copiedEvent, false)) {
+      boolean added = targetCalendar.addEvent(copiedEvent, false);
+      if (!added) {
         allCopied = false;
       }
     }
+
+    System.out.println("==== COPY COMPLETED: SUCCESS = " + allCopied + " ====\n");
     return allCopied;
   }
 

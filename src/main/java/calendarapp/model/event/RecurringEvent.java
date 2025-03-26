@@ -139,6 +139,9 @@ public class RecurringEvent extends AbstractCalendarEvent {
    * @return the character representing the day of the week
    */
   private char getDayChar(DayOfWeek dayOfWeek) {
+    if (dayOfWeek == null) {
+      throw new IllegalArgumentException("Unknown day: null");
+    }
     switch (dayOfWeek) {
       case MONDAY:
         return 'M';

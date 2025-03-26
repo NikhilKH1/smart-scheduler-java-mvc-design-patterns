@@ -43,10 +43,15 @@ public class CalendarController implements ICalendarController {
    */
   @Override
   public boolean processCommand(String commandInput) {
+    if (commandInput == null || commandInput.trim().isEmpty()) {
+      view.displayError("Parsing Error: Command cannot be null or empty");
+      return false;
+    }
+
     try {
       ICommand cmd = parser.parse(commandInput);
       if (cmd == null) {
-        view.displayError("Command parsing returned null");
+        view.displayError("Parsing Error: Command parsing returned null");
         return false;
       }
 

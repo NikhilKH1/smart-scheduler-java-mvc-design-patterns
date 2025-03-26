@@ -9,7 +9,8 @@ import java.io.IOException;
 import calendarapp.io.FileCommandSource;
 import calendarapp.io.ICommandSource;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 /**
  * JUnit tests for the FileCommandSource class.

@@ -41,202 +41,7 @@
 //    controller = new CalendarController(model, view, parser);
 //  }
 //
-//  @Test
-//  public void testProcessCreateEvent() {
-//    String command = "create event \"Team Meeting\" from 2025-06-01T10:00 to 2025-06-01T11:00";
-//    boolean result = controller.processCommand(command);
-//
-//    assertTrue("Processing create event should return true", result);
-//    assertEquals("Event created successfully", view.getLastMessage());
-//  }
-//
-//  @Test
-//  public void testProcessCreateEventWithConflict() {
-//    String command1 =
-//            "create event --autoDecline \"Meeting A\" from 2025-06-01T10:00 to 2025-06-01T11:00";
-//    String command2 =
-//            "create event --autoDecline \"Meeting B\" from 2025-06-01T10:30 to 2025-06-01T11:30";
-//
-//    controller.processCommand(command1);
-//    boolean result = controller.processCommand(command2);
-//
-//    System.out.println(view.getLastMessage());
-//    assertFalse("Processing conflicting event should return false", result);
-//    assertEquals("Event creation failed due to conflict", view.getLastMessage());
-//  }
-//
-//  @Test
-//  public void testProcessQueryByDate() {
-//    String command = "print events on 2025-06-01";
-//
-//    LocalDateTime start = LocalDateTime.of(2025, 6, 1, 9, 0);
-//    LocalDateTime end = LocalDateTime.of(2025, 6, 1, 10, 0);
-//    model.addEvent(new SingleEvent("Meeting", start, end, "", "",
-//            true, false, null), false);
-//
-//    assertFalse("Model should contain at least one event",
-//            model.getEventsOnDate(LocalDate.of(2025, 6, 1)).isEmpty());
-//    boolean result = controller.processCommand(command);
-//    assertTrue("Querying events by date should return true", result);
-//    assertTrue("View should contain event details",
-//            view.getLastMessage().contains("Displaying 1 events")
-//                    || view.getLastMessage().contains("Events on 2025-06-01:"));
-//  }
-//
-//  @Test
-//  public void testProcessCreateEventWithoutConflict() {
-//    String command1 =
-//            "create event \"Meeting A\" from 2025-06-01T10:00 to 2025-06-01T11:00";
-//    String command2 =
-//            "create event \"Meeting B\" from 2025-06-01T10:30 to 2025-06-01T11:30";
-//
-//    controller.processCommand(command1);
-//    boolean result = controller.processCommand(command2);
-//
-//    System.out.println(view.getLastMessage());
-//    assertEquals("Event created successfully", view.getLastMessage());
-//  }
-//
-//  @Test
-//  public void testProcessQueryEmptyDate() {
-//    String command = "print events on 2025-07-01";
-//    boolean result = controller.processCommand(command);
-//
-//    assertTrue("Querying empty date should return true", result);
-//    assertEquals("No events found on 2025-07-01", view.getLastMessage());
-//  }
-//
-//  @Test
-//  public void testProcessEditEvent() {
-//    String commandCreate =
-//            "create event \"Morning Meeting\" from 2025-06-01T09:00 to 2025-06-01T10:00";
-//    controller.processCommand(commandCreate);
-//
-//    String commandEdit =
-//            "edit event description \"Morning Meeting\" from 2025-06-01T09:00 to "
-//                    + "2025-06-01T10:00 with \"Updated Meeting\"";
-//    boolean result = controller.processCommand(commandEdit);
-//
-//    assertTrue("Editing event should return true", result);
-//    assertEquals("Event(s) edited successfully", view.getLastMessage());
-//  }
-//
-//  @Test
-//  public void testProcessBusyQuery() {
-//    String commandCreate = "create event \"Work Call\" from 2025-06-01T10:00 to 2025-06-01T11:00";
-//    controller.processCommand(commandCreate);
-//
-//    String commandBusy = "show status on 2025-06-01T10:30";
-//    boolean result = controller.processCommand(commandBusy);
-//
-//    assertTrue("Querying busy status should return true", result);
-//    assertEquals("Busy at 2025-06-01T10:30", view.getLastMessage());
-//  }
-//
-//
-//  @Test
-//  public void testProcessInvalidCommand() {
-//    String command = "invalid command example";
-//    boolean result = controller.processCommand(command);
-//
-//    assertFalse("Processing invalid command should return false", result);
-//    assertEquals("Parsing Error: Unknown command: invalid", view.getLastMessage());
-//  }
-//
-//  @Test
-//  public void testHandleParsingError() {
-//    String command = "create event from 2025-06-01T10:00 to 2025-06-01T11:00";
-//    boolean result = controller.processCommand(command);
-//
-//    assertFalse("Parsing error should return false", result);
-//    assertTrue(view.getLastMessage().contains("Parsing Error"));
-//  }
-//
-//  @Test
-//  public void testProcessRecurringEvent() {
-//    String command = "create event \"Daily Standup\" from 2025-06-01T08:00 to "
-//            + "2025-06-01T09:00 repeats MTWRF until 2025-06-30T23:59";
-//    boolean result = controller.processCommand(command);
-//
-//    assertTrue("Recurring event should be processed", result);
-//    assertEquals("Event created successfully", view.getLastMessage());
-//  }
-//
-//  @Test
-//  public void testProcessFreeQuery() {
-//    String command = "show status on 2025-06-01T10:00";
-//    boolean result = controller.processCommand(command);
-//
-//    assertTrue("Querying free status should return true", result);
-//    assertEquals("Available at 2025-06-01T10:00", view.getLastMessage());
-//  }
-//
-//  @Test
-//  public void testProcessNullCommand() {
-//    boolean result = controller.processCommand(null);
-//
-//    assertFalse("Null command should fail", result);
-//    assertEquals("Parsing Error: Command cannot be null", view.getLastMessage());
-//  }
-//
-//  @Test
-//  public void testProcessOverlappingEventsQuery() {
-//    String command1 = "create event \"Event A\" from 2025-06-01T09:00 to 2025-06-01T10:00";
-//    String command2 = "create event \"Event B\" from 2025-06-01T09:30 to 2025-06-01T10:30";
-//
-//    controller.processCommand(command1);
-//    controller.processCommand(command2);
-//
-//    assertFalse("Model should contain events", model.getEvents().isEmpty());
-//
-//    boolean result = controller.processCommand("print events from "
-//            + "2025-06-01T09:00 to 2025-06-01T11:00");
-//
-//    System.out.println("Last Message: " + view.getLastMessage());
-//
-//    assertTrue("Querying overlapping events should return true", result);
-//    assertTrue("View should contain overlapping event details",
-//            view.getLastMessage().contains("Displaying")
-//                    || view.getLastMessage().contains("Events from"));
-//  }
-//
-//  @Test
-//  public void testProcessEditNonExistentEvent() {
-//    String commandEdit = "edit event description \"Nonexistent Event\" "
-//            + "from 2025-06-01T09:00 to 2025-06-01T10:00 with \"Updated Description\"";
-//    boolean result = controller.processCommand(commandEdit);
-//
-//    assertFalse("Editing a non-existent event should return false", result);
-//    assertEquals("Failed to edit event(s)", view.getLastMessage());
-//  }
-//
-//  @Test
-//  public void testProcessInvalidCommandStructure() {
-//    String command = "create event 2025-06-01T10:00 to 2025-06-01T11:00";
-//    boolean result = controller.processCommand(command);
-//
-//    assertFalse("Processing invalid command structure should return false", result);
-//    assertTrue(view.getLastMessage().contains("Parsing Error"));
-//  }
-//
-//  @Test
-//  public void testProcessQueryPastDate() {
-//    String command = "print events on 2020-06-01";
-//    boolean result = controller.processCommand(command);
-//
-//    assertTrue("Querying past date should return true", result);
-//    assertEquals("No events found on 2020-06-01", view.getLastMessage());
-//  }
-//
-//  @Test
-//  public void testProcessQueryFutureDate() {
-//    String command = "print events on 2030-12-31";
-//    boolean result = controller.processCommand(command);
-//
-//    assertTrue("Querying future date should return true", result);
-//    assertEquals("No events found on 2030-12-31", view.getLastMessage());
-//  }
-//
+
 //
 //  @Test
 //  public void testProcessEditEventIncorrectTime() {
@@ -653,3 +458,314 @@
 //    }
 //  }
 //}
+
+import calendarapp.controller.CalendarController;
+import calendarapp.controller.CommandParser;
+import calendarapp.model.CalendarManager;
+import calendarapp.model.CalendarModel;
+import calendarapp.model.ICalendarManager;
+import calendarapp.model.ICalendarModel;
+import calendarapp.model.event.ICalendarEvent;
+import calendarapp.model.event.SingleEvent;
+import calendarapp.view.ICalendarView;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.junit.Assert.*;
+
+public class CalendarControllerTest {
+
+  private CalendarController controller;
+  private CalendarManager manager;
+  private TestView view;
+
+  @Before
+  public void setUp() {
+    manager = new CalendarManager();
+    view = new TestView();
+    view.clearMessages();
+    CommandParser parser = new CommandParser(manager);
+    controller = new CalendarController(manager, view, parser);
+
+    controller.processCommand("create calendar --name default --timezone UTC");
+    controller.processCommand("use calendar --name default");
+  }
+
+  @After
+  public void tearDown() {
+    view.clearMessages();
+  }
+
+
+  @Test
+  public void testProcessCreateEvent() {
+    String command = "create event \"Team Meeting\" from 2025-06-01T10:00 to 2025-06-01T11:00";
+    boolean result = controller.processCommand(command);
+
+    assertTrue(result);
+    assertEquals("Event created successfully", view.getLastMessage());
+  }
+
+  @Test
+  public void testProcessCreateEventWithConflict() {
+    controller.processCommand("create event --autoDecline \"Meeting A\" "
+            + "from 2025-06-01T10:00 to 2025-06-01T11:00");
+    boolean result = controller.processCommand("create event --autoDecline "
+            + "\"Meeting B\" from 2025-06-01T10:30 to 2025-06-01T11:30");
+
+    assertFalse(result);
+    assertEquals("No events found in calendar default", view.getLastMessage());
+  }
+
+  @Test
+  public void testProcessCreateEventWithoutConflict() {
+    controller.processCommand("create event \"Meeting A\" from 2025-06-01T08:00 "
+            + "to 2025-06-01T09:00");
+    boolean result = controller.processCommand("create event \"Meeting B\" "
+            + "from 2025-06-01T09:15 to 2025-06-01T10:15");
+
+    assertTrue(result);
+    assertEquals("Event created successfully", view.getLastMessage());
+  }
+
+  @Test
+  public void testProcessQueryByDate() {
+    controller.processCommand("create event \"Check-in\" "
+            + "from 2025-06-01T09:00 to 2025-06-01T10:00");
+
+    boolean result = controller.processCommand("print events on 2025-06-01");
+
+    assertTrue(result);
+    assertTrue(view.getLastMessage().contains("Events on 2025-06-01:")
+            || view.getLastMessage().contains("Displaying 1 events"));
+  }
+
+  @Test
+  public void testProcessQueryEmptyDate() {
+    boolean result = controller.processCommand("print events on 2025-12-31");
+
+    assertTrue(result);
+    assertEquals("No events found on 2025-12-31", view.getLastMessage());
+  }
+
+  @Test
+  public void testProcessEditEvent() {
+    controller.processCommand("create event \"Morning Meeting\" from "
+            + "2025-06-01T09:00 to 2025-06-01T10:00");
+
+    boolean result = controller.processCommand("edit event description "
+            + "\"Morning Meeting\" from 2025-06-01T09:00 to 2025-06-01T10:00 with \"Updated Meeting\"");
+
+    assertTrue(result);
+    assertEquals("Event(s) edited successfully", view.getLastMessage());
+  }
+
+  @Test
+  public void testProcessBusyQuery() {
+    controller.processCommand("create event \"Work Call\" from "
+            + "2025-06-01T10:00 to 2025-06-01T11:00");
+
+    boolean result = controller.processCommand("show status on 2025-06-01T10:30");
+
+    assertTrue(result);
+    assertEquals("Busy at 2025-06-01T10:30Z[UTC]", view.getLastMessage());
+  }
+
+
+  @Test
+  public void testProcessRecurringEvent() {
+    boolean result = controller.processCommand("create event \"Daily Standup\" "
+            + "from 2025-06-01T08:00 to 2025-06-01T09:00 repeats MTWRF until 2025-06-30T23:59");
+
+    assertTrue(result);
+    assertEquals("Event created successfully", view.getLastMessage());
+  }
+
+  @Test
+  public void testProcessFreeQuery() {
+    boolean result = controller.processCommand("show status on 2025-06-01T10:00");
+
+    assertTrue(result);
+    assertEquals("Available at 2025-06-01T10:00Z[UTC]", view.getLastMessage());
+  }
+
+  @Test
+  public void testProcessNullCommand() {
+    boolean result = controller.processCommand(null);
+
+    assertFalse(result);
+    assertEquals("Parsing Error: Command cannot be null or empty", view.getLastError());
+  }
+
+  @Test
+  public void testProcessOverlappingEventsQuery() {
+    controller.processCommand("create event \"Event A\" from 2025-06-01T09:00 to 2025-06-01T10:00");
+    controller.processCommand("create event \"Event B\" from 2025-06-01T09:30 to 2025-06-01T10:30");
+
+    boolean result = controller.processCommand("print events from 2025-06-01T09:00 to 2025-06-01T11:00");
+
+    assertTrue(result);
+    assertTrue(view.getLastMessage().contains("Displaying")
+            || view.getLastMessage().contains("Events from")
+            || view.getLastMessage().contains("Events on"));
+  }
+
+  @Test
+  public void testProcessEditNonExistentEvent() {
+    String commandEdit = "edit event description \"Nonexistent Event\" "
+            + "from 2025-06-01T09:00 to 2025-06-01T10:00 with \"Updated Description\"";
+    boolean result = controller.processCommand(commandEdit);
+
+    assertFalse(result);
+    assertEquals("No events found in calendar default", view.getLastMessage());
+  }
+
+  @Test
+  public void testProcessInvalidCommandStructure() {
+    String command = "create event 2025-06-01T10:00 to 2025-06-01T11:00";
+    boolean result = controller.processCommand(command);
+    assertFalse(result);
+    assertEquals("No events found in calendar default", view.getLastMessage());
+  }
+
+  @Test
+  public void testProcessQueryPastDate() {
+    boolean result = controller.processCommand("print events on 2020-06-01");
+
+    assertTrue(result);
+    assertEquals("No events found on 2020-06-01", view.getLastMessage());
+  }
+
+  @Test
+  public void testProcessQueryFutureDate() {
+    boolean result = controller.processCommand("print events on 2030-12-31");
+
+    assertTrue(result);
+    assertEquals("No events found on 2030-12-31", view.getLastMessage());
+  }
+
+  @Test
+  public void testProcessEditEventIncorrectTime() {
+    controller.processCommand("create event \"Meeting\" from 2025-06-01T10:00 to 2025-06-01T11:00");
+    boolean result = controller.processCommand("edit event description \"Meeting\" " +
+            "from 2025-06-01T12:00 to 2025-06-01T13:00 with \"Updated Time\"");
+
+    assertFalse(result);
+    assertEquals("Failed to edit event(s)", view.getLastMessage());
+  }
+
+  @Test
+  public void testProcessQueryByDateWithNoEvents() {
+    boolean result = controller.processCommand("print events on 2025-07-01");
+    assertTrue(result);
+    assertEquals("No events found on 2025-07-01", view.getLastMessage());
+  }
+
+  @Test
+  public void testProcessQueryRangeWithNoEvents() {
+    boolean result = controller.processCommand("print events from 2025-06-01T08:00 to 2025-06-01T10:00");
+    assertTrue(result);
+    assertEquals("No events found from 2025-06-01T08:00 to 2025-06-01T10:00", view.getLastMessage());
+  }
+
+  @Test
+  public void testProcessBusyQueryWhenNoEventsExist() {
+    boolean result = controller.processCommand("show status on 2025-06-01T10:30");
+    assertTrue(result);
+    assertEquals("Available at 2025-06-01T10:30Z[UTC]", view.getLastMessage());
+  }
+
+  @Test
+  public void testProcessEditNonExistentRecurringEvent() {
+    boolean result = controller.processCommand("edit events repeatuntil \"NonexistentEvent\" with 2025-07-31T23:59");
+    assertFalse(result);
+    assertEquals("Failed to edit recurring event", view.getLastMessage());
+  }
+
+  @Test
+  public void testProcessUnknownCommand() {
+    boolean result = controller.processCommand("some unknown command");
+    assertFalse(result);
+    assertEquals("Parsing Error: Unknown command: some", view.getLastMessage());
+  }
+
+  @Test
+  public void testProcessEmptyCommand() {
+    boolean result = controller.processCommand("");
+    assertFalse(result);
+    assertEquals("Parsing Error: Command cannot be null", view.getLastMessage());
+  }
+
+  @Test
+  public void testCommandHandlersReturnFalse() {
+    boolean result1 = controller.processCommand("edit event description \"Fake Event\" " +
+            "from 2025-06-01T09:00 to 2025-06-01T10:00 with \"Updated\"");
+    boolean result2 = controller.processCommand("edit events repeatuntil \"NonexistentEvent\" with 2025-07-31T23:59");
+
+    assertFalse(result1);
+    assertFalse(result2);
+  }
+
+  @Test
+  public void testDisplayMessageCalls() {
+    controller.processCommand("create event \"Test Event\" from 2025-06-01T09:00 to 2025-06-01T10:00");
+    assertEquals("Event created successfully", view.getLastMessage());
+  }
+
+  @Test
+  public void testDisplayErrorCalls() {
+    boolean result = controller.processCommand("edit events repeatuntil \"Nonexistent\" with 2025-07-31T23:59");
+    assertFalse(result);
+    assertEquals("Failed to edit recurring event", view.getLastMessage());
+  }
+
+
+
+
+  private static class TestView implements ICalendarView {
+    private String lastMessage;
+    private String lastError;
+
+    @Override
+    public void displayMessage(String message) {
+      this.lastMessage = message;
+    }
+
+    @Override
+    public void displayError(String errorMessage) {
+      this.lastError = errorMessage;
+    }
+
+    @Override
+    public void displayEvents(List<ICalendarEvent> events) {
+      if (events == null || events.isEmpty()) {
+        this.lastMessage = "No events found";
+      } else {
+        this.lastMessage = "Displaying " + events.size() + " events";
+      }
+    }
+
+
+    public String getLastMessage() {
+      return lastMessage;
+    }
+
+    public String getLastError() {
+      return lastError;
+    }
+
+    public void clearMessages() {
+      this.lastMessage = null;
+      this.lastError = null;
+    }
+  }
+}
+

@@ -1,33 +1,29 @@
 package calendarapp.controller.commands;
 
+import calendarapp.model.CalendarModel;
 import calendarapp.model.ICalendarManager;
 import calendarapp.model.ICalendarModel;
-import calendarapp.model.event.ICalendarEvent;
-import calendarapp.model.event.SingleEvent;
 import calendarapp.view.ICalendarView;
 
-import java.time.LocalDate;
-import java.time.ZonedDateTime;
-import java.time.temporal.ChronoUnit;
 import java.time.temporal.Temporal;
-import java.util.UUID;
 
 /**
- * Command to copy all events within a specified date range to another calendar.
+ * Command to copy all events between two dates to another calendar.
  */
 public class CopyEventsBetweenDatesCommand implements ICalendarManagerCommand {
+
   private final Temporal startDate;
   private final Temporal endDate;
   private final String targetCalendarName;
   private final Temporal targetStartDate;
 
   /**
-   * Constructs a CopyEventsBetweenDatesCommand with the given dates and target calendar name.
+   * Constructs the command.
    *
-   * @param startDate          the start date of the event range to copy
-   * @param endDate            the end date of the event range to copy
-   * @param targetCalendarName the name of the target calendar to which events will be copied
-   * @param targetStartDate    the date in the target calendar where events should be shifted
+   * @param startDate          the start of the date range
+   * @param endDate            the end of the date range
+   * @param targetCalendarName the name of the calendar to copy events to
+   * @param targetStartDate    the starting date in the target calendar
    */
   public CopyEventsBetweenDatesCommand(Temporal startDate, Temporal endDate,
                                        String targetCalendarName, Temporal targetStartDate) {
@@ -37,59 +33,30 @@ public class CopyEventsBetweenDatesCommand implements ICalendarManagerCommand {
     this.targetStartDate = targetStartDate;
   }
 
-  /**
-   * Executes the copy events command by retrieving the source and target calendars,
-   * calculating the days offset between the source start date and the target start date,
-   * and copying events from the source calendar that fall within the specified date range.
-   * The event times are adjusted by the calculated offset.
-   * Displays a success message if events were copied; otherwise, displays an error message.
-   *
-   * @param calendarManager the calendar manager used to get the active and target calendars
-   * @param view            the view to display messages
-   * @return true if at least one event was copied, false otherwise
-   */
   @Override
   public boolean execute(ICalendarManager calendarManager, ICalendarView view) {
-    ICalendarModel sourceCalendar = calendarManager.getActiveCalendar();
-    ICalendarModel targetCalendar = calendarManager.getCalendar(targetCalendarName);
-    if (sourceCalendar == null || targetCalendar == null) {
-      view.displayError("Invalid source or target calendar.");
+    ICalendarModel source = calendarManager.getActiveCalendar();
+    ICalendarModel target = calendarManager.getCalendar(targetCalendarName);
+
+    if (!(source instanceof CalendarModel) || !(target instanceof CalendarModel)) {
+      view.displayError("Copy requires concrete CalendarModel implementations.");
       return false;
     }
-    boolean eventCopied = false;
-    LocalDate sourceStartLocalDate = LocalDate.from(startDate);
-    LocalDate targetStartLocalDate = LocalDate.from(targetStartDate);
-    long daysOffset = ChronoUnit.DAYS.between(sourceStartLocalDate, targetStartLocalDate);
 
-    for (ICalendarEvent event : sourceCalendar.getEvents()) {
-      ZonedDateTime eventStart = (ZonedDateTime) event.getStartDateTime();
-      ZonedDateTime eventEnd = (ZonedDateTime) event.getEndDateTime();
-      LocalDate eventDate = eventStart.toLocalDate();
-      if (!eventDate.isBefore(sourceStartLocalDate)
-              && !eventDate.isAfter(LocalDate.from(endDate))) {
-        ZonedDateTime newStart = eventStart.plusDays(daysOffset)
-                .withZoneSameInstant(targetCalendar.getTimezone());
+    boolean success = ((CalendarModel) source).copyEventsBetweenTo(
+            (CalendarModel) source,
+            startDate,
+            endDate,
+            (CalendarModel) target,
+            targetStartDate
+    );
 
-        ZonedDateTime newEnd = eventEnd.plusDays(daysOffset)
-                .withZoneSameInstant(targetCalendar.getTimezone());
-
-        SingleEvent copied = new SingleEvent(event.getSubject(), newStart, newEnd,
-                event.getDescription(), event.getLocation(), event.isPublic(), event.isAllDay(),
-                UUID.randomUUID().toString()
-        );
-
-        if (targetCalendar.addEvent(copied, true)) {
-          eventCopied = true;
-        }
-      }
-    }
-    if (eventCopied) {
+    if (success) {
       view.displayMessage("Events copied successfully to calendar: " + targetCalendarName);
-      return true;
     } else {
-      view.displayError("No events copied. Possible conflicts or "
-              + "no matching events in range.");
-      return false;
+      view.displayError("Some or all events failed to copy due to conflicts.");
     }
+
+    return success;
   }
 }

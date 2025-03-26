@@ -1,123 +1,106 @@
 # Calendar Application
 
-This project involves designing and implementing a virtual calendar application. The goal is to mimic core features commonly found in popular calendar applications like Google Calendar or Apple's iCalendar.
+This project is an enhanced version of a calendar application that allows users to manage multiple calendars, handle timezones, create and edit events, and copy events between calendars. The application follows the Model-View-Controller (MVC) design pattern and utilizes abstraction, dynamic dispatch, and the command pattern.
 
-## Key Features
+## Design Changes and Justifications
 
-- **Event Management:**
-    - Add and manage single and recurring events.
-    - Edit event properties, including start/end times, descriptions, locations, and recurrence patterns.
+1. **Moved the `commands` package from model to controller**
+* **Justification**: Command execution is a controller-level concern, not a model-level one. This change improves the separation of concerns.
 
-- **Event Querying:**
-    - Retrieve events based on specific dates or date/time ranges.
-    - Check availability at particular dates and times.
+2. **Created a new package for io**
+* **Justification**: Previously, input handling was tightly coupled with the terminal scanner. This change modularizes input handling, making it more adaptable.
 
-- **Export Functionality:**
-    - Export calendar data to a CSV format compatible with standard calendar applications.
+### Multiple Calendar Support
 
-## Architecture
+3. **Created `CalendarManager` and `ICalendarManager`**
+* **Justification**: Manages multiple calendars, allowing users to switch between them efficiently.
 
-The project follows the **Model-View-Controller (MVC)** architecture, clearly separating responsibilities:
-- **Model:** Handles data representation and core calendar logic.
-- **View:** Manages presentation of calendar data.
-- **Controller:** Processes user input and coordinates interactions between Model and View.
+4. **Added new command classes to support calendar creation, usage, and editing**
+* **Justification**: Extends command-driven control to handle multiple calendars.
 
-## Technical Concepts
+5. **Separated calendar-level and event-level command interfaces**
+* **Justification**: Improves modularity and distinguishes between commands acting on calendars and those acting on events.
 
-This project demonstrates essential programming principles:
+### Timezone Support
 
-- **Abstraction and Abstract Data Types:**
-    - Interfaces and abstract classes (e.g., `CalendarEvent`, `AbstractCalendarEvent`) encapsulate event details and define clear interactions.
+6. **Created an `Exporter` interface**
+* **Justification**: Enables support for multiple export formats such as PDF and TXT in the future.
 
-- **Command Pattern:**
-    - Implementation of command objects (`CreateEventCommand`, `EditEventCommand`, `ExportCalendarCommand`) decouples operation invocation from execution.
+7. **Changed `LocalDateTime` to `Temporal`**
+* **Justification**: Allows seamless support for multiple timezones without breaking existing functionality.
 
-- **Dynamic Dispatch:**
-    - Leveraging dynamic dispatch techniques to handle various command types, enhancing flexibility and maintainability.
+## How to Run the Program
 
-- **Functional Programming:**
-    - Utilizing lambda expressions for concise and efficient command processing within the controller.
+### Running from the Terminal (Using JAR File)
 
-- **Modular Design:**
-    - Emphasizes modularity to facilitate future enhancements and scalability.
-
-## How to Run
-
-### Compilation
-
-1. Navigate to the project's root directory in a terminal.
-2. Compile Java source files:
+1. Ensure that you have Java installed (Java 11 or later recommended).
+2. Open a terminal and navigate to the directory containing the `calendarapp.jar` file.
+3. Run the application in interactive mode:
    ```bash
-   javac -d target/classes src/calendarapp/**/*.java
-   ```
+   java -jar calendarapp.jar --mode interactive
+- This mode allows users to input commands interactively.
 
-### Running the Application
+4. Run the application in headless mode (executing commands from a file):
 
-The main entry point is the `CalendarApp` class. The application supports two modes:
+    ``` bash
+    java -jar calendarapp.jar --mode headless <commands-file>
+- Replace <commands-file> with the path to a text file containing valid commands.
 
-#### Interactive Mode
+## Working Features
+All features from the previous version, plus:
 
-Allows users to type commands directly and view immediate feedback.
+### Multiple Calendars
 
-Run in interactive mode:
-```bash
-java -cp target/classes calendarapp.CalendarApp --mode interactive
-```
+Users can create, use, and edit multiple named calendars.
 
-Type commands at the prompt, and use `exit` to quit.
+### Timezone Support
 
-##### Supported Commands
+Each calendar has its own timezone.
 
-- **Create Event:**
-  ```
-  create event --autoDecline <eventName> from <dateTime> to <dateTime>
-  ```
+Events are automatically adjusted when changing timezones.
 
-- **Create Recurring Event:**
-  ```
-  create event --autoDecline <eventName> from <dateTime> to <dateTime> repeats <weekdays> for <N> times
-  create event --autoDecline <eventName> from <dateTime> to <dateTime> repeats <weekdays> until <dateTime>
-  ```
+### Event Copying
 
-- **Edit Single Event:**
-  ```
-  edit event <property> <eventName> from <dateTime> to <dateTime> with <NewValue>
-  ```
+Users can copy events within the same calendar or across different calendars.
 
-- **Edit Recurring Event:**
-  ```
-  edit events <property> <eventName> from <dateTime> with <NewValue>
-  edit events <property> <eventName> <NewValue>
-  ```
+## Additional commands supported:
 
-- **Query Events:**
-  ```
-  print events on <date>
-  print events from <dateTime> to <dateTime>
-  show status on <dateTime>
-  ```
+- create calendar --name \<calName> --timezone area/location
 
-- **Export Calendar:**
-  ```
-  export cal <filename.csv>
-  ```
 
-#### Headless Mode
+- edit calendar --name \<name-of-calendar> --property \<property-name> \<new-property-value>
 
-Executes commands sequentially from a provided file:
-```bash
-java -cp target/classes calendarapp.CalendarApp --mode headless <commands-file>
-```
-Replace `<commands-file>` with your command file path.
+
+- use calendar --name \<name-of-calendar>
+
+
+- copy event \<eventName> on \<date> --target \<calendarName> to \<date>
+
+
+- copy events on \<date> --target \<calendarName> to \<date>
+
+
+- copy events between \<startDate> and \<endDate> --target \<calendarName> to \<startDate>
 
 ## Team Contributions
+### Nikhil:
 
-The project was collaboratively developed by two contributors:
+- Implemented event copying within and across calendars.
 
-- **Nikhil:**
-    - Single and recurring events, command parsing, conflict checking, calendar model, and view implementation.
+- Refined the command set.
 
-- **Nisha:**
-    - Event editing, event querying, controller management, command execution, and utilities.
+- Adjusted the autoDecline behavior.
 
-Both contributors jointly developed comprehensive test cases.
+### Nisha:
+
+- Designed and implemented multiple calendar and timezone support.
+
+- Developed commands for creating, using, and editing calendars.
+
+### Both:
+
+- Collaborated on testing to ensure functionality and correctness.
+
+
+
+

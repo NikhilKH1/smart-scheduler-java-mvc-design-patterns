@@ -135,4 +135,54 @@ public interface ICalendarModel {
    */
   public ZoneId getTimezone();
 
+  /**
+   * Updates the calendar's timezone and adjusts all events accordingly.
+   *
+   * @param newTimezone the new timezone to apply to the calendar
+   */
+  public void updateTimezone(ZoneId newTimezone);
+
+  /**
+   * Copies a single event from the source calendar to the target calendar at the new datetime.
+   *
+   * @param sourceCalendar  the calendar to copy from
+   * @param eventName       the name of the event
+   * @param sourceDateTime  the start datetime of the original event
+   * @param targetCalendar  the calendar to copy to
+   * @param targetDateTime  the new start datetime for the copied event
+   * @return true if the event was copied successfully, false otherwise
+   */
+  public boolean copySingleEventTo(CalendarModel sourceCalendar, String eventName,
+                                   Temporal sourceDateTime, CalendarModel targetCalendar,
+                                   Temporal targetDateTime);
+
+  /**
+   * Copies all events from a specific date in the source calendar to a new date in the target calendar.
+   *
+   * @param sourceCalendar the calendar to copy from
+   * @param sourceDate     the source date to copy events from
+   * @param targetCalendar the calendar to copy to
+   * @param targetDate     the target date to place copied events
+   * @return true if all events were copied successfully, false otherwise
+   */
+  public boolean copyEventsOnDateTo(CalendarModel sourceCalendar, Temporal sourceDate,
+                                    CalendarModel targetCalendar, Temporal targetDate);
+
+  /**
+   * Copies all events in a date range from the source calendar to the target calendar starting at a given date.
+   *
+   * @param sourceCalendar   the calendar to copy from
+   * @param startDate        the start date of the source range
+   * @param endDate          the end date of the source range
+   * @param targetCalendar   the calendar to copy to
+   * @param targetStartDate  the start date in the target calendar to begin placing events
+   * @return true if all events were copied successfully, false otherwise
+   */
+  public boolean copyEventsBetweenTo(CalendarModel sourceCalendar, Temporal startDate,
+                                     Temporal endDate, CalendarModel targetCalendar,
+                                     Temporal targetStartDate);
+
+
 }
+
+

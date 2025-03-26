@@ -1,20 +1,17 @@
 package calendarapp.controller.commands;
 
+import calendarapp.model.CalendarModel;
 import calendarapp.model.ICalendarManager;
 import calendarapp.model.ICalendarModel;
-import calendarapp.model.event.ICalendarEvent;
-import calendarapp.model.event.SingleEvent;
 import calendarapp.view.ICalendarView;
 
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.time.temporal.Temporal;
 
 /**
  * Command to copy all events on a specific date to another calendar.
  */
 public class CopyEventsOnDateCommand implements ICalendarManagerCommand {
+
   private final Temporal sourceDate;
   private final String targetCalendarName;
   private final Temporal targetDate;
@@ -34,56 +31,31 @@ public class CopyEventsOnDateCommand implements ICalendarManagerCommand {
   }
 
   /**
-   * Copies events from the active calendar on the given source date to the target calendar.
-   * The event times are adjusted to match the target calendar's timezone and the target date.
+   * Executes the command by copying events from the active calendar to the target calendar.
    *
    * @param calendarManager the calendar manager used to access calendars
    * @param view            the view used to display messages
-   * @return true if at least one event was copied, false otherwise
+   * @return true if events were successfully copied, false otherwise
    */
   @Override
   public boolean execute(ICalendarManager calendarManager, ICalendarView view) {
-    ICalendarModel sourceCalendar = calendarManager.getActiveCalendar();
-    ICalendarModel targetCalendar = calendarManager.getCalendar(targetCalendarName);
-    if (sourceCalendar == null || targetCalendar == null) {
-      view.displayError("Invalid source or target calendar.");
+    ICalendarModel source = calendarManager.getActiveCalendar();
+    ICalendarModel target = calendarManager.getCalendar(targetCalendarName);
+
+    if (!(source instanceof CalendarModel) || !(target instanceof CalendarModel)) {
+      view.displayError("Copy requires concrete CalendarModel implementations.");
       return false;
     }
 
-    boolean eventCopied = false;
-    ZoneId targetZone = targetCalendar.getTimezone();
+    boolean success = ((CalendarModel) source).copyEventsOnDateTo(
+            (CalendarModel) source, sourceDate, (CalendarModel) target, targetDate);
 
-    LocalDate sourceLocalDate = LocalDate.from(sourceDate);
-    LocalDate targetLocalDate = LocalDate.from(targetDate);
-
-    for (ICalendarEvent event : sourceCalendar.getEventsOnDate(sourceLocalDate)) {
-      ZonedDateTime eventStart = (ZonedDateTime) event.getStartDateTime();
-      ZonedDateTime eventEnd = (ZonedDateTime) event.getEndDateTime();
-      ZonedDateTime newStart = eventStart.withZoneSameInstant(targetZone)
-              .withYear(targetLocalDate.getYear())
-              .withMonth(targetLocalDate.getMonthValue())
-              .withDayOfMonth(targetLocalDate.getDayOfMonth());
-      ZonedDateTime newEnd = eventEnd.withZoneSameInstant(targetZone)
-              .withYear(targetLocalDate.getYear())
-              .withMonth(targetLocalDate.getMonthValue())
-              .withDayOfMonth(targetLocalDate.getDayOfMonth());
-      SingleEvent copied = new SingleEvent(event.getSubject(), newStart, newEnd,
-              event.getDescription(), event.getLocation(), event.isPublic(), event.isAllDay(),
-              null
-      );
-
-      boolean added = targetCalendar.addEvent(copied, true);
-      if (added) {
-        eventCopied = true;
-      }
-    }
-
-    if (eventCopied) {
+    if (success) {
       view.displayMessage("Events copied successfully to calendar: " + targetCalendarName);
     } else {
-      view.displayError("No events copied. Possible conflicts or"
-              + " no events on the date.");
+      view.displayError("Some or all events could not be copied due to conflicts.");
     }
-    return eventCopied;
+
+    return success;
   }
 }
