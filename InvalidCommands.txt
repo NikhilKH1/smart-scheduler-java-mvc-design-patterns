@@ -7,7 +7,7 @@ create calendar --name USCal --timezone America/New_York
 use calendar --name USCal
 create event "House Warming" from 2025-03-11T10:00 to 2025-03-11T11:00
 edit events description "House Warming" from 2025-03-11T10:00 with "Congratulations!!"
-create calendars --name Invalid --timezone India/Kolkata
+create calendar --name Invalid --timezone India/Kolkata
 created event "Team Meeting" from 2025-03-10T11:00 to 2025-03-10T12:00 repeats MTW for 3 times description "Initial meeting" location "Old Room"
 edit events description "Team Meeting" "Updated description for all"
 print events on 2025-03-08h

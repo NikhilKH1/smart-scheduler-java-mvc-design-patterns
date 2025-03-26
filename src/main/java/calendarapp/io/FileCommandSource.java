@@ -45,7 +45,7 @@ public class FileCommandSource implements ICommandSource {
     try {
       reader.close();
     } catch (IOException e) {
-      // No action needed if an error occurs while closing
+      System.out.println("Error closing file");
     }
   }
 }

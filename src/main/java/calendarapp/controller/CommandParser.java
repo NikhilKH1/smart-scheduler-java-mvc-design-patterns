@@ -1,6 +1,5 @@
 package calendarapp.controller;
 
-
 import calendarapp.controller.commands.BusyQueryCommand;
 import calendarapp.controller.commands.CopyEventsBetweenDatesCommand;
 import calendarapp.controller.commands.CopyEventsOnDateCommand;
@@ -324,7 +323,6 @@ public class CommandParser {
     }
     return new ExportCalendarCommand(fileName);
   }
-
 
   /**
    * Parses the "print" command to print events either on a specific date or in a range.
