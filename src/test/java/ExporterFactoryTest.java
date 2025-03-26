@@ -7,6 +7,9 @@ import org.junit.Test;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+/**
+ * JUnit test class for ExporterFactory class.
+ */
 public class ExporterFactoryTest {
 
   @Test

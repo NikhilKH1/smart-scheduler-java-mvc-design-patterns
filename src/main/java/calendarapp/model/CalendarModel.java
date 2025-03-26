@@ -111,9 +111,9 @@ public class CalendarModel implements ICalendarModel {
     for (Map.Entry<String, RecurringEvent> entry : recurringMap.entrySet()) {
       RecurringEvent recurringEvent = entry.getValue();
 
-      events.removeIf(e -> e instanceof SingleEvent &&
-              e.getSubject().equals(entry.getKey()) &&
-              ((SingleEvent) e).getSeriesId() != null);
+      events.removeIf(e -> e instanceof SingleEvent
+              && e.getSubject().equals(entry.getKey())
+              && ((SingleEvent) e).getSeriesId() != null);
 
       RecurringEvent updatedRecurringEvent = recurringEvent.withUpdatedTimezone(newTimezone);
       List<SingleEvent> newOccurrences = updatedRecurringEvent.

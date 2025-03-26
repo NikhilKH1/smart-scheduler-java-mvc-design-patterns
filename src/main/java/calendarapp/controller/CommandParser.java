@@ -1,14 +1,30 @@
 package calendarapp.controller;
 
-import calendarapp.controller.commands.*;
+
+import calendarapp.controller.commands.BusyQueryCommand;
+import calendarapp.controller.commands.CopyEventsBetweenDatesCommand;
+import calendarapp.controller.commands.CopyEventsOnDateCommand;
+import calendarapp.controller.commands.CopySingleEventCommand;
+import calendarapp.controller.commands.CreateCalendarCommand;
+import calendarapp.controller.commands.CreateEventCommand;
+import calendarapp.controller.commands.EditCalendarCommand;
+import calendarapp.controller.commands.EditEventCommand;
+import calendarapp.controller.commands.EditRecurringEventCommand;
+import calendarapp.controller.commands.ExportCalendarCommand;
+import calendarapp.controller.commands.ICommand;
+import calendarapp.controller.commands.QueryByDateCommand;
+import calendarapp.controller.commands.QueryRangeDateTimeCommand;
+import calendarapp.controller.commands.UseCalendarCommand;
 import calendarapp.model.ICalendarManager;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.time.ZonedDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeParseException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -248,7 +264,9 @@ public class CommandParser {
    * @throws IllegalArgumentException if the command format is invalid
    */
   private ICommand parseEditCalendarCommand(List<String> tokens) {
-    String name = null, property = null, newValue = null;
+    String name = null;
+    String property = null;
+    String newValue = null;
     for (int i = 2; i < tokens.size() - 1; i++) {
       if ("--name".equalsIgnoreCase(tokens.get(i))) {
         name = tokens.get(++i);
@@ -387,7 +405,9 @@ public class CommandParser {
    * @throws IllegalArgumentException if the command format is invalid
    */
   private ICommand parseEditEvent(List<String> tokens) {
-    if (tokens.size() < 4) throw new IllegalArgumentException("Incomplete edit command");
+    if (tokens.size() < 4) {
+      throw new IllegalArgumentException("Incomplete edit command");
+    }
 
     switch (tokens.get(1).toLowerCase()) {
       case "events":
@@ -636,21 +656,6 @@ public class CommandParser {
     } catch (DateTimeParseException e) {
       return LocalDate.parse(token).atStartOfDay(calendarManager.getActiveCalendar().getTimezone());
     }
-  }
-
-  /**
-   * Parses a date and time into a ZonedDateTime object.
-   *
-   * @param date the date in "YYYY-MM-DD" format
-   * @param time the time in "HH:mm:ss" format
-   * @return the corresponding ZonedDateTime object
-   * @throws DateTimeParseException if the date or time cannot be parsed into a valid ZonedDateTime
-   */
-  private ZonedDateTime parseDateTime(String date, String time) {
-    LocalDate localDate = LocalDate.parse(date);
-    LocalTime localTime = LocalTime.parse(time);
-    ZoneId zone = calendarManager.getActiveCalendar().getTimezone();
-    return ZonedDateTime.of(localDate, localTime, zone);
   }
 
   /**

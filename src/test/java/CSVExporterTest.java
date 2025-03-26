@@ -22,6 +22,9 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 
+/**
+ * JUnit tests for the CreateEventCommand class.
+ */
 public class CSVExporterTest {
 
   private CSVExporter exporter;

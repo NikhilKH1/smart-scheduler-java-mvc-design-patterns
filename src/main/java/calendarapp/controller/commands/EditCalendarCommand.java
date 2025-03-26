@@ -20,8 +20,8 @@ public class EditCalendarCommand implements ICalendarManagerCommand {
    * @throws IllegalArgumentException if any parameter is null or empty
    */
   public EditCalendarCommand(String calendarName, String property, String newValue) {
-    if (calendarName == null || property == null || newValue == null ||
-            calendarName.trim().isEmpty() || property.trim().isEmpty()
+    if (calendarName == null || property == null || newValue == null
+            || calendarName.trim().isEmpty() || property.trim().isEmpty()
             || newValue.trim().isEmpty()) {
       throw new IllegalArgumentException("Calendar name, property, or value cannot be empty.");
     }

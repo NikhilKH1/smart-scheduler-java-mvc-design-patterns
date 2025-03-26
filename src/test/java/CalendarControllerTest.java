@@ -18,6 +18,9 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
+/**
+ * JUnit test class for CalendarController class.
+ */
 public class CalendarControllerTest {
 
   private CalendarController controller;
@@ -689,8 +692,8 @@ public class CalendarControllerTest {
   public void testPrintEventsOnDate() {
     controller.processCommand("create calendar --name Default --timezone UTC");
     controller.processCommand("use calendar --name Default");
-    controller.processCommand
-            ("create event \"Meeting\" from 2025-06-01T10:00 to 2025-06-01T11:00");
+    controller.processCommand("create event \"Meeting\" from 2025-06-01T10:00"
+            + " to 2025-06-01T11:00");
 
     boolean result = controller.processCommand("print events on 2025-06-01");
 
@@ -704,8 +707,8 @@ public class CalendarControllerTest {
   public void testBusyQuery() {
     controller.processCommand("create calendar --name Default --timezone UTC");
     controller.processCommand("use calendar --name Default");
-    controller.processCommand
-            ("create event \"Meeting\" from 2025-06-01T10:00 to 2025-06-01T11:00");
+    controller.processCommand("create event \"Meeting\" from 2025-06-01T10:00"
+            + " to 2025-06-01T11:00");
 
     boolean result = controller.processCommand("show status on 2025-06-01T10:30");
 
@@ -717,8 +720,8 @@ public class CalendarControllerTest {
   public void testEditEventDescription() {
     controller.processCommand("create calendar --name Default --timezone UTC");
     controller.processCommand("use calendar --name Default");
-    controller.processCommand
-            ("create event \"Daily Brief\" from 2025-06-01T08:00 to 2025-06-01T09:00");
+    controller.processCommand("create event \"Daily Brief\" from "
+            + "2025-06-01T08:00 to 2025-06-01T09:00");
 
     boolean result = controller.processCommand(
             "edit event description \"Daily Brief\" from 2025-06-01T08:00 "

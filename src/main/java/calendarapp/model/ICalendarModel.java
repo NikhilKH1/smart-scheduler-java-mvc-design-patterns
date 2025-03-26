@@ -157,7 +157,8 @@ public interface ICalendarModel {
                                    Temporal targetDateTime);
 
   /**
-   * Copies all events from a specific date in the source calendar to a new date in the target calendar.
+   * Copies all events from a specific date in the source calendar to a
+   * new date in the target calendar.
    *
    * @param sourceCalendar the calendar to copy from
    * @param sourceDate     the source date to copy events from
@@ -169,7 +170,8 @@ public interface ICalendarModel {
                                     CalendarModel targetCalendar, Temporal targetDate);
 
   /**
-   * Copies all events in a date range from the source calendar to the target calendar starting at a given date.
+   * Copies all events in a date range from the source calendar to the target
+   * calendar starting at a given date.
    *
    * @param sourceCalendar   the calendar to copy from
    * @param startDate        the start date of the source range

@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Queue;
 
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -32,9 +33,9 @@ import static org.junit.Assert.fail;
 public class CalendarAppTest {
 
   private SecurityManager originalSecurityManager;
-  private ICalendarManager manager;
+
   private ICalendarView view;
-  private CommandParser parser;
+
   private ICalendarController controller;
 
   private static class NoExitSecurityManager extends SecurityManager {
@@ -46,7 +47,9 @@ public class CalendarAppTest {
 
     @Override
     public void checkPermission(java.security.Permission perm) {
+      // method to checkPermission
     }
+
 
     @Override
     public void checkExit(int status) {
@@ -57,6 +60,8 @@ public class CalendarAppTest {
 
   @Before
   public void setUp() {
+    ICalendarManager manager;
+    CommandParser parser;
     originalSecurityManager = System.getSecurityManager();
     System.setSecurityManager(new NoExitSecurityManager());
 
@@ -88,6 +93,7 @@ public class CalendarAppTest {
 
     @Override
     public void close() {
+      // method to close
     }
   }
 
@@ -98,7 +104,10 @@ public class CalendarAppTest {
     ICommandSource testSource = new TestCommandSource(commands);
 
     CalendarApp.runInteractiveMode(controller, view, testSource);
+
+    assertNull("Expected no more commands after 'exit' command", testSource.getNextCommand());
   }
+
 
   @Test
   public void testHeadlessModeExitSuccessfully() {

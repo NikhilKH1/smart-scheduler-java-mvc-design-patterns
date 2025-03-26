@@ -60,6 +60,7 @@ public class ConsoleCommandSourceTest {
       commandSource.getNextCommand();
       fail("Expected exception when reading after close");
     } catch (IllegalStateException | NoSuchElementException e) {
+      System.out.println(e.getMessage());
     }
   }
 

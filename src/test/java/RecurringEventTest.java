@@ -17,6 +17,9 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.junit.Assert.assertNull;
 
+/**
+ * JUnit test class for RecurringEvent class.
+ */
 public class RecurringEventTest {
 
   private RecurringEvent baseEvent;
@@ -331,7 +334,7 @@ public class RecurringEventTest {
   public void testGenerateOccurrencesNonEmptyWeekdays() {
     RecurringEvent event = new RecurringEvent("Test",
             ZonedDateTime.of(2025, 6, 3, 9, 0, 0,
-                    0, zone), // Tuesday
+                    0, zone),
             ZonedDateTime.of(2025, 6, 3, 10, 0, 0,
                     0, zone),
             "T", 2, null, "desc", "loc",
@@ -347,7 +350,7 @@ public class RecurringEventTest {
   public void testGenerateOccurrencesRepeatCountBoundary() {
     RecurringEvent event = new RecurringEvent("Test",
             ZonedDateTime.of(2025, 6, 3, 9, 0, 0,
-                    0, zone), // Tuesday
+                    0, zone),
             ZonedDateTime.of(2025, 6, 3, 10, 0, 0,
                     0, zone),
             "T", 3, null, "desc", "loc",
@@ -362,7 +365,7 @@ public class RecurringEventTest {
   public void testGenerateOccurrencesRepeatCountExceeds() {
     RecurringEvent event = new RecurringEvent("Test",
             ZonedDateTime.of(2025, 6, 3, 9, 0, 0,
-                    0, zone), // Tuesday
+                    0, zone),
             ZonedDateTime.of(2025, 6, 3, 10, 0, 0,
                     0, zone),
             "T", 5, null, "desc", "loc",
@@ -376,10 +379,10 @@ public class RecurringEventTest {
   @Test
   public void testGenerateOccurrencesWithRepeatUntilAndNoLimit() {
     ZonedDateTime repeatUntil = ZonedDateTime.of(2025, 6, 8, 0,
-            0, 0, 0, zone); // Sunday
+            0, 0, 0, zone);
     RecurringEvent event = new RecurringEvent("Test",
             ZonedDateTime.of(2025, 6, 3, 9, 0, 0,
-                    0, zone), // Tuesday
+                    0, zone),
             ZonedDateTime.of(2025, 6, 3, 10, 0, 0,
                     0, zone),
             "T", 0, repeatUntil, "desc", "loc",
@@ -399,7 +402,7 @@ public class RecurringEventTest {
             59, 59, 0, zone);
     RecurringEvent event = new RecurringEvent("Test",
             ZonedDateTime.of(2025, 6, 2, 9, 0, 0,
-                    0, zone), // Monday
+                    0, zone),
             ZonedDateTime.of(2025, 6, 2, 10, 0, 0,
                     0, zone),
             "MTW", 0, repeatUntil, "desc", "loc",

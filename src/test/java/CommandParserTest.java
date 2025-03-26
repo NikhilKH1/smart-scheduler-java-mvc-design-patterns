@@ -18,6 +18,9 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+/**
+ * JUnit test class for CommandParser class.
+ */
 public class CommandParserTest {
 
   private CommandParser parser;
@@ -62,69 +65,16 @@ public class CommandParserTest {
     assertTrue(cmd instanceof BusyQueryCommand);
   }
 
-//  @Test
-//  public void testParseCopySingleEventValid() throws Exception {
-//    controller.processCommand("create calendar --name SourceCal --timezone UTC");
-//    controller.processCommand("create calendar --name TargetCal --timezone UTC");
-//    controller.processCommand("use calendar --name SourceCal");
-//
-//    String command = "copy event \"Meeting\" on 2025-06-01T09:00 --target \"TargetCal\" to 2025-06-02T10:00";
-//    ICommand parsedCommand = parser.parse(command);
-//
-//    assertTrue(parsedCommand instanceof CopySingleEventCommand);
-//    CopySingleEventCommand cmd = (CopySingleEventCommand) parsedCommand;
-//
-//    assertEquals("Meeting", cmd.getEventName());
-//    assertEquals(ZonedDateTime.of(2025, 6, 1, 9, 0, 0, 0, ZoneId.of("UTC")), cmd.getSourceDateTime());
-//    assertEquals("TargetCal", cmd.getTargetCalendar());
-//    assertEquals(ZonedDateTime.of(2025, 6, 2, 10, 0, 0, 0, ZoneId.of("UTC")), cmd.getTargetDateTime());
-//  }
-
   @Test(expected = IllegalArgumentException.class)
   public void testParseCopySingleEventInvalidFormat() {
     parser.parse("copy event \"Meeting\" on 2025-06-01T09:00 --target TargetCal");
   }
-//
-//  @Test
-//  public void testParseCopyEventsOnDateValid() throws Exception {
-//    controller.processCommand("create calendar --name SourceCal --timezone UTC");
-//    controller.processCommand("create calendar --name TargetCal --timezone UTC");
-//    controller.processCommand("use calendar --name SourceCal");
-//
-//    String command = "copy events on 2025-06-01 --target \"TargetCal\" to 2025-06-05";
-//    ICommand parsedCommand = parser.parse(command);
-//
-//    assertTrue(parsedCommand instanceof CopyEventsOnDateCommand);
-//    CopyEventsOnDateCommand cmd = (CopyEventsOnDateCommand) parsedCommand;
-//
-//    assertEquals(LocalDate.of(2025, 6, 1), cmd.getSourceDate());
-//    assertEquals("TargetCal", cmd.getTargetCalendar());
-//    assertEquals(LocalDate.of(2025, 6, 5), cmd.getTargetDate());
-//  }
+
 
   @Test(expected = IllegalArgumentException.class)
   public void testParseCopyEventsOnDateInvalidMissingTarget() {
     parser.parse("copy events on 2025-06-01 --target");
   }
-//
-//  @Test
-//  public void testParseCopyEventsBetweenValid() throws Exception {
-//    controller.processCommand("create calendar --name SourceCal --timezone UTC");
-//    controller.processCommand("create calendar --name TargetCal --timezone UTC");
-//    controller.processCommand("use calendar --name SourceCal");
-//
-//    String command = "copy events between 2025-06-01 and 2025-06-10 --target \"TargetCal\" to 2025-07-01";
-//    ICommand parsedCommand = parser.parse(command);
-//
-//    assertTrue(parsedCommand instanceof CopyEventsBetweenDatesCommand);
-//    CopyEventsBetweenDatesCommand cmd = (CopyEventsBetweenDatesCommand) parsedCommand;
-//
-//    assertEquals(LocalDate.of(2025, 6, 1), cmd.getStartDate());
-//    assertEquals(LocalDate.of(2025, 6, 10), cmd.getEndDate());
-//    assertEquals("TargetCal", cmd.getTargetCalendar());
-//    assertEquals(LocalDate.of(2025, 7, 1), cmd.getTargetStartDate());
-//  }
-
 
   @Test
   public void testParseCopyEventsOnDateValid() {
@@ -136,7 +86,8 @@ public class CommandParserTest {
 
   @Test
   public void testParseCopyEventsBetweenValid() {
-    String command = "copy events between 2025-06-01 and 2025-06-10 --target \"NewCal\" to 2025-07-01";
+    String command = "copy events between 2025-06-01 and 2025-06-10 --target \"NewCal\""
+            + " to 2025-07-01";
     ICommand parsedCommand = parser.parse(command);
 
     assertTrue(parsedCommand instanceof CopyEventsBetweenDatesCommand);
@@ -145,7 +96,8 @@ public class CommandParserTest {
 
   @Test(expected = IllegalArgumentException.class)
   public void testParseCopyEventsBetweenInvalidFormat() {
-    parser.parse("copy events between 2025-06-01 and --target \"TargetCal\" to 2025-07-01");
+    parser.parse("copy events between 2025-06-01 and --target \"TargetCal\" "
+            + "to 2025-07-01");
   }
 
   @Test(expected = IllegalArgumentException.class)
@@ -247,10 +199,6 @@ public class CommandParserTest {
     assertEquals(expectedStart, (ZonedDateTime) cmd.getOriginalStart());
     assertEquals(expectedEnd, (ZonedDateTime) cmd.getOriginalEnd());
   }
-
-
-
-
 
   @Test
   public void testParseUnknownCommand() {
@@ -438,8 +386,6 @@ public class CommandParserTest {
     }
   }
 
-
-
   @Test
   public void testParsePrintCommandIncomplete() {
     String command = "print";
@@ -450,7 +396,6 @@ public class CommandParserTest {
       assertTrue(e.getMessage().toLowerCase().contains("invalid print command format"));
     }
   }
-
 
   @Test
   public void testParseExportCommand() throws Exception {
@@ -466,7 +411,6 @@ public class CommandParserTest {
 
     assertEquals("events.csv", filePath);
   }
-
 
   @Test
   public void testParsePrintCommandMissingEventsKeyword() {
@@ -532,8 +476,10 @@ public class CommandParserTest {
 
     assertTrue(parsedCommand instanceof QueryRangeDateTimeCommand);
     QueryRangeDateTimeCommand cmd = (QueryRangeDateTimeCommand) parsedCommand;
-    assertEquals(ZonedDateTime.of(2025, 6, 1, 9, 0, 0, 0, ZoneId.of("UTC")), cmd.getStartDateTime());
-    assertEquals(ZonedDateTime.of(2025, 6, 1, 10, 30, 0, 0, ZoneId.of("UTC")), cmd.getEndDateTime());
+    assertEquals(ZonedDateTime.of(2025, 6, 1, 9, 0,
+            0, 0, ZoneId.of("UTC")), cmd.getStartDateTime());
+    assertEquals(ZonedDateTime.of(2025, 6, 1, 10, 30,
+            0, 0, ZoneId.of("UTC")), cmd.getEndDateTime());
   }
 
   @Test
@@ -560,7 +506,8 @@ public class CommandParserTest {
 
   @Test
   public void testParseEditSingleEventCommandMissingFromKeyword() {
-    String command = "edit event description \"Meeting\" 2025-06-01T09:00 to 2025-06-01T10:00 with \"Updated Description\"";
+    String command = "edit event description \"Meeting\" 2025-06-01T09:00 to 2025-06-01T10:00 "
+            + "with \"Updated Description\"";
     try {
       parser.parse(command);
       fail("Expected IllegalArgumentException for missing 'from' keyword");
@@ -571,7 +518,8 @@ public class CommandParserTest {
 
   @Test
   public void testParseEditSingleEventCommandMissingToKeyword() {
-    String command = "edit event description \"Meeting\" from 2025-06-01T09:00 something 2025-06-01T10:00 with \"Updated Description\"";
+    String command = "edit event description \"Meeting\" from 2025-06-01T09:00 something "
+            + "2025-06-01T10:00 with \"Updated Description\"";
     try {
       parser.parse(command);
       fail("Expected IllegalArgumentException for missing 'to' keyword");
@@ -582,7 +530,8 @@ public class CommandParserTest {
 
   @Test
   public void testParseEditSingleEventCommandMissingFromKeywordMain() {
-    String command = "edit event description \"Meeting\" something 2025-06-01T09:00 to 2025-06-01T10:00 with \"Updated Description\"";
+    String command = "edit event description \"Meeting\" something 2025-06-01T09:00 to"
+            + " 2025-06-01T10:00 with \"Updated Description\"";
     try {
       parser.parse(command);
       fail("Expected IllegalArgumentException for missing 'from' keyword");
@@ -593,7 +542,8 @@ public class CommandParserTest {
 
   @Test
   public void testParseEditSingleEventCommandMissingWithKeywordMain() {
-    String command = "edit event description \"Meeting\" from 2025-06-01T09:00 to 2025-06-01T10:00 without \"Updated Description\"";
+    String command = "edit event description \"Meeting\" from 2025-06-01T09:00 to"
+            + " 2025-06-01T10:00 without \"Updated Description\"";
     try {
       parser.parse(command);
       fail("Expected IllegalArgumentException for missing 'with' keyword");
@@ -618,21 +568,25 @@ public class CommandParserTest {
     controller.processCommand("create calendar --name testCal --timezone UTC");
     controller.processCommand("use calendar --name testCal");
 
-    String command = "edit event description \"Meeting\" from 2025-06-01T09:00 to 2025-06-01T10:00 with \"Updated Description\"";
+    String command = "edit event description \"Meeting\" from 2025-06-01T09:00 to"
+            + " 2025-06-01T10:00 with \"Updated Description\"";
     ICommand parsedCommand = parser.parse(command);
 
     assertTrue(parsedCommand instanceof EditEventCommand);
     EditEventCommand cmd = (EditEventCommand) parsedCommand;
     assertEquals("description", cmd.getProperty());
     assertEquals("Meeting", cmd.getEventName());
-    assertEquals(ZonedDateTime.of(2025, 6, 1, 9, 0, 0, 0, ZoneId.of("UTC")), cmd.getOriginalStart());
-    assertEquals(ZonedDateTime.of(2025, 6, 1, 10, 0, 0, 0, ZoneId.of("UTC")), cmd.getOriginalEnd());
+    assertEquals(ZonedDateTime.of(2025, 6, 1, 9, 0,
+            0, 0, ZoneId.of("UTC")), cmd.getOriginalStart());
+    assertEquals(ZonedDateTime.of(2025, 6, 1, 10, 0,
+            0, 0, ZoneId.of("UTC")), cmd.getOriginalEnd());
     assertEquals("Updated Description", cmd.getNewValue());
   }
 
   @Test
   public void testParseEditEventsCommandMissingFromKeyword() {
-    String command = "edit events description \"Meeting\" nothing 2025-06-01T09:00 with \"Updated Description\"";
+    String command = "edit events description \"Meeting\" nothing 2025-06-01T09:00 "
+            + "with \"Updated Description\"";
     try {
       parser.parse(command);
       fail("Expected IllegalArgumentException for missing 'from' keyword");
@@ -643,7 +597,8 @@ public class CommandParserTest {
 
   @Test
   public void testParseEditEventsCommandMissingWithKeyword() {
-    String command = "edit events description \"Meeting\" from 2025-06-01T09:00 something \"Updated Description\"";
+    String command = "edit events description \"Meeting\" from 2025-06-01T09:00 something "
+            + "\"Updated Description\"";
     try {
       parser.parse(command);
       fail("Expected IllegalArgumentException for missing 'with' keyword");
@@ -724,14 +679,9 @@ public class CommandParserTest {
     boolean result = controller.processCommand(command);
 
     assertFalse(result);
-    assertTrue(view.getLastMessage().contains("Execution Error: Index 3 out of bounds for length 3"));
+    assertTrue(view.getLastMessage().contains("Execution Error: Index 3 out of bounds "
+            + "for length 3"));
   }
-
-
-
-
-
-
 
   /**
    * A minimal test view implementation for CommandParser testing.

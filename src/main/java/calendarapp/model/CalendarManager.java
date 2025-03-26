@@ -3,7 +3,9 @@ package calendarapp.model;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+
 
 /**
  * Manages multiple calendars by name and tracks the active calendar.

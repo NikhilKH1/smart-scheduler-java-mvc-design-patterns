@@ -12,7 +12,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 /**
- * JUnit test class for ParsedEventTiming.
+ * JUnit test class for ParsedEventTiming class.
  */
 public class ParsedEventTimingTest {
 

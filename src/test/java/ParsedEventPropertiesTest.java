@@ -10,7 +10,7 @@ import static org.junit.Assert.assertTrue;
 
 
 /**
- * JUnit test class for ParsedEventProperties.
+ * JUnit test class for ParsedEventProperties class.
  */
 public class ParsedEventPropertiesTest {
 

@@ -22,6 +22,9 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+/**
+ * JUnit test class for CalendarModel class.
+ */
 public class CalendarModelTest {
 
   private CalendarModel model;
@@ -29,7 +32,8 @@ public class CalendarModelTest {
 
   @Before
   public void setUp() {
-    model = new CalendarModel("TestCal", ZoneId.of("Asia/Kolkata"));
+    model = new CalendarModel("TestCal",
+            ZoneId.of("Asia/Kolkata"));
   }
 
   @Test

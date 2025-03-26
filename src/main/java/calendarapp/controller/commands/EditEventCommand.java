@@ -15,6 +15,9 @@ import calendarapp.view.ICalendarView;
  */
 public class EditEventCommand implements ICalendarModelCommand {
 
+  /**
+   * Defines the modes available for editing events in the calendar.
+   */
   public enum EditMode {
     SINGLE,
     FROM,
@@ -118,6 +121,8 @@ public class EditEventCommand implements ICalendarModelCommand {
           break;
         case ALL:
           success = model.editEventsAll(property, eventName, newValue);
+          break;
+        default:
           break;
       }
     } catch (Exception e) {
