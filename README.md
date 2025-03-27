@@ -35,19 +35,21 @@ This project is an enhanced version of a calendar application that allows users 
 1. Ensure that you have Java installed (Java 11).
 2. Open a terminal and navigate to the directory containing the `calendarapp.jar` file.
 3. Run the application in interactive mode:
-   ```bash
-   java -jar calendarapp.jar --mode interactive
+
+
+    java -jar calendarapp.jar --mode interactive
+
 - This mode allows users to input commands interactively.
 
 4. Run the application in headless mode:
  
 - To run Valid Commands file:
 
-    ``` bash
+
     java -jar calendarapp.jar --mode headless ValidCommands.txt
 - To run Invalid Commands file:
 
-    ``` bash
+
     java -jar calendarapp.jar --mode headless InvalidCommands.txt
 
 ## Working Features
@@ -119,6 +121,7 @@ The folder for testing the export command is placed in test/res folder. Please u
 ### Both:
 
 - Jointly worked on writing the test cases.
+
 ## Concepts covered in the project:
 
 #### Abstraction and Abstract Data Types:

@@ -538,9 +538,11 @@ public class CalendarManagerTest {
     ZonedDateTime endB = startB.plusHours(1);
 
     manager.getActiveCalendar().addEvent(new SingleEvent("Meeting A", startA, endA,
-            "", "", true, false, null), false);
+            "", "", true, false, null),
+            false);
     manager.getActiveCalendar().addEvent(new SingleEvent("Meeting B", startB, endB,
-                    "Old Desc", "Room 1", true, false, null),
+                    "Old Desc", "Room 1", true, false,
+                    null),
             false);
 
     boolean updatedDesc = manager.getActiveCalendar().editSingleEvent("description",
