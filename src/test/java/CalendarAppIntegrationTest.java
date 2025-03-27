@@ -17,16 +17,17 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 /**
- * Integration tests for CalendarApp
+ * Integration tests for CalendarApp.
  */
 public class CalendarAppIntegrationTest {
 
   private CalendarController controller;
   private TestCalendarView view;
-  private ICalendarManager manager;
+
 
   @Before
   public void setUp() {
+    ICalendarManager manager;
     manager = new CalendarManager();
     view = new TestCalendarView();
     CommandParser parser = new CommandParser(manager);
