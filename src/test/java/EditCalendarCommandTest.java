@@ -1,6 +1,7 @@
 import calendarapp.controller.commands.EditCalendarCommand;
 import calendarapp.model.ICalendarManager;
 import calendarapp.view.ICalendarView;
+
 import org.junit.Test;
 
 import java.time.ZoneId;
@@ -87,6 +88,7 @@ public class EditCalendarCommandTest {
 
       @Override
       public void displayEvents(java.util.List events) {
+        // No implementation of this is required
       }
     };
 
@@ -141,6 +143,7 @@ public class EditCalendarCommandTest {
 
       @Override
       public void displayEvents(java.util.List events) {
+        // No implementation of this is required
       }
     };
 
@@ -195,6 +198,7 @@ public class EditCalendarCommandTest {
 
       @Override
       public void displayEvents(java.util.List events) {
+        // No implementation of this is required
       }
     };
 

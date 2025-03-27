@@ -2,6 +2,7 @@ import calendarapp.controller.commands.CopyEventsOnDateCommand;
 import calendarapp.model.CalendarModel;
 import calendarapp.model.ICalendarManager;
 import calendarapp.view.ICalendarView;
+
 import org.junit.Test;
 
 import java.time.LocalDate;
@@ -68,6 +69,7 @@ public class CopyEventsOnDateCommandTest {
 
       @Override
       public void displayEvents(java.util.List events) {
+        // No implementation of this is required
       }
     };
 
@@ -122,6 +124,7 @@ public class CopyEventsOnDateCommandTest {
 
       @Override
       public void displayEvents(java.util.List events) {
+        // No implementation of this is required
       }
     };
 

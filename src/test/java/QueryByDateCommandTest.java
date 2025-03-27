@@ -4,7 +4,9 @@ import calendarapp.model.ICalendarModel;
 import calendarapp.model.event.ICalendarEvent;
 import calendarapp.model.event.RecurringEvent;
 import calendarapp.view.ICalendarView;
+
 import org.junit.Test;
+
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.temporal.Temporal;
@@ -23,6 +25,7 @@ public class QueryByDateCommandTest {
 
   private class TestCalendarModel implements ICalendarModel {
     private List<ICalendarEvent> events;
+
     public TestCalendarModel(List<ICalendarEvent> events) {
       this.events = events;
     }
@@ -96,7 +99,7 @@ public class QueryByDateCommandTest {
 
     @Override
     public void updateTimezone(ZoneId newTimezone) {
-
+      // No implementation of this is required
     }
 
     @Override
@@ -123,6 +126,7 @@ public class QueryByDateCommandTest {
   private class TestCalendarView implements ICalendarView {
     private String message;
     private List<ICalendarEvent> displayedEvents;
+
     @Override
     public void displayMessage(String message) {
       this.message = message;
@@ -130,16 +134,18 @@ public class QueryByDateCommandTest {
 
     @Override
     public void displayError(String errorMessage) {
-
+      // No implementation of this is required
     }
 
     @Override
     public void displayEvents(List<ICalendarEvent> events) {
       this.displayedEvents = events;
     }
+
     public String getMessage() {
       return message;
     }
+
     public List<ICalendarEvent> getDisplayedEvents() {
       return displayedEvents;
     }
@@ -147,9 +153,11 @@ public class QueryByDateCommandTest {
 
   private class DummyCalendarEvent implements ICalendarEvent {
     private String subject;
+
     public DummyCalendarEvent(String subject) {
       this.subject = subject;
     }
+
     @Override
     public String getSubject() {
       return subject;

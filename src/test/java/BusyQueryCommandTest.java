@@ -83,7 +83,7 @@ public class BusyQueryCommandTest {
      */
     @Override
     public void updateTimezone(ZoneId newTimezone) {
-
+      // No implementation of this is required
     }
 
     @Override
@@ -154,8 +154,7 @@ public class BusyQueryCommandTest {
 
     @Override
     public boolean copyEventsOnDateTo(calendarapp.model.CalendarModel source, Temporal sourceDate,
-                                      calendarapp.model.CalendarModel target, Temporal targetDate)
-    {
+                                      calendarapp.model.CalendarModel target, Temporal targetDate) {
       return false;
     }
 
@@ -179,6 +178,7 @@ public class BusyQueryCommandTest {
 
     @Override
     public void displayEvents(List<ICalendarEvent> events) {
+      // No implementation of this is required
     }
 
     @Override
