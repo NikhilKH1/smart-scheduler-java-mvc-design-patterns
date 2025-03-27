@@ -91,6 +91,14 @@ public class CalendarModelTest {
   }
 
 
+  @Test(expected = IllegalArgumentException.class)
+  public void testCopyEventToSameDateTimeFails() {
+    ZonedDateTime start = ZonedDateTime.of(2025, 6, 15, 9, 0, 0, 0, model.getTimezone());
+    ZonedDateTime end = start.plusHours(1);
+    model.addEvent(new SingleEvent("Team Sync", start, end, "", "", true, false, null), false);
+    model.copySingleEventTo(model, "Team Sync", start, model, start);
+  }
+
 
   @Test
   public void testAddConflictEventFails() {
