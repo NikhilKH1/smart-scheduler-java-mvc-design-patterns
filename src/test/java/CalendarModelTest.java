@@ -49,6 +49,50 @@ public class CalendarModelTest {
   }
 
   @Test
+  public void testAddEventEndingAtStartOfAnother() {
+    ZonedDateTime start1 = ZonedDateTime.of(2025, 6, 10, 9, 0, 0, 0, model.getTimezone());
+    ZonedDateTime end1 = start1.plusHours(1);
+    ZonedDateTime start2 = end1; // starts exactly at previous end
+    ZonedDateTime end2 = start2.plusHours(1);
+
+    SingleEvent event1 = new SingleEvent("Session A", start1, end1, "", "", true, false, null);
+    SingleEvent event2 = new SingleEvent("Session B", start2, end2, "", "", true, false, null);
+
+    assertTrue(model.addEvent(event1, true));
+    assertTrue("Event should be allowed as it starts right after previous ends",
+            model.addEvent(event2, true));
+  }
+
+  @Test
+  public void testAllDayEventConflictsWithTimedEvent() {
+    ZonedDateTime allDayStart = ZonedDateTime.of(2025, 7, 1, 0, 0, 0, 0, model.getTimezone());
+    ZonedDateTime allDayEnd = ZonedDateTime.of(2025, 7, 1, 23, 59, 0, 0, model.getTimezone());
+
+    ZonedDateTime timedStart = ZonedDateTime.of(2025, 7, 1, 15, 0, 0, 0, model.getTimezone());
+    ZonedDateTime timedEnd = timedStart.plusHours(1);
+
+    SingleEvent allDay = new SingleEvent("Conference", allDayStart, allDayEnd, "", "", true, true, null);
+    SingleEvent timed = new SingleEvent("Check-in", timedStart, timedEnd, "", "", true, false, null);
+
+    assertTrue(model.addEvent(allDay, true));
+    assertFalse("Timed event should conflict with all-day event", model.addEvent(timed, true));
+  }
+
+  @Test
+  public void testRecurringEventRepeatUntilBeforeStart() {
+    ZonedDateTime start = ZonedDateTime.of(2025, 6, 10, 10, 0, 0, 0, model.getTimezone());
+    ZonedDateTime end = start.plusHours(1);
+    ZonedDateTime repeatUntil = ZonedDateTime.of(2025, 6, 1, 10, 0, 0, 0, model.getTimezone());
+
+    RecurringEvent event = new RecurringEvent("Expired", start, end, "MW", 0, repeatUntil, "", "", true, false);
+
+    assertTrue(model.addRecurringEvent(event, true));
+    assertEquals("No events should be generated as repeatUntil is in the past", 0, model.getEvents().size());
+  }
+
+
+
+  @Test
   public void testAddConflictEventFails() {
     ZonedDateTime start1 = ZonedDateTime.of(2025, 3, 25,
             10, 0, 0, 0, model.getTimezone());

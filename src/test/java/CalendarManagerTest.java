@@ -240,10 +240,10 @@ public class CalendarManagerTest {
 
     CalendarModel model = manager.getActiveCalendar();
     assertTrue(model.addEvent(new SingleEvent("Meeting A", start1, end1,
-            "", "", true, false, null),
+                    "", "", true, false, null),
             false));
     assertFalse(model.addEvent(new SingleEvent("Meeting B", start2, end2,
-            "", "", true, false, null),
+                    "", "", true, false, null),
             false));
   }
 
@@ -408,6 +408,7 @@ public class CalendarManagerTest {
     assertFalse(result);
   }
 
+
   @Test
   public void testEditEventsAllNoMatchReturnsFalse() {
     manager.addCalendar("NoMatchAll", ZoneId.of("UTC"));
@@ -471,7 +472,7 @@ public class CalendarManagerTest {
     manager.getActiveCalendar().addEvent(new SingleEvent("Meeting A", startA, endA,
             "", "", true, false, null), false);
     manager.getActiveCalendar().addEvent(new SingleEvent("Meeting B", startB, endB,
-            "Old Desc", "Room 1", true, false, null),
+                    "Old Desc", "Room 1", true, false, null),
             false);
 
     boolean updatedDesc = manager.getActiveCalendar().editSingleEvent("description",
@@ -694,6 +695,34 @@ public class CalendarManagerTest {
   }
 
 
+  @Test
+  public void testAddCalendarWithTrailingSpaces() {
+    boolean result = manager.addCalendar("  TrimTest  ", ZoneId.of("UTC"));
+    assertTrue(result);
+    assertNotNull(manager.getCalendar("  TrimTest  "));
+  }
 
+  @Test
+  public void testUseCalendarAfterRenaming() {
+    manager.addCalendar("TempCal", ZoneId.of("UTC"));
+    manager.editCalendar("TempCal", "name", "FinalCal");
+    boolean used = manager.useCalendar("FinalCal");
+    assertTrue(used);
+    assertEquals("FinalCal", manager.getActiveCalendar().getName());
+  }
+
+  @Test
+  public void testGetCalendarStripsQuotes() {
+    manager.addCalendar("TestCal", ZoneId.of("UTC"));
+    CalendarModel found = manager.getCalendar("\"TestCal\"");
+    assertNotNull(found);
+    assertEquals("TestCal", found.getName());
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testEditCalendarToSameNameThrowsException() {
+    manager.addCalendar("SameNameCal", ZoneId.of("UTC"));
+    manager.editCalendar("SameNameCal", "name", "SameNameCal");
+  }
 
 }
