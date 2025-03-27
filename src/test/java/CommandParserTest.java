@@ -57,8 +57,8 @@ public class CommandParserTest {
 
   @Test
   public void testParseCreateEventCommand() {
-    ICommand cmd = parser.parse
-            ("create event \"Meeting\" from 2025-06-01T09:00 to 2025-06-01T10:00");
+    ICommand cmd = parser.parse("create event \"Meeting\" from"
+            + " 2025-06-01T09:00 to 2025-06-01T10:00");
     assertTrue(cmd instanceof CreateEventCommand);
   }
 
@@ -151,8 +151,8 @@ public class CommandParserTest {
 
   @Test
   public void testParseCreateEvent() {
-    ICommand parsedCommand = parser.parse
-            ("create event \"Meeting\" from 2025-06-01T09:00 to 2025-06-01T10:00");
+    ICommand parsedCommand = parser.parse("create event \"Meeting\" "
+            + "from 2025-06-01T09:00 to 2025-06-01T10:00");
     assertTrue("Should parse as CreateEventCommand",
             parsedCommand instanceof CreateEventCommand);
 
@@ -175,8 +175,8 @@ public class CommandParserTest {
 
   @Test
   public void testParsePrintEventsInRange() {
-    ICommand parsedCommand = parser.parse
-            ("print events from 2025-06-01T09:00 to 2025-06-01T10:30");
+    ICommand parsedCommand = parser.parse("print events from"
+            + " 2025-06-01T09:00 to 2025-06-01T10:30");
     assertTrue(parsedCommand instanceof QueryRangeDateTimeCommand);
 
     QueryRangeDateTimeCommand cmd = (QueryRangeDateTimeCommand) parsedCommand;

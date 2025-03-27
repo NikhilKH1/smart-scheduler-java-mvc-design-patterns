@@ -2,6 +2,7 @@ import calendarapp.controller.commands.CopySingleEventCommand;
 import calendarapp.model.CalendarModel;
 import calendarapp.model.ICalendarManager;
 import calendarapp.view.ICalendarView;
+
 import org.junit.Test;
 
 import java.time.ZoneId;
@@ -67,6 +68,7 @@ public class CopySingleEventCommandTest {
 
       @Override
       public void displayEvents(java.util.List events) {
+        // No implementation of this is required
       }
     };
 
@@ -122,6 +124,7 @@ public class CopySingleEventCommandTest {
 
       @Override
       public void displayEvents(java.util.List events) {
+        // No implementation of this is required
       }
     };
 

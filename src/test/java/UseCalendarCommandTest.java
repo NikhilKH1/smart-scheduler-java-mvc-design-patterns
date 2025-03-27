@@ -5,6 +5,7 @@ import calendarapp.model.ICalendarModel;
 import calendarapp.model.event.ICalendarEvent;
 import calendarapp.model.event.RecurringEvent;
 import calendarapp.view.ICalendarView;
+
 import org.junit.Test;
 
 import java.time.ZoneId;
@@ -203,7 +204,7 @@ public class UseCalendarCommandTest {
            */
           @Override
           public void updateTimezone(ZoneId newTimezone) {
-
+            // No implementation of this is required
           }
 
           /**
@@ -386,7 +387,7 @@ public class UseCalendarCommandTest {
 
           @Override
           public void updateTimezone(ZoneId newTimezone) {
-
+            // No implementation of this is required
           }
 
           @Override

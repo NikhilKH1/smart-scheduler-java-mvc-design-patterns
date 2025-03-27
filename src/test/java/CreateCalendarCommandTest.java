@@ -7,7 +7,9 @@ import calendarapp.controller.commands.CreateCalendarCommand;
 
 import static org.junit.Assert.assertEquals;
 
-
+/**
+ * JUnit tests for the CreateCalendarCommand class.
+ */
 public class CreateCalendarCommandTest {
 
   @Test(expected = IllegalArgumentException.class)

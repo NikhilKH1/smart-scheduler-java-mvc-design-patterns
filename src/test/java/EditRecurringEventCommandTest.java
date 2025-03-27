@@ -4,11 +4,13 @@ import calendarapp.model.ICalendarModel;
 import calendarapp.model.event.ICalendarEvent;
 import calendarapp.model.event.RecurringEvent;
 import calendarapp.view.ICalendarView;
+
 import java.time.ZoneId;
 import java.time.temporal.Temporal;
 import java.util.List;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
+
 import org.junit.Test;
 
 import static org.junit.Assert.assertFalse;
@@ -52,11 +54,13 @@ public class EditRecurringEventCommandTest {
                                        CalendarModel target, Temporal targetStartDate) {
       return true;
     }
+
     @Override
     public boolean copyEventsOnDateTo(CalendarModel source, Temporal sourceDate,
                                       CalendarModel target, Temporal targetDate) {
       return true;
     }
+
     @Override
     public boolean copySingleEventTo(CalendarModel source, String eventName,
                                      Temporal sourceDateTime, CalendarModel target,
@@ -106,24 +110,29 @@ public class EditRecurringEventCommandTest {
 
     @Override
     public void updateTimezone(ZoneId newTimezone) {
-
+      // No implementation of this is required
     }
   }
 
   private class TestCalendarViewImpl implements ICalendarView {
     private final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
     private final PrintStream ps = new PrintStream(outputStream);
+
     @Override
     public void displayMessage(String message) {
       ps.println(message);
     }
+
     @Override
     public void displayError(String errorMessage) {
       ps.println(errorMessage);
     }
+
     @Override
     public void displayEvents(List<ICalendarEvent> events) {
+      // No implementation of this is required
     }
+
     public String getOutput() {
       return outputStream.toString();
     }

@@ -4,11 +4,13 @@ import calendarapp.model.ICalendarModel;
 import calendarapp.model.event.ICalendarEvent;
 import calendarapp.model.event.RecurringEvent;
 import calendarapp.view.ICalendarView;
+
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.temporal.Temporal;
 import java.util.ArrayList;
 import java.util.List;
+
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -23,6 +25,7 @@ public class QueryRangeDateTimeCommandTest {
 
   private class TestCalendarModel implements ICalendarModel {
     private List<ICalendarEvent> events;
+
     public TestCalendarModel(List<ICalendarEvent> events) {
       this.events = events;
     }
@@ -97,7 +100,7 @@ public class QueryRangeDateTimeCommandTest {
 
     @Override
     public void updateTimezone(ZoneId newTimezone) {
-
+      // No implementation of this is required
     }
 
     @Override
@@ -124,20 +127,26 @@ public class QueryRangeDateTimeCommandTest {
   private class TestCalendarView implements ICalendarView {
     private String message;
     private List<ICalendarEvent> displayedEvents;
+
     @Override
     public void displayMessage(String message) {
       this.message = message;
     }
+
     @Override
     public void displayEvents(List<ICalendarEvent> events) {
       this.displayedEvents = events;
     }
+
     @Override
     public void displayError(String errorMessage) {
+      // No implementation of this is required
     }
+
     public String getMessage() {
       return message;
     }
+
     public List<ICalendarEvent> getDisplayedEvents() {
       return displayedEvents;
     }
@@ -145,9 +154,11 @@ public class QueryRangeDateTimeCommandTest {
 
   private class DummyCalendarEvent implements ICalendarEvent {
     private String subject;
+
     public DummyCalendarEvent(String subject) {
       this.subject = subject;
     }
+
     @Override
     public String getSubject() {
       return subject;

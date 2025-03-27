@@ -25,7 +25,7 @@ This project is an enhanced version of a calendar application that allows users 
 * **Justification**: Decouples input sources from core logic. This modular structure allows input to come from various sources (e.g., console, files), making the app extensible for GUI or web interfaces in the future.
 
 #### Exporter Extensibility
-6. **Introduced the IExporter interface and concrete CSVExporter class**
+6. **Introduced the IExporter interface**
 * **Justification**: Enabling future extensions with minimal modifications. In Assignment 4, we had a CSV exporter within the utils package. In this assignment, we introduced an Exporter interface to support different formats, making it easier to add new export types like PDF or TXT when needed.
 
 ## How to Run the Program

@@ -213,7 +213,7 @@ public class CreateEventCommandTest {
 
       @Override
       public void updateTimezone(ZoneId newTimezone) {
-
+        // No implementation of this is required
       }
 
       @Override
@@ -345,7 +345,7 @@ public class CreateEventCommandTest {
 
     @Override
     public void updateTimezone(ZoneId newTimezone) {
-
+      // No implementation of this is required
     }
 
     @Override

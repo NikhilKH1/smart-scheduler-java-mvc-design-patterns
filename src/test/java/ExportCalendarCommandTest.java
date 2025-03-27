@@ -15,7 +15,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-
+/**
+ * JUnit test class for ExportCalendarCommand class.
+ */
 public class ExportCalendarCommandTest {
 
   private class TestCalendarView implements calendarapp.view.ICalendarView {
@@ -34,6 +36,7 @@ public class ExportCalendarCommandTest {
 
     @Override
     public void displayEvents(List<ICalendarEvent> events) {
+      // No implementation of this is required
     }
 
     public String getLastMessage() {
