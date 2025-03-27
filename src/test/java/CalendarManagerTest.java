@@ -34,6 +34,74 @@ public class CalendarManagerTest {
     manager = new CalendarManager();
   }
 
+  @Test(expected = NullPointerException.class)
+  public void testCopySingleEventNullSourceDateThrows() {
+    manager.addCalendar("Source", ZoneId.of("UTC"));
+    manager.addCalendar("Target", ZoneId.of("UTC"));
+    manager.useCalendar("Source");
+
+    manager.copySingleEvent("Event", null, "Target", ZonedDateTime.now());
+  }
+
+  @Test
+  public void testEditCalendarToSameTimezone() {
+    manager.addCalendar("TimeCal", ZoneId.of("Asia/Kolkata"));
+    boolean result = manager.editCalendar("TimeCal", "timezone", "Asia/Kolkata");
+    assertTrue(result); // Allow it but treat as no-op
+    assertEquals(ZoneId.of("Asia/Kolkata"), manager.getCalendar("TimeCal").getTimezone());
+  }
+
+  @Test
+  public void testCopyEventWithinSameCalendar() {
+    manager.addCalendar("SameCal", ZoneId.of("UTC"));
+    manager.useCalendar("SameCal");
+
+    ZonedDateTime start = ZonedDateTime.of(2025, 6, 1, 9, 0, 0, 0, ZoneId.of("UTC"));
+    ZonedDateTime end = start.plusHours(1);
+    manager.getActiveCalendar().addEvent(new SingleEvent("Session", start, end, "", "", true, false, null), false);
+
+    ZonedDateTime newStart = ZonedDateTime.of(2025, 6, 2, 9, 0, 0, 0, ZoneId.of("UTC"));
+    boolean result = manager.copySingleEvent("Session", start, "SameCal", newStart);
+
+    assertTrue(result);
+    assertEquals(2, manager.getActiveCalendar().getEvents().size());
+  }
+
+  @Test
+  public void testCopyEventCausesConflictInTargetCalendarFails() {
+    manager.addCalendar("Source", ZoneId.of("UTC"));
+    manager.addCalendar("Target", ZoneId.of("UTC"));
+    manager.useCalendar("Source");
+
+    ZonedDateTime sourceStart = ZonedDateTime.of(2025, 6, 1, 10, 0, 0, 0, ZoneId.of("UTC"));
+    ZonedDateTime sourceEnd = sourceStart.plusHours(1);
+    manager.getActiveCalendar().addEvent(new SingleEvent("Meeting", sourceStart, sourceEnd, "", "", true, false, null), false);
+
+    CalendarModel target = manager.getCalendar("Target");
+    ZonedDateTime conflictStart = ZonedDateTime.of(2025, 6, 2, 10, 0, 0, 0, ZoneId.of("UTC"));
+    ZonedDateTime conflictEnd = conflictStart.plusHours(1);
+    target.addEvent(new SingleEvent("Existing", conflictStart, conflictEnd, "", "", true, false, null), false);
+
+    boolean result = manager.copySingleEvent("Meeting", sourceStart, "Target", conflictStart);
+    assertFalse(result);
+  }
+
+  @Test
+  public void testCopyNonExistentEventFails() {
+    manager.addCalendar("Source", ZoneId.of("UTC"));
+    manager.addCalendar("Target", ZoneId.of("UTC"));
+    manager.useCalendar("Source");
+
+    boolean result = manager.copySingleEvent("UnknownEvent",
+            ZonedDateTime.of(2025, 6, 1, 10, 0, 0, 0, ZoneId.of("UTC")),
+            "Target",
+            ZonedDateTime.of(2025, 6, 2, 10, 0, 0, 0, ZoneId.of("UTC")));
+    assertFalse(result);
+  }
+
+
+
+
   @Test
   public void testAddCalendarSuccessfully() {
     boolean added = manager.addCalendar("Work", ZoneId.of("Asia/Kolkata"));
