@@ -17,7 +17,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 /**
- * Integration tests for Assignment 5: controller, model, parser, and view.
+ * Integration tests for CalendarApp
  */
 public class CalendarAppIntegrationTest {
 
@@ -89,6 +89,78 @@ public class CalendarAppIntegrationTest {
             + "\"New desc for all\"");
     assertTrue(view.getLastMessage().toLowerCase().contains("edited successfully"));
   }
+
+  @Test
+  public void testCreateCalendarWithInvalidTimezone() {
+    boolean result = controller.processCommand("create calendar --name InvalidTZ"
+            + " --timezone Invalid/Zone");
+    assertFalse(result);
+    assertTrue(view.getLastMessage().toLowerCase().contains("invalid timezone"));
+  }
+
+  @Test
+  public void testEditNonexistentCalendar() {
+    boolean result = controller.processCommand("edit calendar "
+            + "--name DoesNotExist --property name NewName");
+    assertFalse(result);
+    assertTrue(view.getLastMessage().toLowerCase().contains("not found"));
+  }
+
+  @Test
+  public void testEditCalendarWithInvalidProperty() {
+    controller.processCommand("create calendar --name Work --timezone UTC");
+    boolean result = controller.processCommand("edit calendar "
+            + "--name Work --property unsupported value");
+    assertFalse(result);
+    assertTrue(view.getLastMessage().toLowerCase().contains("unsupported property"));
+  }
+
+  @Test
+  public void testUseCalendarBeforeCreation() {
+    boolean result = controller.processCommand("use calendar --name GhostCal");
+    assertFalse(result);
+    assertTrue(view.getLastMessage().toLowerCase().contains("not found"));
+  }
+
+  @Test
+  public void testCreateOverlappingRecurringEventFails() {
+    controller.processCommand("create event \"Standup\" from 2025-06-01T09:00"
+            + " to 2025-06-01T09:30 repeats MTWRF for 5 times");
+    boolean result = controller.processCommand("create event \"Overlap\" from"
+            + " 2025-06-02T09:15 to 2025-06-02T09:45");
+    assertFalse(result);
+    assertTrue(view.getLastMessage().toLowerCase().contains("conflict"));
+  }
+
+
+  @Test
+  public void testCopyRecurringEventToDifferentCalendarWithTimezone() {
+    controller.processCommand("create calendar --name SourceCal "
+            + "--timezone America/New_York");
+    controller.processCommand("create calendar --name TargetCal "
+            + "--timezone Europe/Paris");
+    controller.processCommand("use calendar --name SourceCal");
+    controller.processCommand("create event \"DailySync\" from 2025-06-01T08:00"
+            + " to 2025-06-01T08:30 repeats MTWRF for 3 times");
+    controller.processCommand("copy event \"DailySync\" on 2025-06-02T08:00 "
+            + "--target TargetCal to 2025-06-10T09:00");
+    controller.processCommand("use calendar --name TargetCal");
+    controller.processCommand("print events on 2025-06-10");
+    assertTrue(view.getLastMessage().toLowerCase().contains("displaying"));
+  }
+
+  @Test
+  public void testUpdateTimezoneUpdatesAllEventTimes() {
+    controller.processCommand("create calendar --name TestCal --timezone UTC");
+    controller.processCommand("use calendar --name TestCal");
+    controller.processCommand("create event \"Workshop\" from "
+            + "2025-06-01T10:00 to 2025-06-01T11:00");
+    controller.processCommand("edit calendar --name TestCal "
+            + "--property timezone Asia/Kolkata");
+    controller.processCommand("print events on 2025-06-01");
+    assertTrue(view.getLastMessage().toLowerCase().contains("displaying"));
+  }
+
 
   @Test
   public void testStatusCommand() {
