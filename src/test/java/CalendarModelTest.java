@@ -37,6 +37,18 @@ public class CalendarModelTest {
   }
 
   @Test
+  public void testRecurringEventWithNoRepeatingDaysGeneratesNothing() {
+    ZonedDateTime start = ZonedDateTime.of(2025, 7, 1, 10, 0, 0, 0, model.getTimezone());
+    ZonedDateTime end = start.plusHours(1);
+    RecurringEvent event = new RecurringEvent("NoRepeatDays", start, end,
+            "", 3, null, "Desc", "Loc", true, false);
+
+    boolean added = model.addRecurringEvent(event, false);
+    assertTrue(added);
+    assertTrue(model.getEvents().isEmpty());
+  }
+
+  @Test
   public void testAddSingleEventSuccess() {
     ZonedDateTime start = ZonedDateTime.of(2025, 3, 25, 10,
             0, 0, 0, model.getTimezone());
@@ -47,6 +59,33 @@ public class CalendarModelTest {
     assertTrue(model.addEvent(event, true));
     assertEquals(1, model.getEvents().size());
   }
+
+  @Test
+  public void testEditEventSameFieldValueDoesNotDuplicateOrChange() {
+    ZonedDateTime start = ZonedDateTime.of(2025, 6, 1, 10, 0, 0, 0, model.getTimezone());
+    ZonedDateTime end = start.plusHours(1);
+    SingleEvent event = new SingleEvent("Workshop", start, end, "Topic", "Room A", true, false, null);
+    assertTrue(model.addEvent(event, false));
+
+    boolean edited = model.editSingleEvent("description", "Workshop", start, end, "Topic"); // no change
+    assertTrue(edited);
+    assertEquals(1, model.getEvents().size());
+  }
+
+  @Test
+  public void testCopyEventToDateBeforeEpoch() {
+    ZonedDateTime start = ZonedDateTime.of(2025, 6, 1, 10, 0, 0, 0, model.getTimezone());
+    ZonedDateTime end = start.plusHours(1);
+    assertTrue(model.addEvent(new SingleEvent("History", start, end, "", "", true, false, null), false));
+
+    ZonedDateTime ancientDate = ZonedDateTime.of(1800, 1, 1, 10, 0, 0, 0, model.getTimezone());
+    boolean copied = model.copySingleEventTo(model, "History", start, model, ancientDate);
+    assertTrue(copied);
+  }
+
+
+
+
 
   @Test
   public void testAddEventEndingAtStartOfAnother() {
