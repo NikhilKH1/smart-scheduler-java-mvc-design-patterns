@@ -27,6 +27,7 @@ import java.lang.reflect.Field;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.time.ZoneId;
+import java.time.format.DateTimeParseException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -54,6 +55,37 @@ public class CommandParserTest {
     controller.processCommand("create calendar --name testCal --timezone UTC");
     controller.processCommand("use calendar --name testCal");
   }
+
+
+  @Test(expected = DateTimeParseException.class)
+  public void testEditRecurringEventEmptyNewValue() {
+    parser.parse("edit events repeatuntil \"Standup\" \"\"");
+  }
+
+  @Test(expected = DateTimeParseException.class)
+  public void testEditRecurringEventRepeatUntilMissingT() {
+    parser.parse("edit events repeatuntil \"Standup\" \"2025-07-31 23:59\"");
+  }
+
+
+  @Test
+  public void testEditRecurringEventEmptyNewValue_ManualCheck() {
+    try {
+      parser.parse("edit events repeatuntil \"Standup\" \"\"");
+      fail("Expected DateTimeParseException for empty date string");
+    } catch (DateTimeParseException e) {
+      assertTrue(e.getMessage().contains("could not be parsed"));
+    }
+  }
+
+
+  @Test
+  public void testParseCommandWithExtraWhitespace() {
+    ICommand cmd = parser.parse("  create   event   \"Meeting\"  from  2025-04-01T10:00  "
+            + "to  2025-04-01T11:00  ");
+    assertTrue(cmd instanceof CreateEventCommand);
+  }
+
 
   @Test
   public void testParseCreateEventCommand() {
@@ -862,6 +894,7 @@ public class CommandParserTest {
     assertFalse(result);
     assertTrue(view.getLastMessage().contains("Failed to export calendar: Disk error"));
   }
+
 
   @Test
   public void testExportCalendarCommandHandlesIllegalArgumentException() {
