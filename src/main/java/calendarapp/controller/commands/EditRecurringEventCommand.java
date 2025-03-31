@@ -3,6 +3,7 @@ package calendarapp.controller.commands;
 import calendarapp.model.ICalendarModel;
 import calendarapp.view.ICalendarView;
 
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.temporal.Temporal;
@@ -85,8 +86,10 @@ public class EditRecurringEventCommand implements ICalendarModelCommand {
   private ZonedDateTime convertToZonedDateTime(Temporal temporal, ZoneId zoneId) {
     if (temporal instanceof ZonedDateTime) {
       return (ZonedDateTime) temporal;
+    } else if (temporal instanceof LocalDateTime) {
+      return ZonedDateTime.of((LocalDateTime) temporal, zoneId);
     } else {
-      return ZonedDateTime.from(temporal).withZoneSameInstant(zoneId);
+      throw new IllegalArgumentException("Unsupported Temporal type");
     }
   }
 }

@@ -5,7 +5,10 @@ import calendarapp.model.event.ICalendarEvent;
 import calendarapp.model.event.RecurringEvent;
 import calendarapp.view.ICalendarView;
 
+import java.lang.reflect.Method;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.temporal.Temporal;
 import java.util.List;
 import java.io.ByteArrayOutputStream;
@@ -13,7 +16,9 @@ import java.io.PrintStream;
 
 import org.junit.Test;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -166,4 +171,51 @@ public class EditRecurringEventCommandTest {
     String output = view.getOutput();
     assertTrue(output.contains("Failed to modify recurring event."));
   }
+
+  @Test
+  public void testConvertToZonedDateTimeCoversAllPaths() throws Exception {
+    EditRecurringEventCommand cmd = new EditRecurringEventCommand("repeatuntil", "Test", "2025-12-31T00:00");
+
+    Method method = EditRecurringEventCommand.class.getDeclaredMethod(
+            "convertToZonedDateTime", Temporal.class, ZoneId.class);
+    method.setAccessible(true);
+
+    ZoneId zone = ZoneId.of("UTC");
+
+    // Case 1: Input is ZonedDateTime (covers line 86)
+    ZonedDateTime inputZoned = ZonedDateTime.now(zone);
+    Object result1 = method.invoke(cmd, inputZoned, zone);
+    assertEquals(inputZoned, result1);  // Should return the same instance
+
+    // Case 2: Input is LocalDateTime (covers line 89)
+    LocalDateTime inputLocal = LocalDateTime.of(2025, 1, 1, 10, 0);
+    Object result2 = method.invoke(cmd, inputLocal, zone);
+    assertNotNull(result2);
+    assertTrue(result2 instanceof ZonedDateTime);
+    ZonedDateTime expected = ZonedDateTime.of(inputLocal, zone);
+    assertEquals(expected, result2);
+  }
+
+  @Test
+  public void testEditRecurringEventCommandThrowsException() {
+    // Simulate a model that throws an exception during editRecurringEvent
+    ICalendarModel model = new TestCalendarModel() {
+      @Override
+      public boolean editRecurringEvent(String eventName, String property, String newValue) {
+        throw new RuntimeException("Simulated failure");
+      }
+    };
+
+    TestCalendarViewImpl view = new TestCalendarViewImpl();
+
+    EditRecurringEventCommand cmd = new EditRecurringEventCommand("repeatuntil",
+            "SomeEvent", "2025-12-31T00:00");
+
+    boolean result = cmd.execute(model, view);
+
+    // Assert fallback path
+    assertFalse(result); // ✅ line 68
+    assertTrue(view.getOutput().contains("Execution Error:")); // ✅ line 67
+  }
+
 }

@@ -129,6 +129,44 @@ public class RecurringEventTest {
   }
 
   @Test
+  public void testGenerateOccurrencesReturnsCorrectList() {
+    ZonedDateTime start = ZonedDateTime.of(2025, 6, 3, 9,
+            0, 0, 0, zone);
+    ZonedDateTime end = ZonedDateTime.of(2025, 6, 3, 10,
+            0, 0, 0, zone);
+    RecurringEvent event = new RecurringEvent("Test", start, end, "T",
+            2, null, "desc", "loc", true,
+            false);
+
+    List<SingleEvent> actual = event.generateOccurrences("seriesABC");
+
+    assertEquals(2, actual.size());
+    assertEquals("Test", actual.get(0).getSubject());
+    assertEquals("seriesABC", actual.get(0).getSeriesId());
+    assertEquals(start, actual.get(0).getStartDateTime());
+    assertEquals(end, actual.get(0).getEndDateTime());
+  }
+
+  @Test
+  public void testGenerateOccurrencesRepeatCountZeroAndNoRepeatUntil() {
+    ZonedDateTime start = ZonedDateTime.of(2025, 6, 3, 9,
+            0, 0, 0, zone);
+    ZonedDateTime end = ZonedDateTime.of(2025, 6, 3, 10,
+            0, 0, 0, zone);
+
+    RecurringEvent event = new RecurringEvent("Zero Repeat", start, end,
+            "T", 0, null, "desc", "loc",
+            true, false);
+
+    List<SingleEvent> occurrences = event.generateOccurrences("series1");
+
+    assertTrue("Expected no occurrences when repeatCount=0 and no repeatUntil",
+            occurrences.isEmpty());
+  }
+
+
+
+  @Test
   public void testCreateRecurringEvent() {
     ZonedDateTime start = ZonedDateTime.of(2025, 6, 1, 9, 0,
             0, 0, zone);
@@ -473,5 +511,138 @@ public class RecurringEventTest {
       assertEquals("Unknown day: null", cause.getMessage());
     }
   }
+
+  @Test
+  public void testGenerateOccurrencesWithEmptyWeekdays() {
+    ZonedDateTime start = ZonedDateTime.parse("2025-04-01T09:00:00+00:00");
+    ZonedDateTime end = ZonedDateTime.parse("2025-04-01T10:00:00+00:00");
+
+    RecurringEvent event = new RecurringEvent(
+            "NoDays", start, end, "", 5, null,
+            "desc", "loc", true, false);
+
+    List<SingleEvent> result = event.generateOccurrences("series-1");
+    assertTrue(result.isEmpty());
+  }
+
+  @Test
+  public void testGenerateOccurrencesWithZeroRepeatCountAndNoUntil() {
+    ZonedDateTime start = ZonedDateTime.parse("2025-04-01T09:00:00+00:00");
+    ZonedDateTime end = ZonedDateTime.parse("2025-04-01T10:00:00+00:00");
+
+    RecurringEvent event = new RecurringEvent(
+            "NoRepeats", start, end, "M", 0, null,
+            "desc", "loc", true, false);
+
+    List<SingleEvent> result = event.generateOccurrences("series-2");
+    assertTrue(result.isEmpty());
+  }
+
+  @Test
+  public void testGenerateOccurrencesWithRepeatUntilOnly() {
+    ZonedDateTime start = ZonedDateTime.parse("2025-04-01T09:00:00+00:00"); // Tuesday
+    ZonedDateTime end = ZonedDateTime.parse("2025-04-01T10:00:00+00:00");
+    ZonedDateTime until = ZonedDateTime.parse("2025-04-05T10:00:00+00:00"); // covers W, R, F
+
+    RecurringEvent event = new RecurringEvent(
+            "WithUntil", start, end, "TRF", 0, until,
+            "desc", "loc", true, false);
+
+    List<SingleEvent> result = event.generateOccurrences("series-3");
+    assertEquals(3, result.size()); // R = Thu, F = Fri
+    assertEquals("WithUntil", result.get(0).getSubject());
+  }
+
+  @Test
+  public void testGenerateOccurrencesStopsAfterRepeatCount() {
+    ZonedDateTime start = ZonedDateTime.parse("2025-04-01T09:00:00+00:00"); // Tuesday
+    ZonedDateTime end = ZonedDateTime.parse("2025-04-01T10:00:00+00:00");
+
+    RecurringEvent event = new RecurringEvent(
+            "LimitedRepeats", start, end, "T", 3, null,
+            "desc", "loc", true, false);
+
+    List<SingleEvent> result = event.generateOccurrences("series-4");
+    assertEquals(3, result.size());
+  }
+
+  @Test
+  public void testGetDayCharAllDays() {
+    ZonedDateTime start = ZonedDateTime.parse("2025-04-01T09:00:00+00:00"); // Tuesday
+    ZonedDateTime end = start.plusHours(1);
+
+    RecurringEvent event = new RecurringEvent("AllDays", start, end, "MTWRFSU", 1, null,
+            "desc", "loc", true, false);
+
+    assertEquals(1, event.generateOccurrences("series-5").size());
+  }
+
+  @Test
+  public void testGetDayCharThrowsOnNull2() throws Exception {
+    ZonedDateTime start = ZonedDateTime.parse("2025-04-01T10:00:00Z");
+    ZonedDateTime end = start.plusHours(1);
+
+    RecurringEvent event = new RecurringEvent(
+            "Test", start, end, "M", 1, null,
+            "desc", "loc", true, false);
+
+    Method method = RecurringEvent.class.getDeclaredMethod("getDayChar", java.time.DayOfWeek.class);
+    method.setAccessible(true);
+
+    try {
+      method.invoke(event, new Object[]{null});
+      fail("Expected IllegalArgumentException to be thrown");
+    } catch (java.lang.reflect.InvocationTargetException e) {
+      Throwable cause = e.getCause();
+      assertEquals(IllegalArgumentException.class, cause.getClass());
+      assertEquals("Unknown day: null", cause.getMessage());
+    }
+  }
+
+  @Test
+  public void testGenerateOccurrencesWhenWeekdaysIsEmpty() {
+    ZonedDateTime start = ZonedDateTime.parse("2025-04-01T10:00:00Z");
+    ZonedDateTime end = start.plusHours(1);
+
+    RecurringEvent event = new RecurringEvent(
+            "EmptyWeekdayTest", start, end,
+            "", 5, null,
+            "desc", "loc", true, false
+    );
+
+    List<?> occurrences = event.generateOccurrences("series1");
+    assertTrue(occurrences.isEmpty()); // Should return empty list
+  }
+
+  @Test
+  public void testGenerateOccurrencesWithNoRepeatCountAndNoRepeatUntil() {
+    ZonedDateTime start = ZonedDateTime.parse("2025-04-01T10:00:00Z");
+    ZonedDateTime end = start.plusHours(1);
+
+    RecurringEvent event = new RecurringEvent(
+            "NoRepeatTest", start, end,
+            "MW", 0, null, // No repeatCount AND no repeatUntil
+            "desc", "loc", true, false
+    );
+
+    List<?> occurrences = event.generateOccurrences("series2");
+    assertTrue(occurrences.isEmpty()); // Should return empty list
+  }
+
+  @Test
+  public void testGenerateOccurrencesStopsAtRepeatCount() {
+    ZonedDateTime start = ZonedDateTime.parse("2025-04-01T10:00:00Z"); // Tuesday
+    ZonedDateTime end = start.plusHours(1);
+
+    RecurringEvent event = new RecurringEvent(
+            "RepeatCountTest", start, end,
+            "T", 2, null, // Repeat 2 times on Tuesdays
+            "desc", "loc", true, false
+    );
+
+    List<?> occurrences = event.generateOccurrences("series3");
+    assertEquals(2, occurrences.size()); // Should stop after 2 valid events
+  }
+
 
 }

@@ -85,8 +85,6 @@ public class CalendarModelTest {
 
 
 
-
-
   @Test
   public void testAddEventEndingAtStartOfAnother() {
     ZonedDateTime start1 = ZonedDateTime.of(2025, 6, 10, 9,
@@ -1906,6 +1904,8 @@ public class CalendarModelTest {
     }
   }
 
+
+
   @Test
   public void testEventRemovalFromList() {
     CalendarModel calendar = new CalendarModel("Test Calendar", ZoneId.of("UTC"));
@@ -1926,4 +1926,54 @@ public class CalendarModelTest {
     assertEquals(2, events.size());
   }
 
+  @Test
+  public void testEditEventsAllReturnsFalseWhenNoMatch() {
+    CalendarModel model = new CalendarModel("Test", ZoneId.of("UTC"));
+    boolean result = model.editEventsAll("description", "NonExistentEvent", "Updated");
+    assertFalse(result); // Covers mutation: replaced return with true
+  }
+
+  @Test
+  public void testEditEventsAllReturnsTrueOnEdit() {
+    CalendarModel model = new CalendarModel("Test", ZoneId.of("UTC"));
+    ZonedDateTime start = ZonedDateTime.now();
+    ZonedDateTime end = start.plusHours(1);
+    SingleEvent e = new SingleEvent("Meeting", start, end, "desc", "loc", true, false, null);
+    model.addEvent(e, true);
+
+    boolean result = model.editEventsAll("description", "Meeting", "Updated Desc");
+    assertTrue(result); // Covers mutation: replaced return with false
+  }
+
+  @Test
+  public void testEditRecurringEventReturnsTrue() {
+    CalendarModel model = new CalendarModel("Test", ZoneId.of("UTC"));
+    ZonedDateTime start = ZonedDateTime.now();
+    ZonedDateTime end = start.plusHours(1);
+    RecurringEvent re = new RecurringEvent("Daily Standup", start, end, "MTWRF", 5, null,
+            "desc", "room", true, false);
+    model.addRecurringEvent(re, true);
+
+    boolean result = model.editRecurringEvent("Daily Standup", "description", "Updated");
+    assertTrue(result); // Covers mutations 556, 567
+  }
+
+  @Test
+  public void testEditRecurringEventReturnsFalseWhenNoMatch() {
+    CalendarModel model = new CalendarModel("Test", ZoneId.of("UTC"));
+    boolean result = model.editRecurringEvent("UnknownEvent", "description", "New");
+    assertFalse(result); // Covers mutation 556
+  }
+
+  @Test
+  public void testHasConflictExceptReturnsTrue() {
+    CalendarModel model = new CalendarModel("Test", ZoneId.of("UTC"));
+    ZonedDateTime start = ZonedDateTime.now();
+    ZonedDateTime end = start.plusHours(1);
+    SingleEvent e1 = new SingleEvent("e1", start, end, "", "", true, false, null);
+    SingleEvent e2 = new SingleEvent("e2", start, end, "", "", true, false, null);
+
+    model.addEvent(e1, true);
+    assertTrue(model.hasConflictExcept(e2, e1)); // Covers mutation 596
+  }
 }

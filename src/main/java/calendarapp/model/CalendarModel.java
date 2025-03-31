@@ -587,7 +587,7 @@ public class CalendarModel implements ICalendarModel {
    * @param newEvent the event to be checked for conflicts with other events
    * @return true if a conflict is found with any other event, false otherwise
    */
-  private boolean hasConflictExcept(ICalendarEvent oldEvent, ICalendarEvent newEvent) {
+  public boolean hasConflictExcept(ICalendarEvent oldEvent, ICalendarEvent newEvent) {
     for (ICalendarEvent existing : events) {
       if (!existing.equals(oldEvent) && ConflictChecker.hasConflict(existing, newEvent)) {
         return true;

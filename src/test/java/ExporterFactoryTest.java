@@ -1,16 +1,29 @@
 import calendarapp.utils.CSVExporter;
 import calendarapp.utils.ExporterFactory;
 import calendarapp.utils.IExporter;
-
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import java.io.IOException;
+import java.util.function.Function;
+
+import static org.junit.Assert.*;
 
 /**
- * JUnit test class for ExporterFactory class.
+ * JUnit test class for ExporterFactory class with full coverage and mutation killing.
  */
 public class ExporterFactoryTest {
+
+  @Before
+  public void setUp() {
+    ExporterFactory.clearCustomExporterSupplier(); // Ensure no residual state
+  }
+
+  @After
+  public void tearDown() {
+    ExporterFactory.clearCustomExporterSupplier(); // Reset state after each test
+  }
 
   @Test
   public void testGetExporterReturnsCSVExporter() {
@@ -39,5 +52,20 @@ public class ExporterFactoryTest {
   @Test(expected = NullPointerException.class)
   public void testGetExporterThrowsOnNullFileName() {
     ExporterFactory.getExporter(null);
+  }
+
+  @Test
+  public void testSetCustomExporterSupplierOverridesDefaultLogic() throws IOException {
+    ExporterFactory.setCustomExporterSupplier(path -> (events, file) -> "custom-output.csv");
+    IExporter exporter = ExporterFactory.getExporter("any.txt");
+    assertEquals("custom-output.csv", exporter.export(null, null));
+  }
+
+  @Test
+  public void testClearCustomExporterSupplierRestoresDefaultBehavior() {
+    ExporterFactory.setCustomExporterSupplier(path -> (events, file) -> "custom-output.csv");
+    ExporterFactory.clearCustomExporterSupplier();
+    IExporter exporter = ExporterFactory.getExporter("calendar.csv");
+    assertTrue(exporter instanceof CSVExporter);
   }
 }

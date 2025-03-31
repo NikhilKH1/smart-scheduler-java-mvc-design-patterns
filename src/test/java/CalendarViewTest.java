@@ -137,4 +137,26 @@ public class CalendarViewTest {
             + " | Public" + System.lineSeparator();
     assertEquals(expected, outContent.toString());
   }
+
+  @Test
+  public void testDisplayAllDayEvent() {
+    outContent.reset();
+    ZoneId zone = ZoneId.of("UTC");
+    ZonedDateTime start = ZonedDateTime.of(2025, 6, 2, 0, 0, 0, 0, zone);
+    ZonedDateTime end = ZonedDateTime.of(2025, 6, 2, 23, 59, 0, 0, zone);
+    DummyCalendarEvent allDayEvent = new DummyCalendarEvent("Holiday", start, end,
+            "Independence Day", "Nationwide", true, true);
+
+    List<ICalendarEvent> events = new ArrayList<>();
+    events.add(allDayEvent);
+    calendarView.displayEvents(events);
+
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm z");
+    String expected = "- Holiday: " + start.format(formatter) + " to " + end.format(formatter)
+            + " | Description: Independence Day | Location: Nationwide | Public | All Day Event"
+            + System.lineSeparator();
+
+    assertEquals(expected, outContent.toString());
+  }
+
 }

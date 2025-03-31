@@ -101,7 +101,12 @@ public class RecurringEvent extends AbstractCalendarEvent {
    */
   public List<SingleEvent> generateOccurrences(String seriesId) {
     List<SingleEvent> occurrences = new ArrayList<>();
+
     if (weekdays == null || weekdays.isEmpty()) {
+      return occurrences;
+    }
+
+    if (repeatCount <= 0 && repeatUntil == null) {
       return occurrences;
     }
 
@@ -129,8 +134,10 @@ public class RecurringEvent extends AbstractCalendarEvent {
         break;
       }
     }
+
     return occurrences;
   }
+
 
   /**
    * Converts a DayOfWeek to its corresponding character representation (e.g., "M" for Monday).
