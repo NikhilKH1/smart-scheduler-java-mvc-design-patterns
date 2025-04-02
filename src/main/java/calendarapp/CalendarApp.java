@@ -5,7 +5,7 @@ import java.io.*;
 import calendarapp.controller.CalendarController;
 import calendarapp.controller.CommandParser;
 import calendarapp.controller.ICalendarController;
-import calendarapp.controller.IOCalendarController;
+import calendarapp.controller.IOCalendarHelper;
 import calendarapp.model.CalendarManager;
 import calendarapp.model.ICalendarManager;
 import calendarapp.view.CalendarView;
@@ -15,7 +15,7 @@ public class CalendarApp {
 
   public static void main(String[] args) {
     try {
-      run(args);
+      run(args, new InputStreamReader(System.in), System.out);
     } catch (IOException e) {
       System.err.println("I/O error: " + e.getMessage());
       System.exit(1);
@@ -23,9 +23,14 @@ public class CalendarApp {
   }
 
   /**
-   * Refactored logic for testability.
+   * Refactored run method to decouple I/O for easier testing and flexibility.
+   *
+   * @param args command-line args
+   * @param in   input source (can be System.in, StringReader, FileReader, etc.)
+   * @param out  output destination (can be System.out, StringBuilder, etc.)
+   * @throws IOException on I/O errors
    */
-  public static void run(String[] args) throws IOException {
+  public static void run(String[] args, Reader in, Appendable out) throws IOException {
     ICalendarManager manager = new CalendarManager();
     ICalendarView view = new CalendarView();
     CommandParser parser = new CommandParser(manager);
@@ -35,22 +40,19 @@ public class CalendarApp {
       String mode = args[1].toLowerCase();
 
       if (mode.equals("interactive")) {
-        IOCalendarController ioController =
-                new IOCalendarController(new InputStreamReader(System.in), System.out, controller);
+        IOCalendarHelper ioController = new IOCalendarHelper(in, out, controller);
         ioController.run();
       } else if (mode.equals("headless") && args.length == 3) {
         Reader fileReader = new BufferedReader(new FileReader(args[2]));
-        IOCalendarController ioController =
-                new IOCalendarController(fileReader, System.out, controller);
+        IOCalendarHelper ioController = new IOCalendarHelper(fileReader, out, controller);
         ioController.run();
       } else {
-        System.err.println("Usage: --mode interactive OR --mode headless <commands-file>");
-        System.exit(1);
+        out.append("Usage: --mode interactive OR --mode headless <commands-file>\n");
       }
     } else {
-      IOCalendarController ioController =
-              new IOCalendarController(new InputStreamReader(System.in), System.out, controller);
+      IOCalendarHelper ioController = new IOCalendarHelper(in, out, controller);
       ioController.run();
     }
   }
+
 }

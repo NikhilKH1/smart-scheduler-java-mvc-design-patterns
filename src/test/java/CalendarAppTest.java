@@ -1,8 +1,14 @@
 
 package calendarapp;
 
+import calendarapp.controller.CalendarController;
+import calendarapp.controller.CommandParser;
 import calendarapp.controller.ICalendarController;
-import calendarapp.controller.IOCalendarController;
+import calendarapp.controller.IOCalendarHelper;
+import calendarapp.model.CalendarManager;
+import calendarapp.model.ICalendarManager;
+import calendarapp.view.CalendarView;
+import calendarapp.view.ICalendarView;
 
 import java.io.*;
 
@@ -38,7 +44,7 @@ public class CalendarAppTest {
     StringWriter output = new StringWriter();
 
     DummyController dummy = new DummyController(true);
-    IOCalendarController controller = new IOCalendarController(input, output, dummy);
+    IOCalendarHelper controller = new IOCalendarHelper(input, output, dummy);
     controller.run();
 
     assertTrue(output.toString().contains("Enter commands"));
@@ -52,7 +58,7 @@ public class CalendarAppTest {
     StringWriter output = new StringWriter();
 
     DummyController dummy = new DummyController(false);
-    IOCalendarController controller = new IOCalendarController(input, output, dummy);
+    IOCalendarHelper controller = new IOCalendarHelper(input, output, dummy);
     controller.run();
 
     assertTrue(output.toString().contains("Command failed: bad command"));
@@ -65,7 +71,7 @@ public class CalendarAppTest {
     StringWriter output = new StringWriter();
 
     DummyController dummy = new DummyController(true);
-    IOCalendarController controller = new IOCalendarController(input, output, dummy);
+    IOCalendarHelper controller = new IOCalendarHelper(input, output, dummy);
     controller.run();
 
     assertTrue(output.toString().startsWith("Enter commands"));
@@ -79,7 +85,7 @@ public class CalendarAppTest {
     StringWriter output = new StringWriter();
 
     DummyController dummy = new DummyController(true);
-    IOCalendarController controller = new IOCalendarController(input, output, dummy);
+    IOCalendarHelper controller = new IOCalendarHelper(input, output, dummy);
     controller.run();
 
     assertTrue(output.toString().contains("Enter commands"));
@@ -95,7 +101,7 @@ public class CalendarAppTest {
     StringWriter output = new StringWriter();
 
     DummyController dummy = new DummyController(false); // simulate failure
-    IOCalendarController controller = new IOCalendarController(input, output, dummy);
+    IOCalendarHelper controller = new IOCalendarHelper(input, output, dummy);
     controller.run();
 
     String out = output.toString();
@@ -105,25 +111,15 @@ public class CalendarAppTest {
 
   @Test
   public void testRunNoArgsDefaultsToInteractive() throws IOException {
-    // Simulate user entering a single command and then 'exit'
     String simulatedInput = "create calendar --name TestCal --timezone UTC\nexit\n";
-    InputStream testIn = new ByteArrayInputStream(simulatedInput.getBytes());
-    ByteArrayOutputStream testOut = new ByteArrayOutputStream();
-    PrintStream originalOut = System.out;
-    InputStream originalIn = System.in;
+    Reader testIn = new StringReader(simulatedInput);
+    StringWriter testOut = new StringWriter();
 
-    System.setIn(testIn);
-    System.setOut(new PrintStream(testOut));
+    String[] args = {};
+    CalendarApp.run(args, testIn, testOut);
 
-    try {
-      String[] args = {};
-      CalendarApp.run(args);
-      String output = testOut.toString();
-      assertTrue(output.contains("Enter commands"));
-    } finally {
-      System.setIn(originalIn); // Restore original input/output
-      System.setOut(originalOut);
-    }
+    String output = testOut.toString();
+    assertTrue(output.contains("Enter commands"));
   }
 
 
@@ -131,60 +127,97 @@ public class CalendarAppTest {
   public void testRunInteractiveModeExplicit() throws IOException {
     // Simulate user entering a command followed by 'exit'
     String simulatedInput = "create calendar --name TestCal --timezone UTC\nexit\n";
-    InputStream testIn = new ByteArrayInputStream(simulatedInput.getBytes());
-    ByteArrayOutputStream testOut = new ByteArrayOutputStream();
-    PrintStream originalOut = System.out;
-    InputStream originalIn = System.in;
+    Reader in = new StringReader(simulatedInput);
+    StringWriter out = new StringWriter();
 
-    System.setIn(testIn);
-    System.setOut(new PrintStream(testOut));
+    // Set up controller components
+    ICalendarManager manager = new CalendarManager();
+    ICalendarView view = new CalendarView();
+    CommandParser parser = new CommandParser(manager);
+    ICalendarController controller = new CalendarController(manager, view, parser);
 
-    try {
-      String[] args = {"--mode", "interactive"};
-      CalendarApp.run(args);
-      String output = testOut.toString();
-      assertTrue(output.contains("Enter commands"));
-    } finally {
-      System.setIn(originalIn);
-      System.setOut(originalOut);
-    }
+    // Run the helper with simulated I/O
+    IOCalendarHelper ioHelper = new IOCalendarHelper(in, out, controller);
+    ioHelper.run();
+
+    // Verify that output contains expected message
+    String output = out.toString();
+    assertTrue(output.contains("Enter commands"));
   }
 
 
   @Test
   public void testRunHeadlessModeWithFile() throws IOException {
+    // Create a temp file with commands
     File tempFile = File.createTempFile("calendar-test", ".txt");
     try (PrintWriter pw = new PrintWriter(tempFile)) {
       pw.println("create calendar --name AutoCal --timezone UTC");
       pw.println("exit");
     }
 
+    // Prepare input from the temp file and capture output
+    Reader reader = new FileReader(tempFile);
+    StringWriter output = new StringWriter();
+
+    // Run the application with redirected input/output
     String[] args = {"--mode", "headless", tempFile.getAbsolutePath()};
-    CalendarApp.run(args);
-    assertTrue(tempFile.exists()); // file was read successfully
+    CalendarApp.run(args, reader, output);
+
+    // Assert output contains expected messages (optional)
+    String result = output.toString();
+    assertTrue(result.contains("Enter commands"));  // optional check
+    // You can also check for success or failure messages if needed
+
+    // Clean up
     tempFile.delete();
   }
 
   @Test
   public void testRunInvalidArgumentsPrintsUsage() throws IOException {
-    ByteArrayOutputStream err = new ByteArrayOutputStream();
-    PrintStream originalErr = System.err;
-    System.setErr(new PrintStream(err));
+    StringWriter dummyOutput = new StringWriter();
+    Reader dummyInput = new StringReader("");
+    String[] args = {"--mode", "unknown"};
 
-    forbidSystemExitCall();
-    try {
-      String[] args = {"--mode", "unknown"};
-      CalendarApp.run(args);
-      fail("Expected System.exit to be called");
-    } catch (ExitTrappedException e) {
-      assertEquals(1, e.status); // Expected exit code
-      assertTrue(err.toString().toLowerCase().contains("usage"));
-    } finally {
-      enableSystemExit();
-      System.setErr(originalErr);
-    }
+    CalendarApp.run(args, dummyInput, dummyOutput);
+
+    String output = dummyOutput.toString().toLowerCase();
+
+    assertTrue(output.contains("usage"));
   }
 
+  @Test
+  public void testRunInteractiveMode() throws IOException {
+    String[] args = {"--mode", "interactive"};
+    StringReader input = new StringReader("exit\n");
+    StringWriter output = new StringWriter();
+
+    CalendarApp.run(args, input, output);
+
+    String result = output.toString();
+    assertTrue(result.contains("Enter commands"));
+    assertTrue(result.contains("Exiting"));
+  }
+
+  @Test
+  public void testRunHeadlessMode() throws IOException {
+    File tempFile = File.createTempFile("calendarapp-test", ".txt");
+    try (PrintWriter pw = new PrintWriter(tempFile)) {
+      pw.println("create calendar --name TestCal --timezone UTC");
+      pw.println("exit");
+    }
+
+    String[] args = {"--mode", "headless", tempFile.getAbsolutePath()};
+    StringWriter output = new StringWriter();
+
+    try (Reader fileReader = new FileReader(tempFile)) {
+      CalendarApp.run(args, fileReader, output);
+    }
+
+    String result = output.toString();
+    assertTrue(result.contains("Enter commands"));
+    assertTrue(result.contains("Exiting"));
+    tempFile.delete();
+  }
 
 
   @Test
@@ -195,8 +228,11 @@ public class CalendarAppTest {
 
     try {
       String[] args = {"--mode", "headless", "nonexistent_file.txt"};
+      Reader dummyInput = new StringReader(""); // not used, still required
+      Appendable dummyOutput = new StringWriter(); // not used, still required
+
       try {
-        CalendarApp.run(args);
+        CalendarApp.run(args, dummyInput, dummyOutput);
         fail("Expected IOException to be thrown");
       } catch (IOException e) {
         assertTrue(e.getMessage().contains("nonexistent_file.txt"));
@@ -205,6 +241,7 @@ public class CalendarAppTest {
       System.setErr(originalErr);
     }
   }
+
 
   @Test
   public void testMainCatchesIOExceptionAndExits() {
