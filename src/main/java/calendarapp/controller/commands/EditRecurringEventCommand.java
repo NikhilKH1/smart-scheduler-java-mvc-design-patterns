@@ -3,9 +3,9 @@ package calendarapp.controller.commands;
 import calendarapp.model.ICalendarModel;
 import calendarapp.view.ICalendarView;
 
-import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.time.LocalDateTime;
 import java.time.temporal.Temporal;
 
 /**
@@ -55,11 +55,11 @@ public class EditRecurringEventCommand implements ICalendarModelCommand {
    */
   @Override
   public boolean execute(ICalendarModel model, ICalendarView view) {
-    boolean success = false;
+    boolean success;
     try {
       if (property.equalsIgnoreCase("repeatuntil") && temporalValue != null) {
-        ZonedDateTime zonedDateTime = convertToZonedDateTime(temporalValue, model.getTimezone());
-        success = model.editRecurringEvent(eventName, property, zonedDateTime.toString());
+        ZonedDateTime adjusted = toZonedDateTime(temporalValue, model.getTimezone());
+        success = model.editRecurringEvent(eventName, property, adjusted.toString());
       } else {
         success = model.editRecurringEvent(eventName, property, newValue);
       }
@@ -79,17 +79,17 @@ public class EditRecurringEventCommand implements ICalendarModelCommand {
   /**
    * Converts a temporal value to a ZonedDateTime based on the given timezone.
    *
-   * @param temporal the temporal value to convert
-   * @param zoneId the timezone to apply
+   * @param input the temporal value to convert
+   * @param zone the timezone to apply
    * @return the converted ZonedDateTime
    */
-  private ZonedDateTime convertToZonedDateTime(Temporal temporal, ZoneId zoneId) {
-    if (temporal instanceof ZonedDateTime) {
-      return (ZonedDateTime) temporal;
-    } else if (temporal instanceof LocalDateTime) {
-      return ZonedDateTime.of((LocalDateTime) temporal, zoneId);
-    } else {
-      throw new IllegalArgumentException("Unsupported Temporal type");
+  private ZonedDateTime toZonedDateTime(Temporal input, ZoneId zone) {
+    if (input instanceof ZonedDateTime) {
+      return ((ZonedDateTime) input).withZoneSameInstant(zone);
     }
+    if (input instanceof LocalDateTime) {
+      return ZonedDateTime.of((LocalDateTime) input, zone);
+    }
+    throw new IllegalArgumentException("Unsupported temporal type for repeatuntil.");
   }
 }

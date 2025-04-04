@@ -1,5 +1,6 @@
 package calendarapp.controller.commands;
 
+import java.time.LocalDate;
 import java.time.temporal.Temporal;
 import java.util.List;
 
@@ -11,14 +12,14 @@ import calendarapp.view.ICalendarView;
  * Command to query calendar events for a specific date.
  */
 public class QueryByDateCommand implements ICalendarModelCommand {
-  private final Temporal queryDate;
+  private final LocalDate queryDate;
 
   /**
    * Constructs a QueryByDateCommand with the specified date.
    *
    * @param queryDate the date for which to retrieve calendar events
    */
-  public QueryByDateCommand(Temporal queryDate) {
+  public QueryByDateCommand(LocalDate queryDate) {
     this.queryDate = queryDate;
   }
 

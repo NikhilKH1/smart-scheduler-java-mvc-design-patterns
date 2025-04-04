@@ -3,7 +3,6 @@ package calendarapp.model.event;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
-import java.time.temporal.Temporal;
 
 /**
  * Represents a single (non-recurring) calendar event.
@@ -16,8 +15,8 @@ public class SingleEvent extends AbstractCalendarEvent {
    * Constructs a single event with the specified details.
    *
    * @param subject       the subject of the event
-   * @param startDateTime the start date and time of the event (as Temporal)
-   * @param endDateTime   the end date and time of the event (as Temporal)
+   * @param startDateTime the start date and time of the event
+   * @param endDateTime   the end date and time of the event
    * @param description   the event description
    * @param location      the event location
    * @param isPublic      true if the event is public; false otherwise
@@ -25,7 +24,7 @@ public class SingleEvent extends AbstractCalendarEvent {
    * @param seriesId      an identifier linking the event to a recurring series,
    *                      or null if not applicable
    */
-  public SingleEvent(String subject, Temporal startDateTime, Temporal endDateTime,
+  public SingleEvent(String subject, ZonedDateTime startDateTime, ZonedDateTime endDateTime,
                      String description, String location, boolean isPublic,
                      boolean isAllDay, String seriesId) {
     this.subject = subject;
@@ -59,8 +58,8 @@ public class SingleEvent extends AbstractCalendarEvent {
     String newSubject = this.subject;
     String newDescription = this.description;
     String newLocation = this.location;
-    ZonedDateTime newStart = ZonedDateTime.from(this.startDateTime);
-    ZonedDateTime newEnd = ZonedDateTime.from(this.endDateTime);
+    ZonedDateTime newStart = this.startDateTime;
+    ZonedDateTime newEnd = this.endDateTime;
     boolean newIsPublic = this.isPublic;
 
     switch (property.toLowerCase().trim()) {

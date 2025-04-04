@@ -1,6 +1,6 @@
 package calendarapp.model.event;
 
-import java.time.temporal.Temporal;
+import java.time.ZonedDateTime;
 
 /**
  * This interface represents a calendar event.
@@ -14,47 +14,47 @@ public interface ICalendarEvent {
    *
    * @return the subject of the event
    */
-  public String getSubject();
+  String getSubject();
 
   /**
    * Returns the start date and time of the event.
    *
-   * @return the start date and time as Temporal
+   * @return the start date and time as ZonedDateTime
    */
-  public Temporal getStartDateTime();
+  ZonedDateTime getStartDateTime();
 
   /**
    * Returns the end date and time of the event.
    *
-   * @return the end date and time as Temporal
+   * @return the end date and time as ZonedDateTime
    */
-  public Temporal getEndDateTime();
+  ZonedDateTime getEndDateTime();
 
   /**
    * Returns the description of the event.
    *
    * @return the event description
    */
-  public String getDescription();
+  String getDescription();
 
   /**
    * Returns the location of the event.
    *
    * @return the event location
    */
-  public String getLocation();
+  String getLocation();
 
   /**
    * Indicates whether the event lasts all day.
    *
    * @return true if the event is an all-day event, false otherwise
    */
-  public boolean isAllDay();
+  boolean isAllDay();
 
   /**
    * Indicates whether the event is public.
    *
    * @return true if the event is public, false otherwise
    */
-  public boolean isPublic();
+  boolean isPublic();
 }

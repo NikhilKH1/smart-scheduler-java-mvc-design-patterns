@@ -1,6 +1,6 @@
 package calendarapp.controller;
 
-import java.time.temporal.Temporal;
+import java.time.ZonedDateTime;
 
 /**
  * Represents the timing details of an event.
@@ -10,10 +10,10 @@ import java.time.temporal.Temporal;
  */
 public class ParsedEventTiming {
 
-  Temporal start;
-  Temporal end;
-  boolean isAllDay;
-  int index;
+  protected ZonedDateTime start;
+  protected ZonedDateTime end;
+  protected boolean isAllDay;
+  protected int index;
 
   /**
    * Default constructor initializing fields to null/default.
@@ -28,18 +28,18 @@ public class ParsedEventTiming {
   /**
    * Sets the start time.
    *
-   * @param start the start time as a Temporal object
+   * @param start the start time as a ZonedDateTime object
    */
-  public void setStart(Temporal start) {
+  public void setStart(ZonedDateTime start) {
     this.start = start;
   }
 
   /**
    * Sets the end time.
    *
-   * @param end the end time as a Temporal object
+   * @param end the end time as a ZonedDateTime object
    */
-  public void setEnd(Temporal end) {
+  public void setEnd(ZonedDateTime end) {
     this.end = end;
   }
 
@@ -64,18 +64,18 @@ public class ParsedEventTiming {
   /**
    * Gets the start time.
    *
-   * @return the start time as a Temporal
+   * @return the start time as a ZonedDateTime
    */
-  public Temporal getStart() {
+  public ZonedDateTime getStart() {
     return start;
   }
 
   /**
    * Gets the end time.
    *
-   * @return the end time as a Temporal
+   * @return the end time as a ZonedDateTime
    */
-  public Temporal getEnd() {
+  public ZonedDateTime getEnd() {
     return end;
   }
 

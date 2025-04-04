@@ -5,17 +5,17 @@ import calendarapp.model.ICalendarManager;
 import calendarapp.model.ICalendarModel;
 import calendarapp.view.ICalendarView;
 
-import java.time.temporal.Temporal;
+import java.time.ZonedDateTime;
 
 /**
  * Command to copy all events between two dates to another calendar.
  */
 public class CopyEventsBetweenDatesCommand implements ICalendarManagerCommand {
 
-  private final Temporal startDate;
-  private final Temporal endDate;
+  private final ZonedDateTime startDate;
+  private final ZonedDateTime endDate;
   private final String targetCalendarName;
-  private final Temporal targetStartDate;
+  private final ZonedDateTime targetStartDate;
 
   /**
    * Constructs the command.
@@ -25,8 +25,8 @@ public class CopyEventsBetweenDatesCommand implements ICalendarManagerCommand {
    * @param targetCalendarName the name of the calendar to copy events to
    * @param targetStartDate    the starting date in the target calendar
    */
-  public CopyEventsBetweenDatesCommand(Temporal startDate, Temporal endDate,
-                                       String targetCalendarName, Temporal targetStartDate) {
+  public CopyEventsBetweenDatesCommand(ZonedDateTime startDate, ZonedDateTime endDate,
+                                       String targetCalendarName, ZonedDateTime targetStartDate) {
     this.startDate = startDate;
     this.endDate = endDate;
     this.targetCalendarName = targetCalendarName;

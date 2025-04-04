@@ -5,7 +5,7 @@ import calendarapp.model.ICalendarManager;
 import calendarapp.model.ICalendarModel;
 import calendarapp.view.ICalendarView;
 
-import java.time.temporal.Temporal;
+import java.time.ZonedDateTime;
 
 /**
  * Command to copy a single event to a different calendar at a new time.
@@ -13,9 +13,9 @@ import java.time.temporal.Temporal;
 public class CopySingleEventCommand implements ICalendarManagerCommand {
 
   private final String eventName;
-  private final Temporal sourceDateTime;
+  private final ZonedDateTime sourceDateTime;
   private final String targetCalendarName;
-  private final Temporal targetDateTime;
+  private final ZonedDateTime targetDateTime;
 
   /**
    * Constructs the command.
@@ -25,8 +25,8 @@ public class CopySingleEventCommand implements ICalendarManagerCommand {
    * @param targetCalendarName the name of the target calendar
    * @param targetDateTime     the new start date/time for the copied event
    */
-  public CopySingleEventCommand(String eventName, Temporal sourceDateTime,
-                                String targetCalendarName, Temporal targetDateTime) {
+  public CopySingleEventCommand(String eventName, ZonedDateTime sourceDateTime,
+                                String targetCalendarName, ZonedDateTime targetDateTime) {
     this.eventName = eventName;
     this.sourceDateTime = sourceDateTime;
     this.targetCalendarName = targetCalendarName;
@@ -54,8 +54,7 @@ public class CopySingleEventCommand implements ICalendarManagerCommand {
     if (success) {
       view.displayMessage("Event '" + eventName + "' copied to calendar: " + targetCalendarName);
     } else {
-      view.displayError("Failed to copy event. It may not exist or conflicts with "
-              + "another event.");
+      view.displayError("Failed to copy event. It may not exist or conflicts with another event.");
     }
 
     return success;

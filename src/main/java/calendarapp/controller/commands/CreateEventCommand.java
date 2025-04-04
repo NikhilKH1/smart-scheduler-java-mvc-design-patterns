@@ -7,16 +7,17 @@ import calendarapp.view.ICalendarView;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.time.LocalDate;
 import java.time.temporal.Temporal;
 
 /**
  * Command to create a new calendar event.
- * This command holds all details required for creating both single and recurring events.
+ * Supports both single and recurring events.
  */
 public class CreateEventCommand implements ICalendarModelCommand {
   private final String eventName;
-  private final Temporal startDateTime;
-  private final Temporal endDateTime;
+  private final ZonedDateTime startDateTime;
+  private final ZonedDateTime endDateTime;
   private final boolean autoDecline;
   private final String description;
   private final String location;
@@ -41,13 +42,19 @@ public class CreateEventCommand implements ICalendarModelCommand {
    * @param isRecurring   whether the event is recurring
    * @param weekdays      the days of the week on which the event recurs
    * @param repeatCount   the number of times the event repeats
-   * @param repeatUntil   the date until which the event repeats
+   * @param repeatUntil   the date until which the event repeats (nullable, may be LocalDate or ZonedDateTime)
    */
-  public CreateEventCommand(String eventName, Temporal startDateTime,
-                            Temporal endDateTime,
-                            boolean autoDecline, String description, String location,
-                            boolean isPublic, boolean isAllDay,
-                            boolean isRecurring, String weekdays, int repeatCount,
+  public CreateEventCommand(String eventName,
+                            ZonedDateTime startDateTime,
+                            ZonedDateTime endDateTime,
+                            boolean autoDecline,
+                            String description,
+                            String location,
+                            boolean isPublic,
+                            boolean isAllDay,
+                            boolean isRecurring,
+                            String weekdays,
+                            int repeatCount,
                             Temporal repeatUntil) {
     this.eventName = eventName;
     this.startDateTime = startDateTime;
@@ -63,146 +70,36 @@ public class CreateEventCommand implements ICalendarModelCommand {
     this.repeatUntil = repeatUntil;
   }
 
-  /**
-   * Returns the name of the event.
-   *
-   * @return the event name
-   */
-  public String getEventName() {
-    return eventName;
-  }
-
-  /**
-   * Returns the start date and time of the event.
-   *
-   * @return the start date and time
-   */
-  public Temporal getStartDateTime() {
-    return startDateTime;
-  }
-
-  /**
-   * Returns the end date and time of the event.
-   *
-   * @return the end date and time
-   */
-  public Temporal getEndDateTime() {
-    return endDateTime;
-  }
-
-  /**
-   * Returns whether the event should automatically decline conflicts.
-   *
-   * @return true if conflicts should be declined, false otherwise
-   */
-  public boolean isAutoDecline() {
-    return autoDecline;
-  }
-
-  /**
-   * Returns the description of the event.
-   *
-   * @return the event description
-   */
-  public String getDescription() {
-    return description;
-  }
-
-  /**
-   * Returns the location of the event.
-   *
-   * @return the event location
-   */
-  public String getLocation() {
-    return location;
-  }
-
-  /**
-   * Returns whether the event is public.
-   *
-   * @return true if the event is public, false otherwise
-   */
-  public boolean isPublic() {
-    return isPublic;
-  }
-
-  /**
-   * Returns whether the event is an all-day event.
-   *
-   * @return true if the event is all-day, false otherwise
-   */
-  public boolean isAllDay() {
-    return isAllDay;
-  }
-
-  /**
-   * Returns whether the event is recurring.
-   *
-   * @return true if the event is recurring, false otherwise
-   */
-  public boolean isRecurring() {
-    return isRecurring;
-  }
-
-  /**
-   * Returns the weekdays on which the event recurs.
-   *
-   * @return the weekdays of recurrence
-   */
-  public String getWeekdays() {
-    return weekdays;
-  }
-
-  /**
-   * Returns the number of times the event repeats.
-   *
-   * @return the repeat count
-   */
-  public int getRepeatCount() {
-    return repeatCount;
-  }
-
-  /**
-   * Returns the date until which the event repeats.
-   *
-   * @return the repeat-until date
-   */
-  public Temporal getRepeatUntil() {
-    return repeatUntil;
-  }
-
-  /**
-   * Creates a single or recurring event in the calendar.
-   * The event is adjusted to match the calendar's timezone.
-   * A success message is displayed if the event is created successfully.
-   * If a conflict occurs, an error message is displayed.
-   *
-   * @param model the calendar model where the event is added
-   * @param view  the view used to display messages
-   * @return true if the event was created successfully, false otherwise
-   */
   @Override
   public boolean execute(ICalendarModel model, ICalendarView view) {
     try {
       boolean success;
       ZoneId targetZone = model.getTimezone();
-      ZonedDateTime adjustedStart = ZonedDateTime.from(startDateTime)
-              .withZoneSameInstant(targetZone);
-      ZonedDateTime adjustedEnd = ZonedDateTime.from(endDateTime)
-              .withZoneSameInstant(targetZone);
-      ZonedDateTime adjustedRepeatUntil = (repeatUntil != null)
-              ? ZonedDateTime.from(repeatUntil).withZoneSameInstant(targetZone) : null;
+
+      ZonedDateTime adjustedStart = startDateTime.withZoneSameInstant(targetZone);
+      ZonedDateTime adjustedEnd = endDateTime.withZoneSameInstant(targetZone);
+      ZonedDateTime adjustedRepeatUntil = null;
+
+      if (repeatUntil instanceof ZonedDateTime) {
+        adjustedRepeatUntil = ((ZonedDateTime) repeatUntil).withZoneSameInstant(targetZone);
+      } else if (repeatUntil instanceof LocalDate) {
+        adjustedRepeatUntil = ((LocalDate) repeatUntil).atStartOfDay(targetZone);
+      }
 
       if (isRecurring) {
-        RecurringEvent recurringEvent = new RecurringEvent(eventName, adjustedStart,
-                adjustedEnd, weekdays, repeatCount, adjustedRepeatUntil,
-                description, location, isPublic, isAllDay);
+        RecurringEvent recurringEvent = new RecurringEvent(
+                eventName, adjustedStart, adjustedEnd, weekdays, repeatCount,
+                adjustedRepeatUntil, description, location, isPublic, isAllDay
+        );
         success = model.addRecurringEvent(recurringEvent, autoDecline);
       } else {
-        SingleEvent event = new SingleEvent(eventName, adjustedStart, adjustedEnd,
-                description, location, isPublic, isAllDay, null);
+        SingleEvent event = new SingleEvent(
+                eventName, adjustedStart, adjustedEnd, description,
+                location, isPublic, isAllDay, null
+        );
         success = model.addEvent(event, autoDecline);
       }
+
       if (success) {
         view.displayMessage("Event created successfully");
       } else {

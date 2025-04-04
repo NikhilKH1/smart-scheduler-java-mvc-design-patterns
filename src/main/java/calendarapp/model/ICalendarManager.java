@@ -1,5 +1,6 @@
 package calendarapp.model;
 
+import java.time.LocalDate;
 import java.time.ZoneId;
 
 /**
@@ -28,6 +29,7 @@ public interface ICalendarManager {
    * @param newValue the new value for the specified property
    * @return true if the update was successful, false otherwise
    */
+
   public boolean editCalendar(String name, String property, String newValue);
 
   /**
@@ -52,4 +54,7 @@ public interface ICalendarManager {
    * @return the calendar with the specified name, or null if the calendar does not exist
    */
   public ICalendarModel getCalendar(String name);
+
+  public boolean copyEventsOnDate(LocalDate sourceDate, String targetCalendarName,
+                                  LocalDate targetDate);
 }

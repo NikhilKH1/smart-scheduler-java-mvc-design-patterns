@@ -1,5 +1,6 @@
 package calendarapp.controller.commands;
 
+import java.time.ZonedDateTime;
 import java.time.temporal.Temporal;
 import java.util.List;
 
@@ -11,8 +12,8 @@ import calendarapp.view.ICalendarView;
  * Command to query calendar events within a specific date and time range.
  */
 public class QueryRangeDateTimeCommand implements ICalendarModelCommand {
-  private final Temporal startDateTime;
-  private final Temporal endDateTime;
+  private final ZonedDateTime startDateTime;
+  private final ZonedDateTime endDateTime;
 
   /**
    * Constructs a QueryRangeDateTimeCommand with the specified start and end date/time.
@@ -20,7 +21,7 @@ public class QueryRangeDateTimeCommand implements ICalendarModelCommand {
    * @param startDateTime the beginning of the query range
    * @param endDateTime   the end of the query range
    */
-  public QueryRangeDateTimeCommand(Temporal startDateTime, Temporal endDateTime) {
+  public QueryRangeDateTimeCommand(ZonedDateTime startDateTime, ZonedDateTime endDateTime) {
     this.startDateTime = startDateTime;
     this.endDateTime = endDateTime;
   }

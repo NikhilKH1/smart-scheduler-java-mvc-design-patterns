@@ -17,6 +17,7 @@ import calendarapp.controller.commands.UseCalendarCommand;
 import calendarapp.model.ICalendarManager;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeParseException;
@@ -156,11 +157,17 @@ public class CommandParser {
             || !"to".equalsIgnoreCase(tokens.get(6))) {
       throw new IllegalArgumentException("Invalid copy events on format");
     }
-    LocalDate sourceDate = LocalDate.parse(tokens.get(3));
+
+    ZoneId zone = calendarManager.getActiveCalendar().getTimezone();
+
+    ZonedDateTime sourceDate = LocalDate.parse(tokens.get(3)).atStartOfDay(zone);
     String targetCalendar = stripQuotes(tokens.get(5)).trim();
-    LocalDate targetDate = LocalDate.parse(tokens.get(7));
+    ZonedDateTime targetDate = LocalDate.parse(tokens.get(7)).atStartOfDay(
+            calendarManager.getCalendar(targetCalendar).getTimezone());
+
     return new CopyEventsOnDateCommand(sourceDate, targetCalendar, targetDate);
   }
+
 
   /**
    * Parses the "copy events between" command, which copies all events between
@@ -171,17 +178,24 @@ public class CommandParser {
    * @throws IllegalArgumentException if the command format is invalid
    */
   private ICommand parseCopyEventsBetween(List<String> tokens) {
-    if (tokens.size() < 9 || !"and".equalsIgnoreCase(tokens.get(4))
+    if (tokens.size() < 10 || !"and".equalsIgnoreCase(tokens.get(4))
             || !"--target".equalsIgnoreCase(tokens.get(6))
             || !"to".equalsIgnoreCase(tokens.get(8))) {
       throw new IllegalArgumentException("Invalid copy events between format");
     }
-    LocalDate startDate = LocalDate.parse(tokens.get(3));
-    LocalDate endDate = LocalDate.parse(tokens.get(5));
+
+    ZoneId activeZone = calendarManager.getActiveCalendar().getTimezone();
+
+    ZonedDateTime startDate = LocalDate.parse(tokens.get(3)).atStartOfDay(activeZone);
+    ZonedDateTime endDate = LocalDate.parse(tokens.get(5)).atStartOfDay(activeZone);
+
     String targetCalendar = stripQuotes(tokens.get(7)).trim();
-    LocalDate targetStartDate = LocalDate.parse(tokens.get(9));
+    ZoneId targetZone = calendarManager.getCalendar(targetCalendar).getTimezone();
+    ZonedDateTime targetStartDate = LocalDate.parse(tokens.get(9)).atStartOfDay(targetZone);
+
     return new CopyEventsBetweenDatesCommand(startDate, endDate, targetCalendar, targetStartDate);
   }
+
 
   /**
    * Parses the "create" command, which creates events or calendars.
@@ -364,6 +378,7 @@ public class CommandParser {
     }
   }
 
+
   /**
    * Parses the "print from" command to print events within a specific date range.
    *
@@ -534,35 +549,40 @@ public class CommandParser {
   private ParsedEventTiming parseEventTiming(List<String> tokens, int index) {
     ParsedEventTiming result = new ParsedEventTiming();
     String keyword = tokens.get(index).toLowerCase();
+
     if ("from".equals(keyword)) {
       index++;
-      result.start = parseDateTime(tokens.get(index++));
+      ZonedDateTime start = parseDateTime(tokens.get(index++));
+      result.start = start;
+
       if (index < tokens.size() && "to".equalsIgnoreCase(tokens.get(index))) {
         index++;
-        result.end = parseDateTime(tokens.get(index++));
-        if (((ZonedDateTime) result.end).isBefore((ZonedDateTime) result.start)) {
+        ZonedDateTime end = parseDateTime(tokens.get(index++));
+        if (end.isBefore(start)) {
           throw new IllegalArgumentException("End date must be after start date");
         }
+        result.end = end;
         result.isAllDay = false;
       } else {
-        result.end = ((ZonedDateTime) result.start).toLocalDate()
-                .atTime(23, 59, 59)
-                .atZone(((ZonedDateTime) result.start).getZone());
+        result.end = start.toLocalDate().atTime(23, 59, 59).atZone(start.getZone());
         result.isAllDay = true;
       }
+
     } else if ("on".equals(keyword)) {
       index++;
-      result.start = parseDateTime(tokens.get(index++));
-      result.end = ((ZonedDateTime) result.start).toLocalDate()
-              .atTime(23, 59, 59)
-              .atZone(((ZonedDateTime) result.start).getZone());
+      ZonedDateTime start = parseDateTime(tokens.get(index++));
+      result.start = start;
+      result.end = start.toLocalDate().atTime(23, 59, 59).atZone(start.getZone());
       result.isAllDay = true;
+
     } else {
       throw new IllegalArgumentException("Expected 'from' or 'on' after event name");
     }
+
     result.index = index;
     return result;
   }
+
 
   /**
    * Parses the recurring section of the event, including repeat count and weekdays.
@@ -574,13 +594,16 @@ public class CommandParser {
    */
   private ParsedRecurringEvent parseRecurringSection(List<String> tokens, int index) {
     ParsedRecurringEvent result = new ParsedRecurringEvent();
+
     if (index < tokens.size() && "repeats".equalsIgnoreCase(tokens.get(index))) {
       result.isRecurring = true;
       index++;
+
       if (index >= tokens.size()) {
         throw new IllegalArgumentException("Missing weekdays after 'repeats'");
       }
       result.weekdays = tokens.get(index++).toUpperCase();
+
       if (index < tokens.size() && "for".equalsIgnoreCase(tokens.get(index))) {
         index++;
         result.repeatCount = Integer.parseInt(tokens.get(index++));
@@ -597,9 +620,11 @@ public class CommandParser {
         throw new IllegalArgumentException("Expected 'for' or 'until' after weekdays");
       }
     }
+
     result.index = index;
     return result;
   }
+
 
   /**
    * Parses additional event properties like description, location, and visibility (public/private).
@@ -648,11 +673,11 @@ public class CommandParser {
    * @throws DateTimeParseException if the token cannot be parsed into a valid date-time
    */
   private ZonedDateTime parseDateTime(String token) {
+    ZoneId zone = calendarManager.getActiveCalendar().getTimezone();
     try {
-      return ZonedDateTime.of(java.time.LocalDateTime.parse(token),
-              calendarManager.getActiveCalendar().getTimezone());
+      return ZonedDateTime.of(LocalDateTime.parse(token), zone);
     } catch (DateTimeParseException e) {
-      return LocalDate.parse(token).atStartOfDay(calendarManager.getActiveCalendar().getTimezone());
+      return LocalDate.parse(token).atStartOfDay(zone);
     }
   }
 

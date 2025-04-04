@@ -6,7 +6,6 @@ import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
-
 /**
  * Manages multiple calendars by name and tracks the active calendar.
  * Provides methods to add, edit, use, and retrieve calendars. Also supports
@@ -152,16 +151,23 @@ public class CalendarManager implements ICalendarManager {
    * @return true if the events are successfully copied, false otherwise
    * @throws IllegalArgumentException if either the source or target calendar is not found
    */
+  @Override
   public boolean copyEventsOnDate(LocalDate sourceDate, String targetCalendarName,
                                   LocalDate targetDate) {
     CalendarModel sourceCalendar = activeCalendar;
     CalendarModel targetCalendar = getCalendar(targetCalendarName);
+
     if (sourceCalendar == null || targetCalendar == null) {
       throw new IllegalArgumentException("Source or target calendar not found.");
     }
-    return sourceCalendar.copyEventsOnDateTo(sourceCalendar, sourceDate,
-            targetCalendar, targetDate);
+
+    ZonedDateTime sourceDateTime = sourceDate.atStartOfDay(sourceCalendar.getTimezone());
+    ZonedDateTime targetDateTime = targetDate.atStartOfDay(targetCalendar.getTimezone());
+
+    return sourceCalendar.copyEventsOnDateTo(sourceCalendar, sourceDateTime,
+            targetCalendar, targetDateTime);
   }
+
 
   /**
    * Copies all events within a date range from the active calendar to the target calendar.
@@ -173,13 +179,14 @@ public class CalendarManager implements ICalendarManager {
    * @return true if the events are successfully copied, false otherwise
    * @throws IllegalArgumentException if either the source or target calendar is not found
    */
-  public boolean copyEventsBetween(LocalDate startDate, LocalDate endDate,
-                                   String targetCalendarName, LocalDate targetStartDate) {
+  public boolean copyEventsBetween(ZonedDateTime startDate, ZonedDateTime endDate,
+                                   String targetCalendarName, ZonedDateTime targetStartDate) {
     CalendarModel sourceCalendar = activeCalendar;
     CalendarModel targetCalendar = getCalendar(targetCalendarName);
     if (sourceCalendar == null || targetCalendar == null) {
       throw new IllegalArgumentException("Source or target calendar not found.");
     }
+
     return sourceCalendar.copyEventsBetweenTo(sourceCalendar, startDate,
             endDate, targetCalendar, targetStartDate);
   }

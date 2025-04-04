@@ -2,8 +2,6 @@ package calendarapp.controller.commands;
 
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.Temporal;
-import java.time.ZoneId;
 
 import calendarapp.model.ICalendarModel;
 import calendarapp.view.ICalendarView;
@@ -12,14 +10,14 @@ import calendarapp.view.ICalendarView;
  * Command to query whether the calendar is busy at a specified date and time.
  */
 public class BusyQueryCommand implements ICalendarModelCommand {
-  private final Temporal queryTime;
+  private final ZonedDateTime queryTime;
 
   /**
    * Constructs a BusyQueryCommand with the given query time.
    *
    * @param queryTime the date and time at which to check for calendar conflicts
    */
-  public BusyQueryCommand(Temporal queryTime) {
+  public BusyQueryCommand(ZonedDateTime queryTime) {
     this.queryTime = queryTime;
   }
 
@@ -33,21 +31,14 @@ public class BusyQueryCommand implements ICalendarModelCommand {
    */
   @Override
   public boolean execute(ICalendarModel model, ICalendarView view) {
-    ZonedDateTime zonedQueryTime;
-    if (queryTime instanceof ZonedDateTime) {
-      zonedQueryTime = (ZonedDateTime) queryTime;
-    } else {
-      ZoneId zone = model.getTimezone();
-      zonedQueryTime = ZonedDateTime.from(queryTime).withZoneSameInstant(zone);
-    }
+    boolean busy = model.isBusyAt(queryTime);
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm");
+    String formattedTime = queryTime.format(formatter);
 
-    boolean busy = model.isBusyAt(zonedQueryTime);
     if (busy) {
-      DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm");
-      view.displayMessage("Busy at " + zonedQueryTime.format(formatter));
+      view.displayMessage("Busy at " + formattedTime);
     } else {
-      DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm");
-      view.displayMessage("Available at " + zonedQueryTime.format(formatter));
+      view.displayMessage("Available at " + formattedTime);
     }
     return true;
   }
@@ -57,8 +48,7 @@ public class BusyQueryCommand implements ICalendarModelCommand {
    *
    * @return the query time
    */
-  public Temporal getQueryTime() {
+  public ZonedDateTime getQueryTime() {
     return queryTime;
   }
-
 }

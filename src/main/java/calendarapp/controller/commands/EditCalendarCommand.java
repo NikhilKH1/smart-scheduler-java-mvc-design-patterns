@@ -4,7 +4,7 @@ import calendarapp.model.ICalendarManager;
 import calendarapp.view.ICalendarView;
 
 /**
- * Command to edit a calendar's properties.
+ * Command to edit properties of a calendar such as name or description.
  */
 public class EditCalendarCommand implements ICalendarManagerCommand {
   private final String calendarName;
@@ -17,39 +17,37 @@ public class EditCalendarCommand implements ICalendarManagerCommand {
    * @param calendarName the name of the calendar to edit
    * @param property     the property to modify
    * @param newValue     the new value for the property
-   * @throws IllegalArgumentException if any parameter is null or empty
+   * @throws IllegalArgumentException if any parameter is null or blank
    */
   public EditCalendarCommand(String calendarName, String property, String newValue) {
-    if (calendarName == null || property == null || newValue == null
-            || calendarName.trim().isEmpty() || property.trim().isEmpty()
-            || newValue.trim().isEmpty()) {
-      throw new IllegalArgumentException("Calendar name, property, or value cannot be empty.");
+    if (isNullOrBlank(calendarName) || isNullOrBlank(property) || isNullOrBlank(newValue)) {
+      throw new IllegalArgumentException("Calendar name, property, or new value cannot be null or blank.");
     }
     this.calendarName = calendarName;
     this.property = property;
     this.newValue = newValue;
   }
 
-  /**
-   * Edits the specified property of a calendar.
-   * If the edit is successful, a success message is displayed.
-   * If an error occurs, an error message is displayed.
-   *
-   * @param calendarManager the calendar manager used to modify the calendar
-   * @param view            the view used to display messages
-   * @return true if the edit was successful, false otherwise
-   */
   @Override
   public boolean execute(ICalendarManager calendarManager, ICalendarView view) {
     try {
       boolean success = calendarManager.editCalendar(calendarName, property, newValue);
       if (success) {
         view.displayMessage("Calendar updated: " + calendarName);
+      } else {
+        view.displayError("No calendar found or property change failed for: " + calendarName);
       }
       return success;
     } catch (Exception e) {
-      view.displayError("Edit calendar failed: " + e.getMessage());
+      view.displayError("Failed to edit calendar '" + calendarName + "': " + e.getMessage());
       return false;
     }
+  }
+
+  /**
+   * Utility method to check if a string is null or blank.
+   */
+  private boolean isNullOrBlank(String str) {
+    return str == null || str.trim().isEmpty();
   }
 }

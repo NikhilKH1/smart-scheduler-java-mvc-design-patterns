@@ -5,16 +5,17 @@ import calendarapp.model.ICalendarManager;
 import calendarapp.model.ICalendarModel;
 import calendarapp.view.ICalendarView;
 
-import java.time.temporal.Temporal;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 
 /**
  * Command to copy all events on a specific date to another calendar.
  */
 public class CopyEventsOnDateCommand implements ICalendarManagerCommand {
 
-  private final Temporal sourceDate;
+  private final ZonedDateTime sourceDate;
   private final String targetCalendarName;
-  private final Temporal targetDate;
+  private final ZonedDateTime targetDate;
 
   /**
    * Constructs a CopyEventsOnDateCommand.
@@ -23,8 +24,8 @@ public class CopyEventsOnDateCommand implements ICalendarManagerCommand {
    * @param targetCalendarName the name of the target calendar
    * @param targetDate         the date in the target calendar to set for the copied events
    */
-  public CopyEventsOnDateCommand(Temporal sourceDate, String targetCalendarName,
-                                 Temporal targetDate) {
+  public CopyEventsOnDateCommand(ZonedDateTime sourceDate, String targetCalendarName,
+                                 ZonedDateTime targetDate) {
     this.sourceDate = sourceDate;
     this.targetCalendarName = targetCalendarName;
     this.targetDate = targetDate;
@@ -48,7 +49,11 @@ public class CopyEventsOnDateCommand implements ICalendarManagerCommand {
     }
 
     boolean success = ((CalendarModel) source).copyEventsOnDateTo(
-            (CalendarModel) source, sourceDate, (CalendarModel) target, targetDate);
+            (CalendarModel) source,
+            sourceDate,
+            (CalendarModel) target,
+            targetDate
+    );
 
     if (success) {
       view.displayMessage("Events copied successfully to calendar: " + targetCalendarName);
@@ -58,4 +63,6 @@ public class CopyEventsOnDateCommand implements ICalendarManagerCommand {
 
     return success;
   }
+
+
 }

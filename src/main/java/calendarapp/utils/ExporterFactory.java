@@ -7,8 +7,6 @@ import java.util.function.Function;
  * on the file extension.
  */
 public class ExporterFactory {
-
-  // Used by tests to override exporter selection
   private static Function<String, IExporter> customExporterSupplier = null;
 
   /**
