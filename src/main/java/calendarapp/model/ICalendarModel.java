@@ -153,8 +153,8 @@ public interface ICalendarModel {
    * @param targetDateTime  the new start datetime for the copied event
    * @return true if the event was copied successfully, false otherwise
    */
-  boolean copySingleEventTo(CalendarModel sourceCalendar, String eventName,
-                            ZonedDateTime sourceDateTime, CalendarModel targetCalendar,
+  boolean copySingleEventTo(ICalendarModel sourceCalendar, String eventName,
+                            ZonedDateTime sourceDateTime, ICalendarModel targetCalendar,
                             ZonedDateTime targetDateTime);
 
   /**
@@ -167,8 +167,8 @@ public interface ICalendarModel {
    * @param targetDate     the target date to place copied events
    * @return true if all events were copied successfully, false otherwise
    */
-  boolean copyEventsOnDateTo(CalendarModel sourceCalendar, ZonedDateTime sourceDate,
-                             CalendarModel targetCalendar, ZonedDateTime targetDate);
+  boolean copyEventsOnDateTo(ICalendarModel sourceCalendar, ZonedDateTime sourceDate,
+                             ICalendarModel targetCalendar, ZonedDateTime targetDate);
 
   /**
    * Copies all events in a date range from the source calendar to the target
@@ -181,8 +181,8 @@ public interface ICalendarModel {
    * @param targetStartDate  the start date in the target calendar to begin placing events
    * @return true if all events were copied successfully, false otherwise
    */
-  boolean copyEventsBetweenTo(CalendarModel sourceCalendar, ZonedDateTime startDate,
-                              ZonedDateTime endDate, CalendarModel targetCalendar,
+  boolean copyEventsBetweenTo(ICalendarModel sourceCalendar, ZonedDateTime startDate,
+                              ZonedDateTime endDate, ICalendarModel targetCalendar,
                               ZonedDateTime targetStartDate);
 
 }

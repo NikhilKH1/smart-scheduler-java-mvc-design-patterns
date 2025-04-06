@@ -135,8 +135,8 @@ public class CalendarModel implements ICalendarModel {
    * @return true if the event was successfully copied, false otherwise
    */
   @Override
-  public boolean copySingleEventTo(CalendarModel sourceCalendar, String eventName,
-                                   ZonedDateTime sourceDateTime, CalendarModel targetCalendar,
+  public boolean copySingleEventTo(ICalendarModel sourceCalendar, String eventName,
+                                   ZonedDateTime sourceDateTime, ICalendarModel targetCalendar,
                                    ZonedDateTime targetDateTime) {
     for (ICalendarEvent event : sourceCalendar.getEvents()) {
       if (event.getSubject().equals(eventName) && event.getStartDateTime().equals(sourceDateTime)) {
@@ -165,8 +165,8 @@ public class CalendarModel implements ICalendarModel {
    * @return true if all events were copied successfully, false otherwise
    */
   @Override
-  public boolean copyEventsOnDateTo(CalendarModel sourceCalendar, ZonedDateTime sourceDate,
-                                    CalendarModel targetCalendar, ZonedDateTime targetDate) {
+  public boolean copyEventsOnDateTo(ICalendarModel sourceCalendar, ZonedDateTime sourceDate,
+                                    ICalendarModel targetCalendar, ZonedDateTime targetDate) {
     boolean allCopied = true;
     LocalDate sourceLocalDate = sourceDate.toLocalDate();
     LocalDate targetLocalDate = targetDate.toLocalDate();
@@ -218,8 +218,8 @@ public class CalendarModel implements ICalendarModel {
    * @return true if all events were copied successfully, false otherwise
    */
   @Override
-  public boolean copyEventsBetweenTo(CalendarModel sourceCalendar, ZonedDateTime startDate,
-                                     ZonedDateTime endDate, CalendarModel targetCalendar,
+  public boolean copyEventsBetweenTo(ICalendarModel sourceCalendar, ZonedDateTime startDate,
+                                     ZonedDateTime endDate, ICalendarModel targetCalendar,
                                      ZonedDateTime targetStartDate) {
     boolean allCopied = true;
 
