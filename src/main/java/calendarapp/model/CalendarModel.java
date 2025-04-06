@@ -9,7 +9,6 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
-import java.time.temporal.Temporal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -227,8 +226,10 @@ public class CalendarModel implements ICalendarModel {
     long daysOffset = ChronoUnit.DAYS.between(startDate.toLocalDate(), targetStartDate.toLocalDate());
 
     for (ICalendarEvent event : sourceCalendar.getEventsBetween(startDate, endDate)) {
-      long durationMinutes = Duration.between(event.getStartDateTime(), event.getEndDateTime()).toMinutes();
-      ZonedDateTime newStart = event.getStartDateTime().plusDays(daysOffset).withZoneSameInstant(targetCalendar.getTimezone());
+      long durationMinutes = Duration.between(event.getStartDateTime(),
+              event.getEndDateTime()).toMinutes();
+      ZonedDateTime newStart = event.getStartDateTime().plusDays(daysOffset)
+                      .withZoneSameInstant(targetCalendar.getTimezone());
       ZonedDateTime newEnd = newStart.plusMinutes(durationMinutes);
 
       ICalendarEvent copiedEvent = new SingleEvent(
