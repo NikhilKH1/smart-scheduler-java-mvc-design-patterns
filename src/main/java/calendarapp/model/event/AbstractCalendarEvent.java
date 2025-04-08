@@ -1,5 +1,6 @@
 package calendarapp.model.event;
 
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
 /**
@@ -85,4 +86,13 @@ public abstract class AbstractCalendarEvent implements ICalendarEvent {
   public boolean isAllDay() {
     return isAllDay;
   }
+
+  /**
+   * Returns a copy of the event with the specified property updated.
+   * @param property the property name to update
+   * @param newValue the new value of the property
+   * @return a new instance of the event with the updated property
+   */
+  public abstract ICalendarEvent withUpdatedProperty(String property, String newValue);
+
 }

@@ -5,16 +5,16 @@ import java.io.IOException;
 import java.io.StringReader;
 
 import calendarapp.controller.ICalendarController;
-import calendarapp.controller.IOCalendarHelper;
+import calendarapp.controller.CalendarCommandRunner;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertEquals;
 
-public class IOCalendarHelperTest {
+public class CalendarCommandRunnerTest {
 
   private StringBuilder outputLog;
   private StringReader input;
-  private IOCalendarHelper controller;
+  private CalendarCommandRunner controller;
 
   /**
    * Simple mock that tracks calls and returns true/false based on content.
@@ -45,7 +45,7 @@ public class IOCalendarHelperTest {
     input = new StringReader("create calendar --name TestCal --timezone UTC\nexit");
     MockController mock = new MockController(outputLog, true);
 
-    controller = new IOCalendarHelper(input, outputLog, mock);
+    controller = new CalendarCommandRunner(input, outputLog, mock);
     controller.run();
 
     String output = outputLog.toString();
@@ -58,7 +58,7 @@ public class IOCalendarHelperTest {
     input = new StringReader("bad command\nexit");
     MockController mock = new MockController(outputLog, false);
 
-    controller = new IOCalendarHelper(input, outputLog, mock);
+    controller = new CalendarCommandRunner(input, outputLog, mock);
     controller.run();
 
     String output = outputLog.toString();
@@ -72,7 +72,7 @@ public class IOCalendarHelperTest {
     input = new StringReader("\n\nexit\n");
     MockController mock = new MockController(outputLog, true);
 
-    controller = new IOCalendarHelper(input, outputLog, mock);
+    controller = new CalendarCommandRunner(input, outputLog, mock);
     controller.run();
 
     assertEquals("Enter commands (type 'exit' to quit):\nExiting...\n", outputLog.toString());
@@ -84,7 +84,7 @@ public class IOCalendarHelperTest {
     input = new StringReader("exit\ncreate calendar --name ShouldNotRun --timezone UTC\n");
     MockController mock = new MockController(outputLog, true);
 
-    controller = new IOCalendarHelper(input, outputLog, mock);
+    controller = new CalendarCommandRunner(input, outputLog, mock);
     controller.run();
 
     String output = outputLog.toString();

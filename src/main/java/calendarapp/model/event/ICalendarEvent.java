@@ -1,5 +1,6 @@
 package calendarapp.model.event;
 
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
 /**
@@ -57,4 +58,13 @@ public interface ICalendarEvent {
    * @return true if the event is public, false otherwise
    */
   boolean isPublic();
+
+  /**
+   * Returns a copy of the event with the specified property updated.
+   * @param property the property name to update
+   * @param newValue the new value of the property
+   * @return a new instance of the event with the updated property
+   */
+  ICalendarEvent withUpdatedProperty(String property, String newValue);
+
 }

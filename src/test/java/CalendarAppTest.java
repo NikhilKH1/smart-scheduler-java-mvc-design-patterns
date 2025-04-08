@@ -4,7 +4,7 @@ package calendarapp;
 import calendarapp.controller.CalendarController;
 import calendarapp.controller.CommandParser;
 import calendarapp.controller.ICalendarController;
-import calendarapp.controller.IOCalendarHelper;
+import calendarapp.controller.CalendarCommandRunner;
 import calendarapp.model.CalendarManager;
 import calendarapp.model.ICalendarManager;
 import calendarapp.view.CalendarView;
@@ -44,7 +44,7 @@ public class CalendarAppTest {
     StringWriter output = new StringWriter();
 
     DummyController dummy = new DummyController(true);
-    IOCalendarHelper controller = new IOCalendarHelper(input, output, dummy);
+    CalendarCommandRunner controller = new CalendarCommandRunner(input, output, dummy);
     controller.run();
 
     assertTrue(output.toString().contains("Enter commands"));
@@ -58,7 +58,7 @@ public class CalendarAppTest {
     StringWriter output = new StringWriter();
 
     DummyController dummy = new DummyController(false);
-    IOCalendarHelper controller = new IOCalendarHelper(input, output, dummy);
+    CalendarCommandRunner controller = new CalendarCommandRunner(input, output, dummy);
     controller.run();
 
     assertTrue(output.toString().contains("Command failed: bad command"));
@@ -71,7 +71,7 @@ public class CalendarAppTest {
     StringWriter output = new StringWriter();
 
     DummyController dummy = new DummyController(true);
-    IOCalendarHelper controller = new IOCalendarHelper(input, output, dummy);
+    CalendarCommandRunner controller = new CalendarCommandRunner(input, output, dummy);
     controller.run();
 
     assertTrue(output.toString().startsWith("Enter commands"));
@@ -85,7 +85,7 @@ public class CalendarAppTest {
     StringWriter output = new StringWriter();
 
     DummyController dummy = new DummyController(true);
-    IOCalendarHelper controller = new IOCalendarHelper(input, output, dummy);
+    CalendarCommandRunner controller = new CalendarCommandRunner(input, output, dummy);
     controller.run();
 
     assertTrue(output.toString().contains("Enter commands"));
@@ -101,7 +101,7 @@ public class CalendarAppTest {
     StringWriter output = new StringWriter();
 
     DummyController dummy = new DummyController(false); // simulate failure
-    IOCalendarHelper controller = new IOCalendarHelper(input, output, dummy);
+    CalendarCommandRunner controller = new CalendarCommandRunner(input, output, dummy);
     controller.run();
 
     String out = output.toString();
@@ -137,7 +137,7 @@ public class CalendarAppTest {
     ICalendarController controller = new CalendarController(manager, view, parser);
 
     // Run the helper with simulated I/O
-    IOCalendarHelper ioHelper = new IOCalendarHelper(in, out, controller);
+    CalendarCommandRunner ioHelper = new CalendarCommandRunner(in, out, controller);
     ioHelper.run();
 
     // Verify that output contains expected message
