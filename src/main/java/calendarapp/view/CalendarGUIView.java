@@ -10,10 +10,12 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.time.*;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.List;
 
 import calendarapp.factory.DefaultCommandFactory;
+import calendarapp.factory.EditInput;
 import calendarapp.factory.ICommandFactory;
 import calendarapp.factory.EventInput;
 import calendarapp.controller.CalendarController;
@@ -64,13 +66,8 @@ public class CalendarGUIView implements ICalendarView {
     selectedCalendar = "Default";
     addInitialCalendar("Default", ZoneId.systemDefault());
 
-    // ✅ Other sample calendars
-    addInitialCalendar("Personal", ZoneId.systemDefault());
-    addInitialCalendar("Holidays", ZoneId.systemDefault());
-
-    // ✅ If calendar manager exists, set "Work" as active
     if (calendarManager != null) {
-      calendarManager.useCalendar("Work");
+      calendarManager.useCalendar("Default");
     }
 
     // ✅ Ensure dropdown is updated to show "Work" selected
@@ -489,40 +486,38 @@ public class CalendarGUIView implements ICalendarView {
             return;
           }
 
-          ZonedDateTime startDT = date.atTime(selectedEvent.startTime).atZone(ZoneId.of(calendarTimezones.get(selectedCalendar)));
-          ZonedDateTime endDT = date.atTime(selectedEvent.endTime).atZone(ZoneId.of(calendarTimezones.get(selectedCalendar)));
+          ZoneId zone = ZoneId.of(calendarTimezones.get(selectedCalendar));
+          ZonedDateTime fromStart = date.atTime(selectedEvent.startTime).atZone(zone);
+          ZonedDateTime fromEnd = date.atTime(selectedEvent.endTime).atZone(zone);
 
           boolean updated = false;
 
+          // Use new EditInput pattern
           if (!newName.equals(selectedEvent.name)) {
-            String cmd = commandFactory.editEventCommand("name", selectedEvent.name, startDT, endDT, newName);
-            updated |= controller.processCommand(cmd);
+            EditInput input = new EditInput("name", selectedEvent.name, fromStart, fromEnd, newName, false);
+            updated |= controller.processCommand(commandFactory.createEditCommand(input));
           }
 
           if (!newStartTime.equals(selectedEvent.startTime)) {
-            String cmd = commandFactory.editEventCommand(
-                    "startdatetime", selectedEvent.name, startDT, endDT,
-                    date.atTime(newStartTime).toString()  // no zone
-            );
-            updated |= controller.processCommand(cmd);
+            String newStart = date.atTime(newStartTime).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+            EditInput input = new EditInput("startdatetime", selectedEvent.name, fromStart, fromEnd, newStart, false);
+            updated |= controller.processCommand(commandFactory.createEditCommand(input));
           }
 
           if (!newEndTime.equals(selectedEvent.endTime)) {
-            String cmd = commandFactory.editEventCommand(
-                    "enddatetime", selectedEvent.name, startDT, endDT,
-                    date.atTime(newEndTime).toString()
-            );
-            updated |= controller.processCommand(cmd);
+            String newEnd = date.atTime(newEndTime).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+            EditInput input = new EditInput("enddatetime", selectedEvent.name, fromStart, fromEnd, newEnd, false);
+            updated |= controller.processCommand(commandFactory.createEditCommand(input));
           }
 
           if (!newDesc.isEmpty()) {
-            String cmd = commandFactory.editEventCommand("description", selectedEvent.name, startDT, endDT, newDesc);
-            updated |= controller.processCommand(cmd);
+            EditInput input = new EditInput("description", selectedEvent.name, fromStart, fromEnd, newDesc, false);
+            updated |= controller.processCommand(commandFactory.createEditCommand(input));
           }
 
           if (!newLoc.isEmpty()) {
-            String cmd = commandFactory.editEventCommand("location", selectedEvent.name, startDT, endDT, newLoc);
-            updated |= controller.processCommand(cmd);
+            EditInput input = new EditInput("location", selectedEvent.name, fromStart, fromEnd, newLoc, false);
+            updated |= controller.processCommand(commandFactory.createEditCommand(input));
           }
 
           if (updated) {
@@ -539,6 +534,7 @@ public class CalendarGUIView implements ICalendarView {
         }
       }
     });
+
 
     editAll.addActionListener(e -> {
       int selectedIndex = eventList.getSelectedIndex();
@@ -557,61 +553,122 @@ public class CalendarGUIView implements ICalendarView {
       }
 
       Event selectedEvent = selectedDayEvents.get(selectedIndex);
-      String eventNameToMatch = selectedEvent.name;
 
       JTextField nameField = new JTextField(selectedEvent.name);
       JTextField startField = new JTextField(selectedEvent.startTime.toString());
       JTextField endField = new JTextField(selectedEvent.endTime.toString());
+      JTextField descField = new JTextField();
+      JTextField locField = new JTextField();
+      JTextField repeatUntilField = new JTextField(); // format: yyyy-MM-dd
+      JTextField repeatTimesField = new JTextField(); // format: integer
+      JTextField repeatingDaysField = new JTextField(); // format: e.g. MTWRF
 
-      JPanel editForm = new JPanel(new GridLayout(0, 1));
-      editForm.add(new JLabel("New Event Name:"));
-      editForm.add(nameField);
-      editForm.add(new JLabel("New Start Time (HH:mm):"));
-      editForm.add(startField);
-      editForm.add(new JLabel("New End Time (HH:mm):"));
-      editForm.add(endField);
+      JPanel form = new JPanel(new GridLayout(0, 1));
+      form.add(new JLabel("New Event Name:")); form.add(nameField);
+      form.add(new JLabel("New Start Time (HH:mm):")); form.add(startField);
+      form.add(new JLabel("New End Time (HH:mm):")); form.add(endField);
+      form.add(new JLabel("New Description (optional):")); form.add(descField);
+      form.add(new JLabel("New Location (optional):")); form.add(locField);
+      form.add(new JLabel("Repeat Until (yyyy-MM-dd) (optional):")); form.add(repeatUntilField);
+      form.add(new JLabel("Repeat Times (number) (optional):")); form.add(repeatTimesField);
+      form.add(new JLabel("Repeating Days (e.g., MTWRF) (optional):")); form.add(repeatingDaysField);
 
-      int formResult = JOptionPane.showConfirmDialog(frame, editForm,
-              "Edit All '" + eventNameToMatch + "' From " + date, JOptionPane.OK_CANCEL_OPTION);
+      int result = JOptionPane.showConfirmDialog(frame, form,
+              "Edit All '" + selectedEvent.name + "' From " + date, JOptionPane.OK_CANCEL_OPTION);
 
-      if (formResult == JOptionPane.OK_OPTION) {
+      if (result == JOptionPane.OK_OPTION) {
         try {
           String updatedName = nameField.getText().trim();
           LocalTime updatedStart = LocalTime.parse(startField.getText().trim());
           LocalTime updatedEnd = LocalTime.parse(endField.getText().trim());
+          String updatedDesc = descField.getText().trim();
+          String updatedLoc = locField.getText().trim();
+          String updatedUntilStr = repeatUntilField.getText().trim();
+          String updatedTimesStr = repeatTimesField.getText().trim();
+          String updatedDaysStr = repeatingDaysField.getText().trim();
 
           if (updatedEnd.isBefore(updatedStart) || updatedEnd.equals(updatedStart)) {
             JOptionPane.showMessageDialog(frame, "End time must be after start time.", "Error", JOptionPane.ERROR_MESSAGE);
             return;
           }
 
-          // Loop over all future dates and update matching events
-          for (Map.Entry<LocalDate, List<Event>> entry : calendarEvents.getOrDefault(selectedCalendar, new HashMap<>()).entrySet()) {
-            LocalDate eventDate = entry.getKey();
-            if (!eventDate.isBefore(date)) {
-              List<Event> eventListForDate = entry.getValue();
-              for (Event ev : eventListForDate) {
-                if (ev.name.equals(eventNameToMatch)) {
-                  if (checkConflict(eventListForDate, updatedStart, updatedEnd, eventListForDate.indexOf(ev))) {
-                    continue; // 💥 Skip conflicts
-                  }
-                  ev.name = updatedName;
-                  ev.startTime = updatedStart;
-                  ev.endTime = updatedEnd;
-                }
-              }
+          ZoneId zone = ZoneId.of(calendarTimezones.get(selectedCalendar));
+          ZonedDateTime fromStart = date.atTime(selectedEvent.startTime).atZone(zone);
+          ZonedDateTime fromEnd = date.atTime(selectedEvent.endTime).atZone(zone);
+
+          boolean updated = false;
+
+          if (!updatedName.equals(selectedEvent.name)) {
+            EditInput input = new EditInput("name", selectedEvent.name, fromStart, fromEnd, updatedName, true);
+            updated |= controller.processCommand(commandFactory.createEditCommand(input));
+          }
+
+          if (!updatedStart.equals(selectedEvent.startTime)) {
+            String newStartStr = date.atTime(updatedStart).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+            EditInput input = new EditInput("startdatetime", selectedEvent.name, fromStart, fromEnd, newStartStr, true);
+            updated |= controller.processCommand(commandFactory.createEditCommand(input));
+          }
+
+          if (!updatedEnd.equals(selectedEvent.endTime)) {
+            String newEndStr = date.atTime(updatedEnd).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+            EditInput input = new EditInput("enddatetime", selectedEvent.name, fromStart, fromEnd, newEndStr, true);
+            updated |= controller.processCommand(commandFactory.createEditCommand(input));
+          }
+
+          if (!updatedDesc.isEmpty()) {
+            EditInput input = new EditInput("description", selectedEvent.name, fromStart, fromEnd, updatedDesc, true);
+            updated |= controller.processCommand(commandFactory.createEditCommand(input));
+          }
+
+          if (!updatedLoc.isEmpty()) {
+            EditInput input = new EditInput("location", selectedEvent.name, fromStart, fromEnd, updatedLoc, true);
+            updated |= controller.processCommand(commandFactory.createEditCommand(input));
+          }
+
+          if (!updatedUntilStr.isEmpty()) {
+            try {
+              LocalDate repeatUntilDate = LocalDate.parse(updatedUntilStr);
+              String untilStr = repeatUntilDate.atTime(selectedEvent.startTime).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+              EditInput input = new EditInput("repeatuntil", selectedEvent.name, fromStart, fromEnd, untilStr, true);
+              updated |= controller.processCommand(commandFactory.createEditCommand(input));
+            } catch (Exception ex) {
+              JOptionPane.showMessageDialog(frame, "Invalid repeat-until date format. Use yyyy-MM-dd.", "Error", JOptionPane.ERROR_MESSAGE);
+              return;
             }
           }
 
-          updateCalendarView();
-          JOptionPane.showMessageDialog(frame, "Recurring events updated from " + date + ".");
-          dialog.dispose();
-          showEventDialog(date); // Refresh dialog to show updated events
+          if (!updatedTimesStr.isEmpty()) {
+            try {
+              Integer.parseInt(updatedTimesStr); // Just validation
+              EditInput input = new EditInput("repeattimes", selectedEvent.name, fromStart, fromEnd, updatedTimesStr, true);
+              updated |= controller.processCommand(commandFactory.createEditCommand(input));
+            } catch (Exception ex) {
+              JOptionPane.showMessageDialog(frame, "Repeat times must be a number.", "Error", JOptionPane.ERROR_MESSAGE);
+              return;
+            }
+          }
+
+          if (!updatedDaysStr.isEmpty()) {
+            EditInput input = new EditInput("repeatingdays", selectedEvent.name, fromStart, fromEnd, updatedDaysStr, true);
+            updated |= controller.processCommand(commandFactory.createEditCommand(input));
+          }
+
+          if (updated) {
+            controller.processCommand("print events from " + date + " to " + date.plusMonths(1));
+            JOptionPane.showMessageDialog(frame, "Recurring events updated from " + date + ".");
+            dialog.dispose();
+            showEventDialog(date);
+          } else {
+            JOptionPane.showMessageDialog(frame, "No changes were made.", "Info", JOptionPane.INFORMATION_MESSAGE);
+          }
+
         } catch (Exception ex) {
           JOptionPane.showMessageDialog(frame, "Invalid input: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
       }
     });
+
+
 
     String timezone = calendarTimezones.getOrDefault(selectedCalendar, ZoneId.systemDefault().toString());
     dialog.getContentPane().add(panel);
@@ -659,7 +716,7 @@ public class CalendarGUIView implements ICalendarView {
     int result = JOptionPane.showConfirmDialog(
             frame,
             panel,
-            "Export Calendar",
+            "Export Cal",
             JOptionPane.OK_CANCEL_OPTION
     );
 
@@ -684,33 +741,20 @@ public class CalendarGUIView implements ICalendarView {
           fileToSave = new File(filename);
         }
 
-        try (PrintWriter writer = new PrintWriter(new FileWriter(fileToSave))) {
-          writer.println("Subject,Start Date,Start Time,End Date,End Time,All Day Event,Description,Location,Private");
+        // ✅ Use command factory
+        String command = commandFactory.exportCalendarCommand(fileToSave.getName());
+        System.out.println("EXPORT COMMAND: " + command); // Optional: debug
 
-          Map<LocalDate, List<Event>> selectedEvents = calendarEvents.get(selectedCalendar);
-          for (Map.Entry<LocalDate, List<Event>> entry : selectedEvents.entrySet()) {
-            LocalDate date = entry.getKey();
-            for (Event event : entry.getValue()) {
-              String line = String.format(
-                      "\"%s\",%s,%s,%s,%s,FALSE,,,TRUE",
-                      event.name,
-                      date.toString(),
-                      event.startTime.toString(),
-                      date.toString(),
-                      event.endTime.toString()
-              );
-              writer.println(line);
-            }
-          }
-
+        boolean success = controller.processCommand(command);
+        if (success) {
           JOptionPane.showMessageDialog(frame, "Calendar exported to: " + fileToSave.getAbsolutePath(), "Success", JOptionPane.INFORMATION_MESSAGE);
-
-        } catch (IOException ex) {
-          JOptionPane.showMessageDialog(frame, "Error exporting calendar: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        } else {
+          JOptionPane.showMessageDialog(frame, "Failed to export calendar.", "Error", JOptionPane.ERROR_MESSAGE);
         }
       }
     }
   }
+
 
   private void importCalendarFromCSV() {
     JFileChooser fileChooser = new JFileChooser();

@@ -27,6 +27,10 @@ public interface ICommandFactory {
 
   String useCalendarCommand(String calendarName);
 
-  String editEventCommand(String property, String name, ZonedDateTime fromStart, ZonedDateTime fromEnd, String newValue);
+  String createEditCommand(EditInput input);
+
+  String exportCalendarCommand(String filePath);
+
+
 
 }

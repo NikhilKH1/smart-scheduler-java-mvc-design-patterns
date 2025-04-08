@@ -5,6 +5,7 @@ import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.DayOfWeek;
+import java.time.format.DateTimeFormatter;
 import java.util.Set;
 
 public class DefaultCommandFactory implements ICommandFactory {
@@ -91,11 +92,41 @@ public class DefaultCommandFactory implements ICommandFactory {
   }
 
   @Override
-  public String editEventCommand(String property, String name, ZonedDateTime fromStart, ZonedDateTime fromEnd, String newValue) {
-    return String.format("edit event %s \"%s\" from %s to %s with \"%s\"",
-            property, name, fromStart.toString(), fromEnd.toString(), newValue);
+  public String createEditCommand(EditInput input) {
+    String newValueEscaped = "\"" + input.getNewValue().trim() + "\"";
+    String commandType = input.isRecurring() ? "edit events" : "edit event";
+
+    // Properties that do NOT require from/to range
+    if (input.isRecurring()) {
+      switch (input.getProperty()) {
+        case "repeatuntil":
+        case "repeattimes":
+        case "repeatingdays":
+          return String.format("%s %s \"%s\" %s",
+                  commandType,
+                  input.getProperty(),
+                  input.getEventName(),
+                  input.getProperty().equals("repeatingdays") ? input.getNewValue().trim() : newValueEscaped);
+      }
+    }
+
+    // Default format: edit event[s] <prop> "<name>" from ... to ... with "..."
+    String startStr = input.getFromStart().toLocalDateTime().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+    String endStr = input.getFromEnd().toLocalDateTime().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+
+    return String.format("%s %s \"%s\" from %s to %s with %s",
+            commandType,
+            input.getProperty(),
+            input.getEventName(),
+            startStr,
+            endStr,
+            newValueEscaped);
   }
 
+  @Override
+  public String exportCalendarCommand(String filePath) {
+    return String.format("export cal %s", filePath);
+  }
 
 
 }
