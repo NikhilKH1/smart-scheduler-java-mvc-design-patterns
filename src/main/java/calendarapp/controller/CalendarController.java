@@ -1,11 +1,17 @@
 package calendarapp.controller;
 
+import java.io.FileReader;
+import java.io.IOException;
+
 import calendarapp.controller.commands.ICommand;
 import calendarapp.controller.commands.ICalendarManagerCommand;
 import calendarapp.controller.commands.ICalendarModelCommand;
 import calendarapp.model.ICalendarManager;
 import calendarapp.model.ICalendarModel;
+import calendarapp.view.CalendarGUIView;
+import calendarapp.view.HeadlessView;
 import calendarapp.view.ICalendarView;
+import calendarapp.view.InteractiveCLIView;
 
 /**
  * The Controller class is responsible for processing calendar-related commands.
@@ -15,7 +21,7 @@ import calendarapp.view.ICalendarView;
  */
 public class CalendarController implements ICalendarController {
   private final ICalendarManager calendarManager;
-  private final ICalendarView view;
+  private ICalendarView view;
   private final CommandParser parser;
 
   /**
@@ -30,6 +36,11 @@ public class CalendarController implements ICalendarController {
                             CommandParser parser) {
     this.calendarManager = calendarManager;
     this.view = view;
+    this.parser = parser;
+  }
+
+  public CalendarController(ICalendarManager manager, CommandParser parser) {
+    this.calendarManager = manager;
     this.parser = parser;
   }
 
@@ -98,4 +109,39 @@ public class CalendarController implements ICalendarController {
   public ICalendarView getView() {
     return view;
   }
+
+  public void setView(ICalendarView view) {
+    this.view = view;
+  }
+
+
+  @Override
+  public void run(String[] args) {
+    try {
+      if (args.length == 2 && args[0].equals("--mode") && args[1].equals("interactive")) {
+        this.view = new InteractiveCLIView(this);
+        view.displayMessage("Starting in Interactive CLI mode...");
+        ((InteractiveCLIView) view).run();
+      } else if (args.length == 3 && args[0].equals("--mode") && args[1].equals("headless")) {
+        this.view = new HeadlessView(this, new FileReader(args[2]));
+        view.displayMessage("Running in Headless mode with script: " + args[2]);
+        ((HeadlessView) view).run();
+      } else if (args.length == 0) {
+        this.view = new CalendarGUIView(calendarManager, this);
+        // The GUI frame will be shown automatically inside the GUI constructor
+      } else {
+        System.err.println("Invalid arguments. Use:");
+        System.err.println("--mode interactive");
+        System.err.println("--mode headless <script-file>");
+        System.err.println("(or run with no arguments for GUI mode)");
+      }
+    } catch (IOException e) {
+      System.err.println("Error: " + e.getMessage());
+    }
+  }
+
+
+
 }
+
+
