@@ -1,6 +1,7 @@
 package calendarapp.model;
 
 import calendarapp.model.event.ICalendarEvent;
+import calendarapp.model.event.ReadOnlyCalendarEvent;
 import calendarapp.model.event.RecurringEvent;
 import calendarapp.model.event.SingleEvent;
 
@@ -578,4 +579,32 @@ public class CalendarModel implements ICalendarModel {
             || property.equalsIgnoreCase("repeatuntil")
             || property.equalsIgnoreCase("repeatingdays");
   }
+
+  @Override
+  public List<ReadOnlyCalendarEvent> getReadOnlyEventsOnDate(LocalDate date) {
+    List<ReadOnlyCalendarEvent> result = new ArrayList<>();
+    for (ICalendarEvent event : events) {
+      LocalDate startDate = event.getStartDateTime().toLocalDate();
+      LocalDate endDate = event.getEndDateTime().toLocalDate();
+
+      if (!startDate.isAfter(date) && !endDate.isBefore(date)) {
+        if (event instanceof ReadOnlyCalendarEvent) {
+          result.add((ReadOnlyCalendarEvent) event);
+        }
+      }
+    }
+    return result;
+  }
+
+  @Override
+  public List<ReadOnlyCalendarEvent> getAllReadOnlyEvents() {
+    List<ReadOnlyCalendarEvent> readOnly = new ArrayList<>();
+    for (ICalendarEvent e : events) {
+      if (e instanceof ReadOnlyCalendarEvent) {
+        readOnly.add((ReadOnlyCalendarEvent) e);
+      }
+    }
+    return readOnly;
+  }
+
 }

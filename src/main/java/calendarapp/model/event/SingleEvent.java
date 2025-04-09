@@ -7,7 +7,7 @@ import java.time.ZonedDateTime;
 /**
  * Represents a single (non-recurring) calendar event.
  */
-public class SingleEvent extends AbstractCalendarEvent {
+public class SingleEvent extends AbstractCalendarEvent implements ReadOnlyCalendarEvent {
 
   private final String seriesId;
 
@@ -44,6 +44,26 @@ public class SingleEvent extends AbstractCalendarEvent {
    */
   public String getSeriesId() {
     return seriesId;
+  }
+
+  @Override
+  public boolean isRecurring() {
+    return false;
+  }
+
+  @Override
+  public String getWeekdays() {
+    return "";
+  }
+
+  @Override
+  public ZonedDateTime RepeatUntil() {
+    return null;
+  }
+
+  @Override
+  public Integer getRepeatCount() {
+    return 0;
   }
 
   /**

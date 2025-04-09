@@ -8,7 +8,7 @@ import java.time.ZonedDateTime;
  * It provides methods to retrieve event details such as subject, start and end date/time,
  * description, location, whether the event lasts all day, and its public status.
  */
-public interface ICalendarEvent {
+public interface ICalendarEvent extends ReadOnlyCalendarEvent {
 
   /**
    * Returns the subject of the event.

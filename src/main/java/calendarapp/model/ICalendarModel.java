@@ -4,7 +4,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.List;
-
+import calendarapp.model.event.ReadOnlyCalendarEvent;
 import calendarapp.model.event.ICalendarEvent;
 import calendarapp.model.event.RecurringEvent;
 
@@ -184,5 +184,9 @@ public interface ICalendarModel {
   boolean copyEventsBetweenTo(ICalendarModel sourceCalendar, ZonedDateTime startDate,
                               ZonedDateTime endDate, ICalendarModel targetCalendar,
                               ZonedDateTime targetStartDate);
+
+  List<ReadOnlyCalendarEvent> getReadOnlyEventsOnDate(LocalDate date);
+
+  public List<ReadOnlyCalendarEvent> getAllReadOnlyEvents();
 
 }
