@@ -6,6 +6,7 @@ import java.io.IOException;
 import calendarapp.controller.commands.ICommand;
 import calendarapp.controller.commands.ICalendarManagerCommand;
 import calendarapp.controller.commands.ICalendarModelCommand;
+import calendarapp.factory.DefaultCommandFactory;
 import calendarapp.model.ICalendarManager;
 import calendarapp.model.ICalendarModel;
 import calendarapp.view.CalendarGUIView;
@@ -114,7 +115,6 @@ public class CalendarController implements ICalendarController {
     this.view = view;
   }
 
-
   @Override
   public void run(String[] args) {
     try {
@@ -122,13 +122,25 @@ public class CalendarController implements ICalendarController {
         this.view = new InteractiveCLIView(this);
         view.displayMessage("Starting in Interactive CLI mode...");
         ((InteractiveCLIView) view).run();
+
       } else if (args.length == 3 && args[0].equals("--mode") && args[1].equals("headless")) {
         this.view = new HeadlessView(this, new FileReader(args[2]));
         view.displayMessage("Running in Headless mode with script: " + args[2]);
         ((HeadlessView) view).run();
+
       } else if (args.length == 0) {
-        this.view = new CalendarGUIView(calendarManager, this);
-        // The GUI frame will be shown automatically inside the GUI constructor
+        // 1. Create GUI View
+        CalendarGUIView guiView = new CalendarGUIView(calendarManager, this);
+
+        // 2. Set command factory before anything else to avoid NullPointerException
+        guiView.setCommandFactory(new DefaultCommandFactory());
+
+        // 3. Store the view reference for this controller
+        this.view = guiView;
+
+        // 4. Trigger safe post-initialization from controller
+        guiView.initialize();
+
       } else {
         System.err.println("Invalid arguments. Use:");
         System.err.println("--mode interactive");
@@ -139,7 +151,6 @@ public class CalendarController implements ICalendarController {
       System.err.println("Error: " + e.getMessage());
     }
   }
-
 
 
 }
