@@ -5,8 +5,10 @@ import calendarapp.model.event.ICalendarEvent;
 import calendarapp.model.event.RecurringEvent;
 import calendarapp.view.ICalendarView;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.temporal.Temporal;
 import java.util.ArrayList;
 import java.util.List;
@@ -46,18 +48,17 @@ public class QueryRangeDateTimeCommandTest {
     }
 
     @Override
-    public List<ICalendarEvent> getEventsOnDate(Temporal date) {
-      return List.of();
+    public List<ICalendarEvent> getEventsOnDate(LocalDate date) {
+      return new ArrayList<>(); // Changed to return an empty list
     }
 
     @Override
-    public List<ICalendarEvent> getEventsBetween(java.time.temporal.Temporal start,
-                                                 java.time.temporal.Temporal end) {
-      return events;
+    public List<ICalendarEvent> getEventsBetween(ZonedDateTime start, ZonedDateTime end) {
+      return new ArrayList<>(); // Changed to return an empty list
     }
 
     @Override
-    public boolean isBusyAt(Temporal dateTime) {
+    public boolean isBusyAt(ZonedDateTime dateTime) {
       return false;
     }
 
@@ -72,13 +73,14 @@ public class QueryRangeDateTimeCommandTest {
     }
 
     @Override
-    public boolean editSingleEvent(String property, String eventName, Temporal originalStart,
-                                   Temporal originalEnd, String newValue) {
+    public boolean editSingleEvent(String property, String eventName,
+                                   ZonedDateTime originalStart, ZonedDateTime originalEnd,
+                                   String newValue) {
       return false;
     }
 
     @Override
-    public boolean editEventsFrom(String property, String eventName, Temporal fromDateTime,
+    public boolean editEventsFrom(String property, String eventName, ZonedDateTime fromDateTime,
                                   String newValue) {
       return false;
     }
@@ -104,25 +106,26 @@ public class QueryRangeDateTimeCommandTest {
     }
 
     @Override
-    public boolean copySingleEventTo(CalendarModel sourceCalendar, String eventName,
-                                     Temporal sourceDateTime, CalendarModel targetCalendar,
-                                     Temporal targetDateTime) {
+    public boolean copySingleEventTo(ICalendarModel sourceCalendar, String eventName,
+                                     ZonedDateTime sourceDateTime, ICalendarModel targetCalendar,
+                                     ZonedDateTime targetDateTime) {
       return false;
     }
 
     @Override
-    public boolean copyEventsOnDateTo(CalendarModel sourceCalendar, Temporal sourceDate,
-                                      CalendarModel targetCalendar, Temporal targetDate) {
+    public boolean copyEventsOnDateTo(ICalendarModel sourceCalendar, ZonedDateTime sourceDate,
+                                      ICalendarModel targetCalendar, ZonedDateTime targetDate) {
       return false;
     }
 
     @Override
-    public boolean copyEventsBetweenTo(CalendarModel sourceCalendar, Temporal startDate,
-                                       Temporal endDate, CalendarModel targetCalendar,
-                                       Temporal targetStartDate) {
+    public boolean copyEventsBetweenTo(ICalendarModel sourceCalendar, ZonedDateTime startDate,
+                                       ZonedDateTime endDate, ICalendarModel targetCalendar,
+                                       ZonedDateTime targetStartDate) {
       return false;
     }
   }
+
 
   private class TestCalendarView implements ICalendarView {
     private String message;
@@ -165,12 +168,12 @@ public class QueryRangeDateTimeCommandTest {
     }
 
     @Override
-    public Temporal getStartDateTime() {
+    public ZonedDateTime getStartDateTime() {
       return null;
     }
 
     @Override
-    public Temporal getEndDateTime() {
+    public ZonedDateTime getEndDateTime() {
       return null;
     }
 
@@ -193,12 +196,17 @@ public class QueryRangeDateTimeCommandTest {
     public boolean isPublic() {
       return false;
     }
+
+    @Override
+    public ICalendarEvent withUpdatedProperty(String property, String newValue){
+      return null;
+    }
   }
 
   @Test
   public void testQueryRangeNoEvents() {
-    LocalDateTime start = LocalDateTime.of(2025, 6, 1, 9, 0);
-    LocalDateTime end = LocalDateTime.of(2025, 6, 1, 11, 0);
+    ZonedDateTime start = ZonedDateTime.of(2025, 6, 1, 9, 0, 0, 0, ZoneId.of("America/New_York"));
+    ZonedDateTime end = ZonedDateTime.of(2025, 6, 1, 11, 0, 0, 0, ZoneId.of("America/New_York"));
     QueryRangeDateTimeCommand cmd = new QueryRangeDateTimeCommand(start, end);
     List<ICalendarEvent> emptyList = new ArrayList<>();
     TestCalendarModel model = new TestCalendarModel(emptyList);
@@ -210,10 +218,11 @@ public class QueryRangeDateTimeCommandTest {
     assertNull(view.getDisplayedEvents());
   }
 
+
   @Test
   public void testQueryRangeWithEvents() {
-    LocalDateTime start = LocalDateTime.of(2025, 6, 1, 9, 0);
-    LocalDateTime end = LocalDateTime.of(2025, 6, 1, 11, 0);
+    ZonedDateTime start = ZonedDateTime.of(2025, 6, 1, 9, 0, 0, 0, ZoneId.of("Asia/Kolkata"));
+    ZonedDateTime end = ZonedDateTime.of(2025, 6, 1, 11, 0, 0, 0, ZoneId.of("Asia/Kolkata"));
     QueryRangeDateTimeCommand cmd = new QueryRangeDateTimeCommand(start, end);
     List<ICalendarEvent> events = new ArrayList<>();
     DummyCalendarEvent event = new DummyCalendarEvent("Meeting");
@@ -232,10 +241,11 @@ public class QueryRangeDateTimeCommandTest {
 
   @Test
   public void testGetters() {
-    LocalDateTime start = LocalDateTime.of(2025, 6, 1, 9, 0);
-    LocalDateTime end = LocalDateTime.of(2025, 6, 1, 11, 0);
+    ZonedDateTime start = ZonedDateTime.of(2025, 6, 1, 9, 0, 0, 0, ZoneId.of("Australia/Sydney"));
+    ZonedDateTime end = ZonedDateTime.of(2025, 6, 1, 11, 0, 0, 0, ZoneId.of("Australia/Sydney"));
     QueryRangeDateTimeCommand cmd = new QueryRangeDateTimeCommand(start, end);
     assertEquals(start, cmd.getStartDateTime());
     assertEquals(end, cmd.getEndDateTime());
   }
+
 }

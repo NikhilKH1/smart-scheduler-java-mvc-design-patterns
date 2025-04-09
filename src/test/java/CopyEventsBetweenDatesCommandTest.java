@@ -1,6 +1,7 @@
 import calendarapp.controller.commands.CopyEventsBetweenDatesCommand;
 import calendarapp.model.CalendarModel;
 import calendarapp.model.ICalendarManager;
+import calendarapp.model.ICalendarModel;
 import calendarapp.view.ICalendarView;
 
 import org.junit.Test;
@@ -213,8 +214,9 @@ public class CopyEventsBetweenDatesCommandTest {
     }
 
     @Override
-    public boolean copyEventsBetweenTo(CalendarModel source, Temporal startDate, Temporal endDate,
-                                       CalendarModel target, Temporal targetStartDate) {
+    public boolean copyEventsBetweenTo(ICalendarModel sourceCalendar, ZonedDateTime startDate,
+                                       ZonedDateTime endDate, ICalendarModel targetCalendar,
+                                       ZonedDateTime targetStartDate) {
       return shouldSucceed;
     }
   }

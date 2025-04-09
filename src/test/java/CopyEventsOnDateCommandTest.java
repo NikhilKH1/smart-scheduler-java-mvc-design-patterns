@@ -1,6 +1,7 @@
 import calendarapp.controller.commands.CopyEventsOnDateCommand;
 import calendarapp.model.CalendarModel;
 import calendarapp.model.ICalendarManager;
+import calendarapp.model.ICalendarModel;
 import calendarapp.view.ICalendarView;
 
 import org.junit.Test;
@@ -151,9 +152,9 @@ public class CopyEventsOnDateCommandTest {
     }
 
     @Override
-    public boolean copyEventsOnDateTo(CalendarModel source, Temporal sourceDate,
-                                      CalendarModel target, Temporal targetDate) {
-      return shouldSucceed;
+    public boolean copyEventsOnDateTo(ICalendarModel sourceCalendar, ZonedDateTime sourceDate,
+                                      ICalendarModel targetCalendar, ZonedDateTime targetDate) {
+      return false;
     }
   }
 }

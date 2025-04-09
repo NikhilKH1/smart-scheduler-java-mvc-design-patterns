@@ -8,7 +8,9 @@ import calendarapp.view.ICalendarView;
 
 import org.junit.Test;
 
+import java.time.LocalDate;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.temporal.Temporal;
 import java.util.Collections;
 import java.util.List;
@@ -80,7 +82,7 @@ public class UseCalendarCommandTest {
            * @return a list of calendar events on the specified date
            */
           @Override
-          public List<ICalendarEvent> getEventsOnDate(Temporal date) {
+          public List<ICalendarEvent> getEventsOnDate(LocalDate date) {
             return List.of();
           }
 
@@ -92,7 +94,7 @@ public class UseCalendarCommandTest {
            * @return a list of calendar events that fall within the specified range
            */
           @Override
-          public List<ICalendarEvent> getEventsBetween(Temporal start, Temporal end) {
+          public List<ICalendarEvent> getEventsBetween(ZonedDateTime start, ZonedDateTime end) {
             return List.of();
           }
 
@@ -103,7 +105,7 @@ public class UseCalendarCommandTest {
            * @return true if there is an event occurring at the given date/time, false otherwise
            */
           @Override
-          public boolean isBusyAt(Temporal dateTime) {
+          public boolean isBusyAt(ZonedDateTime dateTime) {
             return false;
           }
 
@@ -144,8 +146,9 @@ public class UseCalendarCommandTest {
            * @return true if successfully edited
            */
           @Override
-          public boolean editSingleEvent(String property, String eventName, Temporal originalStart,
-                                         Temporal originalEnd, String newValue) {
+          public boolean editSingleEvent(String property, String eventName,
+                                         ZonedDateTime originalStart, ZonedDateTime originalEnd,
+                                         String newValue) {
             return false;
           }
 
@@ -159,8 +162,8 @@ public class UseCalendarCommandTest {
            * @return true if successfully edited
            */
           @Override
-          public boolean editEventsFrom(String property, String eventName, Temporal fromDateTime,
-                                        String newValue) {
+          public boolean editEventsFrom(String property, String eventName, ZonedDateTime fromDateTime,
+                                        String newValue){
             return false;
           }
 
@@ -219,9 +222,9 @@ public class UseCalendarCommandTest {
            * @return true if the event was copied successfully, false otherwise
            */
           @Override
-          public boolean copySingleEventTo(CalendarModel sourceCalendar, String eventName,
-                                           Temporal sourceDateTime, CalendarModel targetCalendar,
-                                           Temporal targetDateTime) {
+          public boolean copySingleEventTo(ICalendarModel sourceCalendar, String eventName,
+                                           ZonedDateTime sourceDateTime, ICalendarModel targetCalendar,
+                                           ZonedDateTime targetDateTime) {
             return false;
           }
 
@@ -236,8 +239,8 @@ public class UseCalendarCommandTest {
            * @return true if all events were copied successfully, false otherwise
            */
           @Override
-          public boolean copyEventsOnDateTo(CalendarModel sourceCalendar, Temporal sourceDate,
-                                            CalendarModel targetCalendar, Temporal targetDate) {
+          public boolean copyEventsOnDateTo(ICalendarModel sourceCalendar, ZonedDateTime sourceDate,
+                                            ICalendarModel targetCalendar, ZonedDateTime targetDate) {
             return false;
           }
 
@@ -253,9 +256,9 @@ public class UseCalendarCommandTest {
            * @return true if all events were copied successfully, false otherwise
            */
           @Override
-          public boolean copyEventsBetweenTo(CalendarModel sourceCalendar, Temporal startDate,
-                                             Temporal endDate, CalendarModel targetCalendar,
-                                             Temporal targetStartDate) {
+          public boolean copyEventsBetweenTo(ICalendarModel sourceCalendar, ZonedDateTime startDate,
+                                             ZonedDateTime endDate, ICalendarModel targetCalendar,
+                                             ZonedDateTime targetStartDate) {
             return false;
           }
         };
@@ -333,17 +336,17 @@ public class UseCalendarCommandTest {
           }
 
           @Override
-          public List<ICalendarEvent> getEventsOnDate(Temporal date) {
-            return List.of();
+          public List<ICalendarEvent> getEventsOnDate(LocalDate date) {
+            return null;
           }
 
           @Override
-          public List<ICalendarEvent> getEventsBetween(Temporal start, Temporal end) {
-            return List.of();
+          public List<ICalendarEvent> getEventsBetween(ZonedDateTime start, ZonedDateTime end) {
+            return null;
           }
 
           @Override
-          public boolean isBusyAt(Temporal dateTime) {
+          public boolean isBusyAt(ZonedDateTime dateTime) {
             return false;
           }
 
@@ -358,17 +361,17 @@ public class UseCalendarCommandTest {
           }
 
           @Override
-          public boolean editSingleEvent(String property, String eventName, Temporal originalStart,
-                                         Temporal originalEnd, String newValue) {
+          public boolean editSingleEvent(String property, String eventName,
+                                         ZonedDateTime originalStart, ZonedDateTime originalEnd,
+                                         String newValue) {
             return false;
           }
 
           @Override
-          public boolean editEventsFrom(String property, String eventName, Temporal fromDateTime,
+          public boolean editEventsFrom(String property, String eventName, ZonedDateTime fromDateTime,
                                         String newValue) {
             return false;
           }
-
           @Override
           public boolean editEventsAll(String property, String eventName, String newValue) {
             return false;
@@ -391,23 +394,22 @@ public class UseCalendarCommandTest {
           }
 
           @Override
-          public boolean copySingleEventTo(CalendarModel sourceCalendar, String eventName,
-                                           Temporal sourceDateTime, CalendarModel targetCalendar,
-                                           Temporal targetDateTime) {
+          public boolean copySingleEventTo(ICalendarModel sourceCalendar, String eventName,
+                                           ZonedDateTime sourceDateTime, ICalendarModel targetCalendar,
+                                           ZonedDateTime targetDateTime) {
             return false;
           }
 
           @Override
-          public boolean copyEventsOnDateTo(CalendarModel sourceCalendar, Temporal sourceDate,
-                                            CalendarModel targetCalendar, Temporal targetDate) {
+          public boolean copyEventsOnDateTo(ICalendarModel sourceCalendar, ZonedDateTime sourceDate,
+                                            ICalendarModel targetCalendar, ZonedDateTime targetDate) {
             return false;
           }
 
-
           @Override
-          public boolean copyEventsBetweenTo(CalendarModel sourceCalendar, Temporal startDate,
-                                             Temporal endDate, CalendarModel targetCalendar,
-                                             Temporal targetStartDate) {
+          public boolean copyEventsBetweenTo(ICalendarModel sourceCalendar, ZonedDateTime startDate,
+                                             ZonedDateTime endDate, ICalendarModel targetCalendar,
+                                             ZonedDateTime targetStartDate) {
             return false;
           }
         };

@@ -22,23 +22,29 @@ public class ParsedRecurringEventTest {
    * Subclass to access protected fields.
    */
   private static class TestParsedRecurringEvent extends ParsedRecurringEvent {
-    void setRecurring(boolean recurring) {
+
+    @Override
+    public void setRecurring(boolean recurring) {
       this.isRecurring = recurring;
     }
 
-    void setWeekdays(String days) {
+    @Override
+    public void setWeekdays(String days) {
       this.weekdays = days;
     }
 
-    void setRepeatCount(int count) {
+    @Override
+    public void setRepeatCount(int count) {
       this.repeatCount = count;
     }
 
-    void setRepeatUntil(Temporal until) {
+    @Override
+    public void setRepeatUntil(Temporal until) {
       this.repeatUntil = until;
     }
 
-    void setIndex(int index) {
+    @Override
+    public void setIndex(int index) {
       this.index = index;
     }
   }

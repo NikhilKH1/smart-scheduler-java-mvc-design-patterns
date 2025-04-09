@@ -17,7 +17,7 @@ public class ExporterFactoryTest {
 
   @Before
   public void setUp() {
-    ExporterFactory.clearCustomExporterSupplier(); // Ensure no residual state
+    ExporterFactory.clearCustomExporterSupplier();
   }
 
   @After

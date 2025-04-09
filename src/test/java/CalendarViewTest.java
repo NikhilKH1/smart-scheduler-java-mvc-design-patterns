@@ -82,6 +82,11 @@ public class CalendarViewTest {
     public boolean isAllDay() {
       return isAllDay;
     }
+
+    @Override
+    public ICalendarEvent withUpdatedProperty(String property, String newValue){
+      return this;
+    }
   }
 
   @Before

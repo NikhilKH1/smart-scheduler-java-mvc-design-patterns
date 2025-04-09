@@ -210,3 +210,4 @@ public class EditCalendarCommandTest {
     assertTrue(log.toString().contains("ERROR: Edit calendar failed: Simulated failure"));
   }
 }
+

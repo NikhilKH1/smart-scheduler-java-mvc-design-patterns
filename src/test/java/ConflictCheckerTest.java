@@ -243,3 +243,4 @@ public class ConflictCheckerTest {
     assertTrue(ConflictChecker.hasConflict(event1, event2));
   }
 }
+

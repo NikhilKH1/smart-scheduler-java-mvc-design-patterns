@@ -70,6 +70,114 @@ public class CreateEventCommand implements ICalendarModelCommand {
     this.repeatUntil = repeatUntil;
   }
 
+  /**
+   * Gets the name of the event.
+   *
+   * @return the event name
+   */
+  public String getEventName() {
+    return eventName;
+  }
+
+  /**
+   * Gets the start date and time of the event.
+   *
+   * @return the start date and time as a ZonedDateTime
+   */
+  public ZonedDateTime getStartDateTime() {
+    return startDateTime;
+  }
+
+  /**
+   * Gets the end date and time of the event.
+   *
+   * @return the end date and time as a ZonedDateTime
+   */
+  public ZonedDateTime getEndDateTime() {
+    return endDateTime;
+  }
+
+  /**
+   * Returns whether conflicting events should be automatically declined.
+   *
+   * @return true if conflicts are to be automatically declined; false otherwise
+   */
+  public boolean isAutoDecline() {
+    return autoDecline;
+  }
+
+  /**
+   * Gets the description of the event.
+   *
+   * @return the event description
+   */
+  public String getDescription() {
+    return description;
+  }
+
+  /**
+   * Gets the location of the event.
+   *
+   * @return the event location
+   */
+  public String getLocation() {
+    return location;
+  }
+
+  /**
+   * Returns whether the event is public.
+   *
+   * @return true if the event is public; false if private
+   */
+  public boolean isPublic() {
+    return isPublic;
+  }
+
+  /**
+   * Returns whether the event lasts all day.
+   *
+   * @return true if the event is all-day; false otherwise
+   */
+  public boolean isAllDay() {
+    return isAllDay;
+  }
+
+  /**
+   * Returns whether the event is recurring.
+   *
+   * @return true if the event is recurring; false otherwise
+   */
+  public boolean isRecurring() {
+    return isRecurring;
+  }
+
+  /**
+   * Gets the weekdays on which the event recurs.
+   *
+   * @return a string representing the recurring weekdays (e.g., "MO,TU,WE")
+   */
+  public String getWeekdays() {
+    return weekdays;
+  }
+
+  /**
+   * Gets the number of times the event should repeat.
+   *
+   * @return the repeat count
+   */
+  public int getRepeatCount() {
+    return repeatCount;
+  }
+
+  /**
+   * Gets the date until which the event should repeat.
+   *
+   * @return a Temporal object representing the repeat-until date (could be ZonedDateTime or LocalDate)
+   */
+  public Temporal getRepeatUntil() {
+    return repeatUntil;
+  }
+
   @Override
   public boolean execute(ICalendarModel model, ICalendarView view) {
     try {

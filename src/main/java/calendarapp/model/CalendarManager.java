@@ -96,7 +96,6 @@ public class CalendarManager implements ICalendarManager {
             targetCalendar, targetDateTime);
   }
 
-  @Override
   public boolean copyEventsOnDate(LocalDate sourceDate, String targetCalendarName,
                                   LocalDate targetDate) {
     ICalendarModel sourceCalendar = activeCalendar;

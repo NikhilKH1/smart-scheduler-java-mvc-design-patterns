@@ -55,6 +55,4 @@ public interface ICalendarManager {
    */
   public ICalendarModel getCalendar(String name);
 
-  public boolean copyEventsOnDate(LocalDate sourceDate, String targetCalendarName,
-                                  LocalDate targetDate);
 }

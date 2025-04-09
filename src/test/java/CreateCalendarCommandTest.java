@@ -35,3 +35,4 @@ public class CreateCalendarCommandTest {
     assertEquals(ZoneId.of("America/New_York"), cmd.getTimezone());
   }
 }
+

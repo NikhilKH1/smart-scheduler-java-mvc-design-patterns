@@ -1,5 +1,4 @@
 import calendarapp.controller.commands.EditEventCommand;
-import calendarapp.model.CalendarModel;
 import calendarapp.model.ICalendarModel;
 import calendarapp.model.event.ICalendarEvent;
 import calendarapp.model.event.RecurringEvent;
@@ -8,8 +7,7 @@ import calendarapp.view.ICalendarView;
 import org.junit.Test;
 
 import java.lang.reflect.InvocationTargetException;
-import java.time.Instant;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.temporal.Temporal;
@@ -38,17 +36,17 @@ public class EditEventCommandTest {
     }
 
     @Override
-    public List<ICalendarEvent> getEventsOnDate(Temporal date) {
+    public List<ICalendarEvent> getEventsOnDate(LocalDate date)  {
       return List.of();
     }
 
     @Override
-    public List<ICalendarEvent> getEventsBetween(Temporal start, Temporal end) {
+    public List<ICalendarEvent> getEventsBetween(ZonedDateTime start, ZonedDateTime end) {
       return List.of();
     }
 
     @Override
-    public boolean isBusyAt(Temporal dateTime) {
+    public boolean isBusyAt(ZonedDateTime dateTime) {
       return false;
     }
 
@@ -62,12 +60,14 @@ public class EditEventCommandTest {
       return false;
     }
 
-    @Override public boolean editSingleEvent(String prop, String name, Temporal start,
-                                             Temporal end, String value) {
+    @Override public boolean editSingleEvent(String property, String eventName,
+                                             ZonedDateTime originalStart, ZonedDateTime originalEnd,
+                                             String newValue) {
       throw new RuntimeException("Simulated failure");
     }
 
-    @Override public boolean editEventsFrom(String prop, String name, Temporal from, String value)
+    @Override public boolean editEventsFrom(String property, String eventName, ZonedDateTime fromDateTime,
+                                            String newValue)
     {
       throw new RuntimeException("Simulated failure");
     }
@@ -91,26 +91,25 @@ public class EditEventCommandTest {
     }
 
     @Override
-    public boolean copySingleEventTo(CalendarModel sourceCalendar, String eventName,
-                                     Temporal sourceDateTime, CalendarModel targetCalendar,
-                                     Temporal targetDateTime) {
+    public boolean copySingleEventTo(ICalendarModel sourceCalendar, String eventName,
+                                     ZonedDateTime sourceDateTime, ICalendarModel targetCalendar,
+                                     ZonedDateTime targetDateTime) {
       return false;
     }
 
     @Override
-    public boolean copyEventsOnDateTo(CalendarModel sourceCalendar, Temporal sourceDate,
-                                      CalendarModel targetCalendar, Temporal targetDate) {
+    public boolean copyEventsOnDateTo(ICalendarModel sourceCalendar, ZonedDateTime sourceDate,
+                                      ICalendarModel targetCalendar, ZonedDateTime targetDate) {
       return false;
     }
 
     @Override
-    public boolean copyEventsBetweenTo(CalendarModel sourceCalendar, Temporal startDate,
-                                       Temporal endDate, CalendarModel targetCalendar,
-                                       Temporal targetStartDate) {
+    public boolean copyEventsBetweenTo(ICalendarModel sourceCalendar, ZonedDateTime startDate,
+                                       ZonedDateTime endDate, ICalendarModel targetCalendar,
+                                       ZonedDateTime targetStartDate) {
       return false;
     }
 
-    // Stub other methods if needed
   }
 
   private static class DummyView implements ICalendarView {

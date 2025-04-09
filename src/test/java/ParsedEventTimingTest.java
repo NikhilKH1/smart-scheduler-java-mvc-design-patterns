@@ -3,8 +3,8 @@ import calendarapp.controller.ParsedEventTiming;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.time.LocalDateTime;
-import java.time.temporal.Temporal;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -33,21 +33,23 @@ public class ParsedEventTimingTest {
 
   @Test
   public void testSetAndGetStart() {
-    Temporal start = LocalDateTime.of(2025, 5, 10, 14, 30);
+    ZonedDateTime start = ZonedDateTime.of(2025, 5, 10, 14, 30, 0, 0, ZoneId.of("UTC"));
     timing.setStart(start);
     assertEquals("Start time should be set correctly", start, timing.getStart());
     timing.setStart(null);
     assertNull("Start time should be null after setting null", timing.getStart());
   }
 
+
   @Test
   public void testSetAndGetEnd() {
-    Temporal end = LocalDateTime.of(2025, 5, 10, 16, 0);
+    ZonedDateTime end = ZonedDateTime.of(2025, 5, 10, 16, 0, 0, 0, ZoneId.of("UTC"));
     timing.setEnd(end);
     assertEquals("End time should be set correctly", end, timing.getEnd());
     timing.setEnd(null);
     assertNull("End time should be null after setting null", timing.getEnd());
   }
+
 
   @Test
   public void testSetAndGetIsAllDay() {

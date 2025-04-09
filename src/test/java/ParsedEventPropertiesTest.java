@@ -80,3 +80,4 @@ public class ParsedEventPropertiesTest {
     assertEquals(-1, properties.getIndex());
   }
 }
+

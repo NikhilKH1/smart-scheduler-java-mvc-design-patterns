@@ -1,6 +1,7 @@
 import calendarapp.controller.commands.CopySingleEventCommand;
 import calendarapp.model.CalendarModel;
 import calendarapp.model.ICalendarManager;
+import calendarapp.model.ICalendarModel;
 import calendarapp.view.ICalendarView;
 
 import org.junit.Test;
@@ -151,10 +152,10 @@ public class CopySingleEventCommandTest {
     }
 
     @Override
-    public boolean copySingleEventTo(CalendarModel source, String eventName,
-                                     Temporal sourceDateTime, CalendarModel target,
-                                     Temporal targetDateTime) {
-      return shouldSucceed;
+    public boolean copySingleEventTo(ICalendarModel sourceCalendar, String eventName,
+                                     ZonedDateTime sourceDateTime, ICalendarModel targetCalendar,
+                                     ZonedDateTime targetDateTime) {
+      return false;
     }
   }
 }
