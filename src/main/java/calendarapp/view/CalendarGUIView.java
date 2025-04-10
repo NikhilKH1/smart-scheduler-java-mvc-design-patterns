@@ -447,11 +447,39 @@ public class CalendarGUIView implements ICalendarView {
       };
       JTextField repeatUntilField = new JTextField();
       JTextField repeatCountField = new JTextField();
+      repeatUntilField.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
+        public void insertUpdate(javax.swing.event.DocumentEvent e) { toggleRepeatCount(); }
+        public void removeUpdate(javax.swing.event.DocumentEvent e) { toggleRepeatCount(); }
+        public void changedUpdate(javax.swing.event.DocumentEvent e) { toggleRepeatCount(); }
+
+        private void toggleRepeatCount() {
+          boolean disableRepeatCount = !repeatUntilField.getText().trim().isEmpty();
+          repeatCountField.setEnabled(!disableRepeatCount);
+          repeatCountField.setBackground(disableRepeatCount ? Color.LIGHT_GRAY : Color.WHITE);
+        }
+      });
+
+      repeatCountField.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
+        public void insertUpdate(javax.swing.event.DocumentEvent e) { toggleRepeatUntil(); }
+        public void removeUpdate(javax.swing.event.DocumentEvent e) { toggleRepeatUntil(); }
+        public void changedUpdate(javax.swing.event.DocumentEvent e) { toggleRepeatUntil(); }
+
+        private void toggleRepeatUntil() {
+          boolean disableRepeatUntil = !repeatCountField.getText().trim().isEmpty();
+          repeatUntilField.setEnabled(!disableRepeatUntil);
+          repeatUntilField.setBackground(disableRepeatUntil ? Color.LIGHT_GRAY : Color.WHITE);
+        }
+      });
+
       for (JCheckBox cb : dayChecks) recurringPanel.add(cb);
+      recurringPanel.add(new JLabel(""));
+      recurringPanel.add(new JLabel(""));
       recurringPanel.add(new JLabel("Repeat Until (yyyy-MM-dd):"));
       recurringPanel.add(repeatUntilField);
+      recurringPanel.add(new JLabel(""));
       recurringPanel.add(new JLabel("Repeat Times:"));
       recurringPanel.add(repeatCountField);
+      recurringPanel.add(new JLabel(""));
       recurringPanel.setVisible(false);
 
       singleButton.addActionListener(a -> {
@@ -939,6 +967,7 @@ public class CalendarGUIView implements ICalendarView {
       if (event.RepeatUntil() != null) {
         sb.append("<p><b>Repeat Until:</b> ").append(event.RepeatUntil()).append("</p>");
       } else if (event.getRepeatCount() != null && event.getRepeatCount() > 0) {
+      } else if (event.getRepeatCount() != null && event.getRepeatCount() > 0) {
         sb.append("<p><b>Repeat Count:</b> ").append(event.getRepeatCount()).append("</p>");
       }
     } else {
@@ -981,17 +1010,15 @@ public class CalendarGUIView implements ICalendarView {
       if (userSelection == JFileChooser.APPROVE_OPTION) {
         File fileToSave = fileChooser.getSelectedFile();
 
-        // Ensure .csv extension
-        String filename = fileToSave.getAbsolutePath();
-        if (!filename.endsWith(".csv")) {
-          filename += ".csv";
-          fileToSave = new File(filename);
+        String fullPath = fileToSave.getAbsolutePath();
+        if (!fullPath.toLowerCase().endsWith(".csv")) {
+          fullPath += ".csv";
+          fileToSave = new File(fullPath);
         }
 
-        // ✅ Use command factory
-        String command = commandFactory.exportCalendarCommand(fileToSave.getName());
+        String cmd = "export cal \"" + fullPath + "\"";
+        boolean success = controller.processCommand(cmd);
 
-        boolean success = controller.processCommand(command);
         if (success) {
           JOptionPane.showMessageDialog(frame, "Calendar exported to: " + fileToSave.getAbsolutePath(), "Success", JOptionPane.INFORMATION_MESSAGE);
         } else {
@@ -1000,6 +1027,7 @@ public class CalendarGUIView implements ICalendarView {
       }
     }
   }
+
 
 
   private void importCalendarFromCSV() {
@@ -1082,10 +1110,9 @@ public class CalendarGUIView implements ICalendarView {
         } catch (Exception perLineError) {
           System.err.println("Skipping line " + lineNumber + ": " + perLineError.getMessage());
         }
-        finally {
-          suppressCreationMessages = false;
-        }
       }
+
+      suppressCreationMessages = false;
 
       controller.processCommand("print events from " + currentMonth.atDay(1) + " to " + currentMonth.atEndOfMonth());
       JOptionPane.showMessageDialog(frame, "Imported " + addedCount + " events into '" + selectedCalendar + "'.", "Import Success", JOptionPane.INFORMATION_MESSAGE);

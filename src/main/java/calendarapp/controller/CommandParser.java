@@ -325,18 +325,36 @@ public class CommandParser {
    * @throws IllegalArgumentException if the command format is invalid
    */
   private ICommand parseExportCommand(List<String> tokens) {
-    if (tokens.size() != 3 || !"cal".equalsIgnoreCase(tokens.get(1))) {
-      throw new IllegalArgumentException("Invalid export format. Usage: "
-              + "export calendar <filePath.csv>");
+    if (tokens.size() < 3 || !"cal".equalsIgnoreCase(tokens.get(1))) {
+      throw new IllegalArgumentException("Invalid export format. Usage: export calendar <filePath.csv>");
     }
 
-    String fileName = tokens.get(2);
+    // Reconstruct the file path (to handle spaces)
+    StringBuilder pathBuilder = new StringBuilder();
+    for (int i = 2; i < tokens.size(); i++) {
+      pathBuilder.append(tokens.get(i));
+      if (i != tokens.size() - 1) {
+        pathBuilder.append(" ");
+      }
+    }
 
-    if (!fileName.toLowerCase().endsWith(".csv")) {
+    String filePathRaw = pathBuilder.toString().trim();
+    String filePath;
+
+    // Strip quotes if present
+    if (filePathRaw.startsWith("\"") && filePathRaw.endsWith("\"")) {
+      filePath = filePathRaw.substring(1, filePathRaw.length() - 1);
+    } else {
+      filePath = filePathRaw;
+    }
+
+    if (!filePath.toLowerCase().endsWith(".csv")) {
       throw new IllegalArgumentException("Exported file must have a .csv extension");
     }
-    return new ExportCalendarCommand(fileName);
+
+    return new ExportCalendarCommand(filePath);
   }
+
 
   /**
    * Parses the "print" command to print events either on a specific date or in a range.
