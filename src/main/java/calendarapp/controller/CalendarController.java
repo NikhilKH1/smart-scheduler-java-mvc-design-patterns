@@ -2,6 +2,7 @@ package calendarapp.controller;
 
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 
 import calendarapp.controller.commands.ICommand;
 import calendarapp.controller.commands.ICalendarManagerCommand;
@@ -16,23 +17,12 @@ import calendarapp.view.InteractiveCLIView;
 
 /**
  * The Controller class is responsible for processing calendar-related commands.
- * The CalendarController manages the flow of commands and their execution,
- * interacts with the calendar manager to manipulate calendar data, and
- * communicates with the view to display results or errors.
  */
 public class CalendarController implements ICalendarController {
   private final ICalendarManager calendarManager;
   private ICalendarView view;
   private final CommandParser parser;
 
-  /**
-   * Constructs a CalendarController with the specified calendar manager,
-   * view, and command parser.
-   *
-   * @param calendarManager the calendar manager for managing calendars
-   * @param view            the view used for displaying messages
-   * @param parser          the parser used to parse user commands
-   */
   public CalendarController(ICalendarManager calendarManager, ICalendarView view,
                             CommandParser parser) {
     this.calendarManager = calendarManager;
@@ -40,26 +30,11 @@ public class CalendarController implements ICalendarController {
     this.parser = parser;
   }
 
-  /**
-   * Constructs a new CalendarController instance with the specified calendar manager
-   * and command parser.
-   *
-   * @param manager the calendar manager that handles the calendar operations
-   * @param parser  the command parser used to interpret user input or commands
-   */
   public CalendarController(ICalendarManager manager, CommandParser parser) {
     this.calendarManager = manager;
     this.parser = parser;
   }
 
-  /**
-   * Processes the given command input by parsing it and executing the corresponding command.
-   * The method determines whether the command is a calendar manager command or
-   * a calendar model command, and delegates the execution to the appropriate handler.
-   *
-   * @param commandInput the input command as a string
-   * @return true if the command was successfully processed, false otherwise
-   */
   @Override
   public boolean processCommand(String commandInput) {
     if (commandInput == null || commandInput.trim().isEmpty()) {
@@ -81,8 +56,7 @@ public class CalendarController implements ICalendarController {
       if (cmd instanceof ICalendarModelCommand) {
         ICalendarModel activeCalendar = calendarManager.getActiveCalendar();
         if (activeCalendar == null) {
-          view.displayError("No active calendar selected. Use "
-                  + "'use calendar --name <calName>' first.");
+          view.displayError("No active calendar selected. Use 'use calendar --name <calName>' first.");
           return false;
         }
         return ((ICalendarModelCommand) cmd).execute(activeCalendar, view);
@@ -100,63 +74,40 @@ public class CalendarController implements ICalendarController {
     }
   }
 
-  /**
-   * Retrieves the active calendar from the calendar manager.
-   *
-   * @return the active calendar, or null if no calendar is selected
-   */
   public ICalendarModel getActiveCalendar() {
     return calendarManager.getActiveCalendar();
   }
 
-  /**
-   * Retrieves the view associated with this controller.
-   *
-   * @return the view used for displaying information to the user
-   */
   public ICalendarView getView() {
     return view;
   }
 
-  /**
-   * Sets the view for this controller.
-   * The view is used to display information to the user.
-   *
-   * @param view the view to be set for displaying information to the user
-   */
   public void setView(ICalendarView view) {
     this.view = view;
   }
 
   /**
-   * Executes the application based on the provided command-line arguments.
-   * Depending on the arguments passed, the application can run in one of three modes:
-   * Interactive CLI mode: Launches an interactive command-line interface.
-   * Headless mode: Runs without a graphical interface, using a script file for automation.
-   * GUI mode: Launches the graphical user interface if no arguments are provided.
-   * <p>
-   * If the arguments are invalid, an error message is displayed with usage instructions.
-   *
-   * @param args the command-line arguments that specify the mode of operation
+   * Original run method for handling command-line args.
    */
   @Override
   public void run(String[] args) {
     try {
       if (args.length == 2 && args[0].equals("--mode") && args[1].equals("interactive")) {
-        this.view = new InteractiveCLIView(this);
+        this.view = new InteractiveCLIView(this, new InputStreamReader(System.in), System.out);
         view.displayMessage("Starting in Interactive CLI mode...");
-        ((InteractiveCLIView) view).run();
+        view.run();
 
       } else if (args.length == 3 && args[0].equals("--mode") && args[1].equals("headless")) {
-        this.view = new HeadlessView(this, new FileReader(args[2]));
+        this.view = new HeadlessView(this, new FileReader(args[2]), System.out);
         view.displayMessage("Running in Headless mode with script: " + args[2]);
-        ((HeadlessView) view).run();
+        view.run();
 
       } else if (args.length == 0) {
         CalendarGUIView guiView = new CalendarGUIView(calendarManager, this);
         this.view = guiView;
         guiView.setCommandFactory(new DefaultCommandFactory());
         guiView.initialize();
+
       } else {
         System.err.println("Invalid arguments. Use:");
         System.err.println("--mode interactive");
@@ -168,7 +119,13 @@ public class CalendarController implements ICalendarController {
     }
   }
 
-
+  /**
+   * New method for running with injected input/output.
+   */
+  @Override
+  public void run(Readable in, Appendable out) {
+    this.view = new InteractiveCLIView(this, in, out);
+    view.displayMessage("Starting in Interactive CLI mode...");
+    view.run();
+  }
 }
-
-

@@ -3,104 +3,100 @@ package calendarapp.view;
 import calendarapp.controller.ICalendarController;
 import calendarapp.model.event.ReadOnlyCalendarEvent;
 
+import java.io.IOException;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Scanner;
 
 /**
- * An interactive CLI view for the calendar application.
- * It prompts the user for commands in a loop and delegates command processing to the controller.
+ * An interactive CLI view for the calendar application using Readable and Appendable.
  */
 public class InteractiveCLIView implements ICalendarView, Runnable {
-  private ICalendarController controller;
+  private final ICalendarController controller;
+  private final Readable in;
+  private final Appendable out;
 
-  /**
-   * Constructs an InteractiveCLIView with the specified controller.
-   *
-   * @param controller the controller that processes commands and manages the calendar
-   */
-  public InteractiveCLIView(ICalendarController controller) {
+  public InteractiveCLIView(ICalendarController controller, Readable in, Appendable out) {
     this.controller = controller;
+    this.in = in;
+    this.out = out;
   }
 
-  /**
-   * Runs the interactive command input loop. The user is prompted to enter commands
-   * through the command-line interface. The loop continues until the user types 'exit'.
-   *
-   * @see ICalendarController#processCommand(String)
-   */
+  @Override
   public void run() {
-    Scanner scanner = new Scanner(System.in);
-    System.out.println("Welcome to the Interactive Calendar CLI!");
-    System.out.println("Enter commands (type 'exit' to quit):");
+    Scanner scanner = new Scanner(in);
+    try {
+      out.append("Welcome to the Interactive Calendar CLI!\n");
+      out.append("Enter commands (type 'exit' to quit):\n");
+    } catch (IOException e) {
+      throw new RuntimeException("Output failed", e);
+    }
 
     while (scanner.hasNextLine()) {
       String command = scanner.nextLine().trim();
       if (command.equalsIgnoreCase("exit")) {
-        System.out.println("Exiting.");
+        try {
+          out.append("Exiting.\n");
+        } catch (IOException e) {
+          throw new RuntimeException("Failed to write to output", e);
+        }
         break;
       }
       controller.processCommand(command);
     }
   }
 
-  /**
-   * Displays a general message to the user through the console.
-   *
-   * @param message the message to be displayed
-   */
   @Override
   public void displayMessage(String message) {
-    System.out.println(message);
+    try {
+      out.append(message).append("\n");
+    } catch (IOException e) {
+      throw new RuntimeException("Failed to display message", e);
+    }
   }
 
-  /**
-   * Displays an error message to the user through the console. This method is called
-   * when an error occurs during command processing or other operations.
-   *
-   * @param errorMessage the error message to be displayed
-   */
   @Override
   public void displayError(String errorMessage) {
-    System.err.println("Error: " + errorMessage);
+    try {
+      out.append("Error: ").append(errorMessage).append("\n");
+    } catch (IOException e) {
+      throw new RuntimeException("Failed to display error", e);
+    }
   }
 
-  /**
-   * Displays a list of read-only calendar events to the user. Each event's details are
-   * printed to the console, including subject, start and end times, description, location,
-   * and other relevant information. If no events are found, a message is displayed indicating so.
-   *
-   * @param events a list of read-only calendar events to be displayed
-   */
   @Override
   public void displayEvents(List<ReadOnlyCalendarEvent> events) {
-    if (events.isEmpty()) {
-      System.out.println("No events found.");
-      return;
-    }
-
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm z");
 
-    for (ReadOnlyCalendarEvent event : events) {
-      ZonedDateTime start = event.getStartDateTime();
-      ZonedDateTime end = event.getEndDateTime();
+    try {
+      if (events.isEmpty()) {
+        out.append("No events found.\n");
+        return;
+      }
 
-      System.out.println("- " + event.getSubject() + ": " +
-              start.format(formatter) + " to " + end.format(formatter));
+      for (ReadOnlyCalendarEvent event : events) {
+        ZonedDateTime start = event.getStartDateTime();
+        ZonedDateTime end = event.getEndDateTime();
 
-      if (event.getDescription() != null && !event.getDescription().isEmpty()) {
-        System.out.println("  Description: " + event.getDescription());
+        out.append("- ").append(event.getSubject()).append(": ")
+                .append(start.format(formatter)).append(" to ").append(end.format(formatter)).append("\n");
+
+        if (event.getDescription() != null && !event.getDescription().isEmpty()) {
+          out.append("  Description: ").append(event.getDescription()).append("\n");
+        }
+        if (event.getLocation() != null && !event.getLocation().isEmpty()) {
+          out.append("  Location: ").append(event.getLocation()).append("\n");
+        }
+        if (event.isPublic()) {
+          out.append("  Public Event\n");
+        }
+        if (event.isAllDay()) {
+          out.append("  All Day Event\n");
+        }
       }
-      if (event.getLocation() != null && !event.getLocation().isEmpty()) {
-        System.out.println("  Location: " + event.getLocation());
-      }
-      if (event.isPublic()) {
-        System.out.println("  Public Event");
-      }
-      if (event.isAllDay()) {
-        System.out.println("  All Day Event");
-      }
+    } catch (IOException e) {
+      throw new RuntimeException("Failed to display events", e);
     }
   }
 }

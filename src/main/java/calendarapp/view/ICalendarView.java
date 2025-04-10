@@ -15,19 +15,38 @@ public interface ICalendarView {
    *
    * @param events the list of calendar events to display
    */
-  public void displayEvents(List<ReadOnlyCalendarEvent> events);
+  void displayEvents(List<ReadOnlyCalendarEvent> events);
 
   /**
    * Displays a normal message.
    *
    * @param message the message to display
    */
-  public void displayMessage(String message);
+  void displayMessage(String message);
 
   /**
    * Displays an error message.
    *
    * @param errorMessage the error message to display
    */
-  public void displayError(String errorMessage);
+  void displayError(String errorMessage);
+
+  /**
+   * Runs the main loop of the view (for CLI/headless views).
+   */
+  void run();
+
+  /**
+   * Injects the input stream (Readable) for receiving commands.
+   * @param in the input source
+   */
+  default void setInput(Readable in) {
+  }
+
+  /**
+   * Injects the output stream (Appendable) for writing responses.
+   * @param out the output destination
+   */
+  default void setOutput(Appendable out) {
+  }
 }

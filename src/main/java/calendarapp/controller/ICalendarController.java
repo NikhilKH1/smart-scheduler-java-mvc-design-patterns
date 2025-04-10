@@ -33,4 +33,6 @@ public interface ICalendarController {
    * @param view the view used for displaying information to the user
    */
   public void setView(ICalendarView view);
+
+  void run(Readable in, Appendable out);
 }
