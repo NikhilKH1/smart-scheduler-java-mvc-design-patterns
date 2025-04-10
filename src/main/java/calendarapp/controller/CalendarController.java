@@ -40,6 +40,13 @@ public class CalendarController implements ICalendarController {
     this.parser = parser;
   }
 
+  /**
+   * Constructs a new CalendarController instance with the specified calendar manager
+   * and command parser.
+   *
+   * @param manager the calendar manager that handles the calendar operations
+   * @param parser  the command parser used to interpret user input or commands
+   */
   public CalendarController(ICalendarManager manager, CommandParser parser) {
     this.calendarManager = manager;
     this.parser = parser;
@@ -111,10 +118,27 @@ public class CalendarController implements ICalendarController {
     return view;
   }
 
+  /**
+   * Sets the view for this controller.
+   * The view is used to display information to the user.
+   *
+   * @param view the view to be set for displaying information to the user
+   */
   public void setView(ICalendarView view) {
     this.view = view;
   }
 
+  /**
+   * Executes the application based on the provided command-line arguments.
+   * Depending on the arguments passed, the application can run in one of three modes:
+   * Interactive CLI mode: Launches an interactive command-line interface.
+   * Headless mode: Runs without a graphical interface, using a script file for automation.
+   * GUI mode: Launches the graphical user interface if no arguments are provided.
+   *
+   * If the arguments are invalid, an error message is displayed with usage instructions.
+   *
+   * @param args the command-line arguments that specify the mode of operation
+   */
   @Override
   public void run(String[] args) {
     try {

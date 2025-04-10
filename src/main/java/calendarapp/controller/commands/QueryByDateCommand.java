@@ -5,7 +5,6 @@ import java.time.temporal.Temporal;
 import java.util.List;
 
 import calendarapp.model.ICalendarModel;
-import calendarapp.model.event.ICalendarEvent;
 import calendarapp.model.event.ReadOnlyCalendarEvent;
 import calendarapp.view.ICalendarView;
 

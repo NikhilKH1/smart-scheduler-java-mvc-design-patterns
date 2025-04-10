@@ -5,7 +5,6 @@ import java.time.temporal.Temporal;
 import java.util.List;
 
 import calendarapp.model.ICalendarModel;
-import calendarapp.model.event.ICalendarEvent;
 import calendarapp.model.event.ReadOnlyCalendarEvent;
 import calendarapp.view.ICalendarView;
 
@@ -39,14 +38,13 @@ public class QueryRangeDateTimeCommand implements ICalendarModelCommand {
   public boolean execute(ICalendarModel model, ICalendarView view) {
     List<ReadOnlyCalendarEvent> events = model.getEventsBetween(startDateTime, endDateTime);
     if (events.isEmpty()) {
-      // 👇 Don't show message if the controller is doing a silent fetch for rendering
       if (!(view instanceof calendarapp.view.CalendarGUIView)) {
         view.displayMessage("No events found from " + startDateTime + " to " + endDateTime);
       } else {
-        view.displayEvents(events);  // Still update blank view
+        view.displayEvents(events);
       }
     } else {
-      view.displayEvents(events);  // Always render
+      view.displayEvents(events);
     }
     return true;
   }

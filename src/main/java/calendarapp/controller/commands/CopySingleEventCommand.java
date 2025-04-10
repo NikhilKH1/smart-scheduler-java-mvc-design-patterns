@@ -33,6 +33,14 @@ public class CopySingleEventCommand implements ICalendarManagerCommand {
     this.targetDateTime = targetDateTime;
   }
 
+  /**
+   * Copies a single event from the active calendar to the target calendar at a new time.
+   * Displays a message on success or an error if the event cannot be copied.
+   *
+   * @param calendarManager the calendar manager handling calendars
+   * @param view the view for displaying messages
+   * @return true if the event was copied successfully, false otherwise
+   */
   @Override
   public boolean execute(ICalendarManager calendarManager, ICalendarView view) {
     ICalendarModel source = calendarManager.getActiveCalendar();
@@ -54,7 +62,8 @@ public class CopySingleEventCommand implements ICalendarManagerCommand {
     if (success) {
       view.displayMessage("Event '" + eventName + "' copied to calendar: " + targetCalendarName);
     } else {
-      view.displayError("Failed to copy event. It may not exist or conflicts with another event.");
+      view.displayError("Failed to copy event. It may not exist or conflicts "
+              + "with another event.");
     }
 
     return success;

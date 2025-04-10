@@ -42,20 +42,13 @@ public class CreateEventCommand implements ICalendarModelCommand {
    * @param isRecurring   whether the event is recurring
    * @param weekdays      the days of the week on which the event recurs
    * @param repeatCount   the number of times the event repeats
-   * @param repeatUntil   the date until which the event repeats (nullable, may be LocalDate or ZonedDateTime)
+   * @param repeatUntil   the date until which the event repeats
    */
-  public CreateEventCommand(String eventName,
-                            ZonedDateTime startDateTime,
-                            ZonedDateTime endDateTime,
-                            boolean autoDecline,
-                            String description,
-                            String location,
-                            boolean isPublic,
-                            boolean isAllDay,
-                            boolean isRecurring,
-                            String weekdays,
-                            int repeatCount,
-                            Temporal repeatUntil) {
+  public CreateEventCommand(String eventName, ZonedDateTime startDateTime,
+                            ZonedDateTime endDateTime, boolean autoDecline,
+                            String description, String location, boolean isPublic,
+                            boolean isAllDay, boolean isRecurring, String weekdays,
+                            int repeatCount, Temporal repeatUntil) {
     this.eventName = eventName;
     this.startDateTime = startDateTime;
     this.endDateTime = endDateTime;
@@ -178,6 +171,15 @@ public class CreateEventCommand implements ICalendarModelCommand {
     return repeatUntil;
   }
 
+  /**
+   * Executes the command to create a new event in the given calendar model.
+   * Handles both single and recurring events, adjusting for the calendar's timezone.
+   * Displays a success message if the event is created or an error if it fails.
+   *
+   * @param model the calendar model to add the event to
+   * @param view  the view for displaying messages
+   * @return true if the event was created successfully, false otherwise
+   */
   @Override
   public boolean execute(ICalendarModel model, ICalendarView view) {
     try {
@@ -195,14 +197,13 @@ public class CreateEventCommand implements ICalendarModelCommand {
       }
 
       if (isRecurring) {
-        RecurringEvent recurringEvent = new RecurringEvent(
-                eventName, adjustedStart, adjustedEnd, weekdays, repeatCount,
-                adjustedRepeatUntil, description, location, isPublic, isAllDay
+        RecurringEvent recurringEvent = new RecurringEvent(eventName, adjustedStart,
+                adjustedEnd, weekdays, repeatCount, adjustedRepeatUntil, description,
+                location, isPublic, isAllDay
         );
         success = model.addRecurringEvent(recurringEvent, autoDecline);
       } else {
-        SingleEvent event = new SingleEvent(
-                eventName, adjustedStart, adjustedEnd, description,
+        SingleEvent event = new SingleEvent(eventName, adjustedStart, adjustedEnd, description,
                 location, isPublic, isAllDay, null
         );
         success = model.addEvent(event, autoDecline);

@@ -33,6 +33,14 @@ public class CopyEventsBetweenDatesCommand implements ICalendarManagerCommand {
     this.targetStartDate = targetStartDate;
   }
 
+  /**
+   * Copies events between two dates from the active calendar to the target calendar,
+   * starting at the specified target date. Displays success or error messages based on the result.
+   *
+   * @param calendarManager the calendar manager handling calendars
+   * @param view the view for displaying messages
+   * @return true if events were copied successfully, false otherwise
+   */
   @Override
   public boolean execute(ICalendarManager calendarManager, ICalendarView view) {
     ICalendarModel source = calendarManager.getActiveCalendar();
