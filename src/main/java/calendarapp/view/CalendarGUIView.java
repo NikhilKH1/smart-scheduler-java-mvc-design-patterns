@@ -1033,12 +1033,24 @@ public class CalendarGUIView implements ICalendarView {
           LocalTime startTime = LocalTime.parse(parts[2].trim(), timeFormatter);
           LocalDate endDate = tryParseDate(parts[3].trim());
           LocalTime endTime = LocalTime.parse(parts[4].trim(), timeFormatter);
-          String desc = parts[5].trim();
-          String loc = parts[6].trim();
+          String desc = parts[6].trim();
+          String loc = parts[7].trim();
 
-          String weekdays = parts.length > 7 ? parts[7].trim().toUpperCase() : "";
-          String repeatUntilStr = parts.length > 8 ? parts[8].trim() : "";
-          String repeatCountStr = parts.length > 9 ? parts[9].trim() : "";
+          boolean isRecurring = false;
+          String weekdays = "";
+          String repeatUntilStr = "";
+          String repeatCountStr = "";
+
+          if (parts.length >= 10) {
+            weekdays = parts[9].trim().toUpperCase();
+            isRecurring = !weekdays.isEmpty();
+            if (parts.length >= 11) {
+              repeatUntilStr = parts[10].trim();
+            }
+            if (parts.length >= 12) {
+              repeatCountStr = parts[11].trim();
+            }
+          }
 
           if (!startDate.equals(endDate)) continue;
 
@@ -1054,22 +1066,17 @@ public class CalendarGUIView implements ICalendarView {
           input.setDescription(desc);
           input.setLocation(loc);
 
-          boolean isRecurring = !weekdays.isEmpty();
           if (isRecurring) {
             input.setRecurring(true);
             input.setRepeatingDays(weekdays);
-
             if (!repeatUntilStr.isEmpty()) {
-              ZonedDateTime until = LocalDate.parse(repeatUntilStr,
-                      dateFormatter).atStartOfDay(zone);
+              ZonedDateTime until = LocalDate.parse(repeatUntilStr, dateFormatter).atStartOfDay(zone);
               input.setRepeatUntil(until);
             }
-
             if (!repeatCountStr.isEmpty()) {
               int count = Integer.parseInt(repeatCountStr);
               input.setRepeatTimes(count);
             }
-
             if (repeatUntilStr.isEmpty() && repeatCountStr.isEmpty()) {
               input.setRepeatTimes(4);
             }
@@ -1098,6 +1105,7 @@ public class CalendarGUIView implements ICalendarView {
               + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
     }
   }
+
 
   private LocalDate tryParseDate(String input) {
     DateTimeFormatter[] formats = new DateTimeFormatter[] {
