@@ -11,7 +11,7 @@ import java.util.List;
  * This class defines the behavior for events that repeat based on a set of rules,
  * such as repeating days of the week, repeat count, and repeat until date.
  */
-public class RecurringEvent extends AbstractCalendarEvent implements ReadOnlyCalendarEvent {
+public class RecurringEvent extends AbstractCalendarEvent {
 
   private final String weekdays;
   private final int repeatCount;

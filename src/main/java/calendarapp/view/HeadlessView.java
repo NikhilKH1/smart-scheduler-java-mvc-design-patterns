@@ -1,7 +1,7 @@
 package calendarapp.view;
 
 import calendarapp.controller.ICalendarController;
-import calendarapp.model.event.ICalendarEvent;
+import calendarapp.model.event.ReadOnlyCalendarEvent;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -45,12 +45,12 @@ public class HeadlessView implements ICalendarView {
   }
 
   @Override
-  public void displayEvents(List<ICalendarEvent> events) {
+  public void displayEvents(List<ReadOnlyCalendarEvent> events) {
     if (events.isEmpty()) {
       System.out.println("No events found.");
       return;
     }
-    for (ICalendarEvent event : events) {
+    for (ReadOnlyCalendarEvent event : events) {
       System.out.println(event);
     }
   }

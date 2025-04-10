@@ -1,6 +1,6 @@
 package calendarapp.utils;
 
-import calendarapp.model.event.ICalendarEvent;
+import calendarapp.model.event.ReadOnlyCalendarEvent;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -29,7 +29,7 @@ public class CSVExporter implements IExporter {
    * @throws IllegalArgumentException if the file path is invalid or the file extension is not .csv
    */
   @Override
-  public String export(List<ICalendarEvent> events, String filePath) throws IOException {
+  public String export(List<ReadOnlyCalendarEvent> events, String filePath) throws IOException {
     if (filePath == null || filePath.trim().isEmpty()) {
       throw new IllegalArgumentException("File path must not be null or empty.");
     }
@@ -53,7 +53,7 @@ public class CSVExporter implements IExporter {
       writer.append("Subject,Start Date,Start Time,End Date,End Time,All Day Event,"
               + "Description,Location,Private\n");
 
-      for (ICalendarEvent event : events) {
+      for (ReadOnlyCalendarEvent event : events) {
         writer.append(formatEvent(event)).append("\n");
       }
     }
@@ -66,7 +66,7 @@ public class CSVExporter implements IExporter {
    * @param event the calendar event to be formatted
    * @return the event as a CSV string
    */
-  private String formatEvent(ICalendarEvent event) {
+  private String formatEvent(ReadOnlyCalendarEvent event) {
     String subject = event.getSubject();
     boolean isPrivate = !event.isPublic();
 

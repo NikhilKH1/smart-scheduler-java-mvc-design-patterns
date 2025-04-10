@@ -1,6 +1,7 @@
 package calendarapp.utils;
 
 import calendarapp.model.event.ICalendarEvent;
+import calendarapp.model.event.ReadOnlyCalendarEvent;
 
 import java.io.IOException;
 import java.util.List;
@@ -17,5 +18,5 @@ public interface IExporter {
    * @return the absolute path of the exported file
    * @throws IOException if an error occurs during export
    */
-  public String export(List<ICalendarEvent> events, String filePath) throws IOException;
+  public String export(List<ReadOnlyCalendarEvent> events, String filePath) throws IOException;
 }

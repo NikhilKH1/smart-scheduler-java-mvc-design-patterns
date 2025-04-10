@@ -16,7 +16,7 @@ public interface ICalendarView {
    *
    * @param events the list of calendar events to display
    */
-  void displayEvents(List<ICalendarEvent> events);
+  void displayEvents(List<ReadOnlyCalendarEvent> events);
 
   /**
    * Displays a normal message.

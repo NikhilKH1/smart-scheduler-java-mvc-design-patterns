@@ -7,7 +7,7 @@ import java.time.ZonedDateTime;
 /**
  * Represents a single (non-recurring) calendar event.
  */
-public class SingleEvent extends AbstractCalendarEvent implements ReadOnlyCalendarEvent {
+public class SingleEvent extends AbstractCalendarEvent {
 
   private final String seriesId;
 

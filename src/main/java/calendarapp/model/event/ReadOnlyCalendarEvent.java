@@ -13,4 +13,7 @@ public interface ReadOnlyCalendarEvent {
   String getWeekdays();
   ZonedDateTime RepeatUntil();
   Integer getRepeatCount();
+  boolean isPublic();
+
+  boolean isAllDay();
 }

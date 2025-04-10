@@ -8,7 +8,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.time.*;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.List;
 import calendarapp.model.event.ReadOnlyCalendarEvent;
@@ -17,7 +16,6 @@ import calendarapp.factory.ICommandFactory;
 import calendarapp.factory.EventInput;
 import calendarapp.controller.CalendarController;
 import calendarapp.model.ICalendarManager;
-import calendarapp.model.event.ICalendarEvent;
 
 public class CalendarGUIView implements ICalendarView {
 
@@ -36,8 +34,8 @@ public class CalendarGUIView implements ICalendarView {
   private String selectedCalendar;
   private JLabel calendarNameLabel;
   private JButton importButton;
-  private List<ICalendarEvent> events;
-  private List<ICalendarEvent> lastRenderedEvents = new ArrayList<>();
+  private List<ReadOnlyCalendarEvent> events;
+  private List<ReadOnlyCalendarEvent> lastRenderedEvents = new ArrayList<>();
 
   public CalendarGUIView(ICalendarManager manager, CalendarController controller) {
     this.calendarManager = manager;
@@ -180,8 +178,8 @@ public class CalendarGUIView implements ICalendarView {
     });
   }
 
-
   private void updateCalendarView() {
+    // Clear and set up basic grid (headers, blank cells)
     calendarPanel.removeAll();
     calendarPanel.setLayout(new GridLayout(0, 7));
 
@@ -200,37 +198,32 @@ public class CalendarGUIView implements ICalendarView {
 
     LocalDate firstDay = currentMonth.atDay(1);
     int startDayOfWeek = firstDay.getDayOfWeek().getValue();
-    if (startDayOfWeek == 7) startDayOfWeek = 0;
-
+    // Adjust if week starts on Sunday
+    if (startDayOfWeek == 7) {
+      startDayOfWeek = 0;
+    }
     for (int i = 0; i < startDayOfWeek; i++) {
       calendarPanel.add(new JLabel(""));
     }
 
-    // Render empty buttons first (will be updated via displayEvents)
-    for (int i = 1; i <= currentMonth.lengthOfMonth(); i++) {
-      LocalDate date = currentMonth.atDay(i);
+    // Get events for the whole month directly from your model
+    ZoneId zone = ZoneId.of(calendarTimezones.getOrDefault(selectedCalendar, ZoneId.systemDefault().toString()));
+    ZonedDateTime startZDT = currentMonth.atDay(1).atStartOfDay(zone);
+    ZonedDateTime endZDT = currentMonth.atEndOfMonth().atTime(23, 59).atZone(zone);
 
-      JButton dayButton = new JButton("<html><b>" + i + "</b></html>");
-      dayButton.setToolTipText("Click to view events on " + date);
-      dayButton.addActionListener(e -> showEventDialog(date));
-      calendarPanel.add(dayButton);
+    // Directly fetch events from the model (or calendarManager)
+    String command = commandFactory.printEventsBetweenCommand(startZDT, endZDT);
+    controller.processCommand(command);
+
+    // Rebuild the entire grid with events pre-populated using displayEvents()
+//    displayEvents(events);
+
+    if (lastRenderedEvents.isEmpty()) {
+      displayEvents(Collections.emptyList());  // This renders just the blank calendar with days
     }
 
-    calendarPanel.revalidate();
-    calendarPanel.repaint();
-
-    // Now request events from backend
-    LocalDate monthStart = currentMonth.atDay(1);
-    LocalDate monthEnd = currentMonth.atEndOfMonth();
-    ZoneId zone = ZoneId.of(calendarTimezones.getOrDefault(selectedCalendar, ZoneId.systemDefault().toString()));
-    ZonedDateTime startZDT = monthStart.atStartOfDay(zone);
-    ZonedDateTime endZDT = monthEnd.atStartOfDay(zone);
-    DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm");
-//    String command = "print events from " +
-//            startZDT.toLocalDateTime().format(fmt) + " to " +
-//            endZDT.toLocalDateTime().format(fmt);
-//    controller.processCommand(command);
   }
+
 
 
 
@@ -240,15 +233,41 @@ public class CalendarGUIView implements ICalendarView {
   // Step 2: calendarEvents will be populated inside displayEvents().
   // We'll capture those and render them in that method now.
   @Override
-  public void displayEvents(List<ICalendarEvent> events) {
+  public void displayEvents(List<ReadOnlyCalendarEvent> events) {
     this.lastRenderedEvents = events;
 
-    Map<LocalDate, List<ICalendarEvent>> dayEventMap = new HashMap<>();
-    for (ICalendarEvent e : events) {
-      LocalDate date = e.getStartDateTime().toLocalDate();
-      dayEventMap.computeIfAbsent(date, d -> new ArrayList<>()).add(e);
+    Map<LocalDate, List<ReadOnlyCalendarEvent>> dayEventMap = new HashMap<>();
+
+    for (ReadOnlyCalendarEvent e : events) {
+      if (e.isRecurring()) {
+        LocalDate startDate = e.getStartDateTime().toLocalDate();
+        Set<DayOfWeek> repeatDays = parseWeekdays(e.getWeekdays());
+        if (repeatDays == null || repeatDays.isEmpty()) continue; // safety check
+
+        LocalDate endDate;
+
+        if (e.RepeatUntil() != null) {
+          endDate = e.RepeatUntil().toLocalDate();
+        } else if (e.getRepeatCount() != null) {
+          // Estimate: repeat count × 7 days (worst case)
+          endDate = startDate.plusDays(e.getRepeatCount() * 7L);
+        } else {
+          endDate = currentMonth.atEndOfMonth(); // fallback
+        }
+
+        for (LocalDate d = startDate; !d.isAfter(endDate); d = d.plusDays(1)) {
+          if (repeatDays.contains(d.getDayOfWeek())) {
+            dayEventMap.computeIfAbsent(d, key -> new ArrayList<>()).add(e);
+          }
+        }
+
+      } else {
+        LocalDate date = e.getStartDateTime().toLocalDate();
+        dayEventMap.computeIfAbsent(date, key -> new ArrayList<>()).add(e);
+      }
     }
 
+    // Now update the calendar panel visually (unchanged from before)
     calendarPanel.removeAll();
     calendarPanel.setLayout(new GridLayout(0, 7));
 
@@ -275,7 +294,7 @@ public class CalendarGUIView implements ICalendarView {
 
     for (int i = 1; i <= currentMonth.lengthOfMonth(); i++) {
       LocalDate date = currentMonth.atDay(i);
-      List<ICalendarEvent> dayEvents = dayEventMap.getOrDefault(date, new ArrayList<>());
+      List<ReadOnlyCalendarEvent> dayEvents = dayEventMap.getOrDefault(date, new ArrayList<>());
 
       StringBuilder sb = new StringBuilder("<html><b>").append(i).append("</b>");
       if (!dayEvents.isEmpty()) {
@@ -292,15 +311,12 @@ public class CalendarGUIView implements ICalendarView {
       dayButton.setToolTipText("Click to view events on " + date);
       dayButton.addActionListener(e -> showEventDialog(date));
 
-      calendarPanel.add(dayButton); // ← ✅ Always add the day button
+      calendarPanel.add(dayButton);
     }
 
     calendarPanel.revalidate();
     calendarPanel.repaint();
   }
-
-
-
 
   private void addNewCalendar() {
     JPanel inputPanel = new JPanel(new GridLayout(0, 1));
@@ -351,39 +367,47 @@ public class CalendarGUIView implements ICalendarView {
   }
 
   private void showEventDialog(LocalDate date) {
-    // Step 1: Ask backend for events on this date
-    String command = "print events on " + date;
-    controller.processCommand(command);
-
-    // We'll collect the result through displayEvents — capture a temp list for rendering
-    List<ICalendarEvent> dayEvents = new ArrayList<>();
-    if (lastRenderedEvents != null) {
-      for (ICalendarEvent e : lastRenderedEvents) {
-        if (e.getStartDateTime().toLocalDate().equals(date)) {
-          dayEvents.add(e);
-        }
-      }
-    }
-
     final JDialog dialog = new JDialog(frame,
             "Events on " + date + " (" +
                     calendarTimezones.getOrDefault(selectedCalendar, ZoneId.systemDefault().toString()) + ")", true);
 
     DefaultListModel<String> listModel = new DefaultListModel<>();
-    for (ICalendarEvent event : dayEvents) {
-      String start = event.getStartDateTime().toLocalTime().toString();
-      String end = event.getEndDateTime().toLocalTime().toString();
-      listModel.addElement(event.getSubject() + " (" + start + " - " + end + ")");
-    }
-
     JList<String> eventList = new JList<>(listModel);
+    List<ReadOnlyCalendarEvent> dayEvents = new ArrayList<>();
+
+    Runnable refreshDayEvents = () -> {
+      dayEvents.clear();
+      listModel.clear();
+
+      ZoneId zone = ZoneId.of(calendarTimezones.getOrDefault(selectedCalendar, ZoneId.systemDefault().toString()));
+      ZonedDateTime refreshStart = currentMonth.atDay(1).atStartOfDay(zone);
+      ZonedDateTime refreshEnd = currentMonth.atEndOfMonth().atTime(23, 59).atZone(zone);
+
+      String refreshCmd = commandFactory.printEventsBetweenCommand(refreshStart, refreshEnd);
+      controller.processCommand(refreshCmd);
+      updateCalendarView();
+
+      if (lastRenderedEvents != null) {
+        for (ReadOnlyCalendarEvent e : lastRenderedEvents) {
+          if (e.getStartDateTime().toLocalDate().equals(date)) {
+            dayEvents.add(e);
+            String start = e.getStartDateTime().toLocalTime().toString();
+            String end = e.getEndDateTime().toLocalTime().toString();
+            listModel.addElement(e.getSubject() + " (" + start + " - " + end + ")");
+          }
+        }
+      }
+    };
+
+    refreshDayEvents.run();
+
     eventList.addMouseListener(new MouseAdapter() {
       @Override
       public void mouseClicked(MouseEvent e) {
-        if (e.getClickCount() == 2) { // Double-click to show details
+        if (e.getClickCount() == 2) {
           int index = eventList.getSelectedIndex();
           if (index >= 0 && index < dayEvents.size()) {
-            ICalendarEvent selected = dayEvents.get(index);
+            ReadOnlyCalendarEvent selected = dayEvents.get(index);
             showEventDetailsPopup(selected);
           }
         }
@@ -399,14 +423,11 @@ public class CalendarGUIView implements ICalendarView {
     JButton editAll = new JButton("Edit All Matching");
     controls.add(add);
     controls.add(edit);
-
     controls.add(editAll);
     panel.add(controls, BorderLayout.SOUTH);
 
-
     add.addActionListener(e -> {
       JDialog addDialog = new JDialog(frame, "Create Event on " + date, true);
-
       JPanel inputPanel = new JPanel(new GridBagLayout());
       GridBagConstraints gbc = new GridBagConstraints();
       gbc.insets = new Insets(5, 5, 5, 5);
@@ -424,7 +445,6 @@ public class CalendarGUIView implements ICalendarView {
       group.add(singleButton);
       group.add(recurringButton);
 
-      // Recurring options panel
       JPanel recurringPanel = new JPanel(new GridLayout(0, 3));
       JCheckBox[] dayChecks = {
               new JCheckBox("Monday"), new JCheckBox("Tuesday"), new JCheckBox("Wednesday"),
@@ -432,15 +452,13 @@ public class CalendarGUIView implements ICalendarView {
       };
       JTextField repeatUntilField = new JTextField();
       JTextField repeatCountField = new JTextField();
-
       for (JCheckBox cb : dayChecks) recurringPanel.add(cb);
       recurringPanel.add(new JLabel("Repeat Until (yyyy-MM-dd):"));
       recurringPanel.add(repeatUntilField);
       recurringPanel.add(new JLabel("Repeat Times:"));
       recurringPanel.add(repeatCountField);
-      recurringPanel.setVisible(false);  // default hidden
+      recurringPanel.setVisible(false);
 
-      // Single/Recurring button toggle
       singleButton.addActionListener(a -> {
         recurringPanel.setVisible(false);
         addDialog.pack();
@@ -472,7 +490,6 @@ public class CalendarGUIView implements ICalendarView {
       gbc.gridx = 0; gbc.gridy = row; gbc.gridwidth = 2;
       inputPanel.add(recurringPanel, gbc);
 
-      // Buttons panel
       JPanel buttonsPanel = new JPanel();
       JButton okButton = new JButton("OK");
       JButton cancelButton = new JButton("Cancel");
@@ -502,15 +519,7 @@ public class CalendarGUIView implements ICalendarView {
             Set<DayOfWeek> repeatingDays = new HashSet<>();
             for (JCheckBox box : dayChecks) {
               if (box.isSelected()) {
-                switch (box.getText()) {
-                  case "MONDAY": repeatingDays.add(DayOfWeek.MONDAY); break;
-                  case "TUESDAY": repeatingDays.add(DayOfWeek.TUESDAY); break;
-                  case "WEDNESDAY": repeatingDays.add(DayOfWeek.WEDNESDAY); break;
-                  case "THURSDAY": repeatingDays.add(DayOfWeek.THURSDAY); break;
-                  case "FRIDAY": repeatingDays.add(DayOfWeek.FRIDAY); break;
-                  case "SATURDAY": repeatingDays.add(DayOfWeek.SATURDAY); break;
-                  case "SUNDAY": repeatingDays.add(DayOfWeek.SUNDAY); break;
-                }
+                repeatingDays.add(DayOfWeek.valueOf(box.getText().toUpperCase()));
               }
             }
             input.setRepeatingDays(repeatingDays);
@@ -525,8 +534,8 @@ public class CalendarGUIView implements ICalendarView {
 
           String cmd = commandFactory.createEventCommand(input);
           if (controller.processCommand(cmd)) {
-            controller.processCommand("print events on " + date);
             addDialog.dispose();
+            refreshDayEvents.run(); // 🔥 now updates list in same open dialog
           } else {
             JOptionPane.showMessageDialog(addDialog, "Failed to create event", "Error", JOptionPane.ERROR_MESSAGE);
           }
@@ -538,19 +547,14 @@ public class CalendarGUIView implements ICalendarView {
 
       cancelButton.addActionListener(ev -> addDialog.dispose());
 
-      // Main layout
       addDialog.getContentPane().setLayout(new BorderLayout());
       addDialog.getContentPane().add(inputPanel, BorderLayout.CENTER);
       addDialog.getContentPane().add(buttonsPanel, BorderLayout.SOUTH);
-
       addDialog.pack();
       addDialog.setResizable(false);
       addDialog.setLocationRelativeTo(frame);
       addDialog.setVisible(true);
     });
-
-
-
 
     edit.addActionListener(e -> {
       int selectedIndex = eventList.getSelectedIndex();
@@ -559,7 +563,7 @@ public class CalendarGUIView implements ICalendarView {
         return;
       }
 
-      ICalendarEvent selectedEvent = dayEvents.get(selectedIndex);
+      ReadOnlyCalendarEvent selectedEvent = dayEvents.get(selectedIndex);
 
       JTextField nameField = new JTextField(selectedEvent.getSubject());
       JTextField startField = new JTextField(selectedEvent.getStartDateTime().toLocalTime().toString());
@@ -639,7 +643,7 @@ public class CalendarGUIView implements ICalendarView {
         return;
       }
 
-      ICalendarEvent selectedEvent = dayEvents.get(selectedIndex);
+      ReadOnlyCalendarEvent selectedEvent = dayEvents.get(selectedIndex);
       JPanel inputPanel = new JPanel(new GridLayout(0, 2));
 
       JTextField nameField = new JTextField(selectedEvent.getSubject());
@@ -732,17 +736,43 @@ public class CalendarGUIView implements ICalendarView {
     });
 
 
-
-
-
-
     dialog.getContentPane().add(panel);
     dialog.setSize(520, 400);
     dialog.setLocationRelativeTo(frame);
     dialog.setVisible(true);
   }
 
-  private void showEventDetailsPopup(ICalendarEvent event) {
+  private Set<DayOfWeek> parseWeekdays(Object value) {
+    Set<DayOfWeek> days = new HashSet<>();
+    if (value == null) return days;
+
+    String str = value.toString().toUpperCase().replaceAll("\\s", "");
+    String[] parts = str.split("[,|;]");
+
+    for (String part : parts) {
+      try {
+        // Try full names: MONDAY, TUESDAY, ...
+        days.add(DayOfWeek.valueOf(part));
+      } catch (IllegalArgumentException e) {
+        // Try short codes: M, T, W, Th, F, Sa, Su
+        switch (part) {
+          case "M": days.add(DayOfWeek.MONDAY); break;
+          case "T": days.add(DayOfWeek.TUESDAY); break;
+          case "W": days.add(DayOfWeek.WEDNESDAY); break;
+          case "TH": days.add(DayOfWeek.THURSDAY); break;
+          case "F": days.add(DayOfWeek.FRIDAY); break;
+          case "SA": days.add(DayOfWeek.SATURDAY); break;
+          case "SU": days.add(DayOfWeek.SUNDAY); break;
+          default: /* skip invalid */ break;
+        }
+      }
+    }
+
+    return days;
+  }
+
+
+  private void showEventDetailsPopup(ReadOnlyCalendarEvent event) {
     StringBuilder sb = new StringBuilder("<html>");
     sb.append("<h2>").append(event.getSubject()).append("</h2>");
     sb.append("<p><b>Start:</b> ").append(event.getStartDateTime()).append("</p>");

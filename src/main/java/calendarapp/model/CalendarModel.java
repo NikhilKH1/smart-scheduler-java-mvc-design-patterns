@@ -139,7 +139,7 @@ public class CalendarModel implements ICalendarModel {
   public boolean copySingleEventTo(ICalendarModel sourceCalendar, String eventName,
                                    ZonedDateTime sourceDateTime, ICalendarModel targetCalendar,
                                    ZonedDateTime targetDateTime) {
-    for (ICalendarEvent event : sourceCalendar.getEvents()) {
+    for (ReadOnlyCalendarEvent event : sourceCalendar.getEvents()) {
       if (event.getSubject().equals(eventName) && event.getStartDateTime().equals(sourceDateTime)) {
         long durationMinutes = Duration.between(event.getStartDateTime(), event.getEndDateTime()).toMinutes();
         ZonedDateTime newEnd = targetDateTime.plusMinutes(durationMinutes);
@@ -173,7 +173,8 @@ public class CalendarModel implements ICalendarModel {
     LocalDate targetLocalDate = targetDate.toLocalDate();
     ZoneId targetZone = targetCalendar.getTimezone();
 
-    for (ICalendarEvent event : sourceCalendar.getEventsOnDate(sourceLocalDate)) {
+    for (ReadOnlyCalendarEvent event : sourceCalendar.getEventsOnDate(sourceLocalDate)) {
+      ICalendarEvent editable = (ICalendarEvent) event;
       ZonedDateTime sourceEventStart = event.getStartDateTime();
       ZonedDateTime sourceEventEnd = event.getEndDateTime();
 
@@ -226,7 +227,8 @@ public class CalendarModel implements ICalendarModel {
 
     long daysOffset = ChronoUnit.DAYS.between(startDate.toLocalDate(), targetStartDate.toLocalDate());
 
-    for (ICalendarEvent event : sourceCalendar.getEventsBetween(startDate, endDate)) {
+    for (ReadOnlyCalendarEvent event : sourceCalendar.getEventsBetween(startDate, endDate)) {
+      ICalendarEvent editable = (ICalendarEvent) event;
       long durationMinutes = Duration.between(event.getStartDateTime(),
               event.getEndDateTime()).toMinutes();
       ZonedDateTime newStart = event.getStartDateTime().plusDays(daysOffset)
@@ -304,7 +306,7 @@ public class CalendarModel implements ICalendarModel {
    * @return a list of all events
    */
   @Override
-  public List<ICalendarEvent> getEvents() {
+  public List<ReadOnlyCalendarEvent> getEvents() {
     return new ArrayList<>(events);
   }
 
@@ -315,20 +317,21 @@ public class CalendarModel implements ICalendarModel {
    * @return a list of events on that date
    */
   @Override
-  public List<ICalendarEvent> getEventsOnDate(LocalDate date) {
-    List<ICalendarEvent> result = new ArrayList<>();
+  public List<ReadOnlyCalendarEvent> getEventsOnDate(LocalDate date) {
+    List<ReadOnlyCalendarEvent> result = new ArrayList<>();
 
     for (ICalendarEvent event : events) {
       LocalDate startDate = event.getStartDateTime().toLocalDate();
       LocalDate endDate = event.getEndDateTime().toLocalDate();
 
       if (!startDate.isAfter(date) && !endDate.isBefore(date)) {
-        result.add(event);
+        result.add((ReadOnlyCalendarEvent) event); // safe cast
       }
     }
 
     return result;
   }
+
 
 
 
@@ -340,16 +343,17 @@ public class CalendarModel implements ICalendarModel {
    * @return a list of events that fall within the date range
    */
   @Override
-  public List<ICalendarEvent> getEventsBetween(ZonedDateTime start, ZonedDateTime end) {
-    List<ICalendarEvent> result = new ArrayList<>();
+  public List<ReadOnlyCalendarEvent> getEventsBetween(ZonedDateTime start, ZonedDateTime end) {
+    List<ReadOnlyCalendarEvent> result = new ArrayList<>();
 
     for (ICalendarEvent event : events) {
       ZonedDateTime eventStart = event.getStartDateTime();
       ZonedDateTime eventEnd = event.getEndDateTime();
       if (eventStart.isBefore(end) && eventEnd.isAfter(start)) {
-        result.add(event);
+        result.add((ReadOnlyCalendarEvent) event); // cast is safe if all events implement it
       }
     }
+
     return result;
   }
 

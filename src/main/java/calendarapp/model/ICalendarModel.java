@@ -40,7 +40,7 @@ public interface ICalendarModel {
    *
    * @return a list of all calendar events in the model
    */
-  List<ICalendarEvent> getEvents();
+  List<ReadOnlyCalendarEvent> getEvents();
 
   /**
    * Retrieves calendar events that occur on a specific date.
@@ -48,7 +48,7 @@ public interface ICalendarModel {
    * @param date the date to query for events
    * @return a list of calendar events on the specified date
    */
-  List<ICalendarEvent> getEventsOnDate(LocalDate date);
+  List<ReadOnlyCalendarEvent> getEventsOnDate(LocalDate date);
 
   /**
    * Retrieves calendar events that occur between the specified start and end date/time.
@@ -57,7 +57,7 @@ public interface ICalendarModel {
    * @param end   the end date/time of the query range
    * @return a list of calendar events that fall within the specified range
    */
-  List<ICalendarEvent> getEventsBetween(ZonedDateTime start, ZonedDateTime end);
+  List<ReadOnlyCalendarEvent> getEventsBetween(ZonedDateTime start, ZonedDateTime end);
 
   /**
    * Checks if the calendar is busy at the specified date and time.

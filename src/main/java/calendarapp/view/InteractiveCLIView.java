@@ -1,7 +1,7 @@
 package calendarapp.view;
 
 import calendarapp.controller.ICalendarController;
-import calendarapp.model.event.ICalendarEvent;
+import calendarapp.model.event.ReadOnlyCalendarEvent;
 
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -18,7 +18,6 @@ public class InteractiveCLIView implements ICalendarView, Runnable {
   public InteractiveCLIView(ICalendarController controller) {
     this.controller = controller;
   }
-
 
   /**
    * Runs the interactive command input loop.
@@ -49,15 +48,20 @@ public class InteractiveCLIView implements ICalendarView, Runnable {
   }
 
   @Override
-  public void displayEvents(List<ICalendarEvent> events) {
-    for (ICalendarEvent event : events) {
+  public void displayEvents(List<ReadOnlyCalendarEvent> events) {
+    if (events.isEmpty()) {
+      System.out.println("No events found.");
+      return;
+    }
+
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm z");
+
+    for (ReadOnlyCalendarEvent event : events) {
       ZonedDateTime start = event.getStartDateTime();
       ZonedDateTime end = event.getEndDateTime();
 
       System.out.println("- " + event.getSubject() + ": " +
-              start.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm z")) +
-              " to " +
-              end.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm z")));
+              start.format(formatter) + " to " + end.format(formatter));
 
       if (event.getDescription() != null && !event.getDescription().isEmpty()) {
         System.out.println("  Description: " + event.getDescription());
@@ -72,6 +76,5 @@ public class InteractiveCLIView implements ICalendarView, Runnable {
         System.out.println("  All Day Event");
       }
     }
-
   }
 }
