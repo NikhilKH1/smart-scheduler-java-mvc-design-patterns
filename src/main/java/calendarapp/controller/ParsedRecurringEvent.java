@@ -22,8 +22,8 @@ public class ParsedRecurringEvent {
    */
   public ParsedRecurringEvent() {
     this.isRecurring = false;
-    this.weekdays = "";
-    this.repeatCount = 0;
+    this.weekdays = null;
+    this.repeatCount = -1;
     this.repeatUntil = null;
     this.index = -1;
   }

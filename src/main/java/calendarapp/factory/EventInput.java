@@ -8,13 +8,15 @@ public class EventInput {
   private String subject;
   private ZonedDateTime start;
   private ZonedDateTime end;
-  private Set<DayOfWeek> repeatingDays;
+  private String repeatingDays;
   private Integer repeatTimes;
   private ZonedDateTime repeatUntil;
   private String description;
   private String location;
+  private boolean recurring;
 
   public EventInput() {
+    this.recurring = false;
   }
 
   public void setSubject(String subject) {
@@ -29,8 +31,8 @@ public class EventInput {
     this.end = end;
   }
 
-  public void setRepeatingDays(Set<DayOfWeek> repeatingDays) {
-    this.repeatingDays = repeatingDays;
+  public void setRepeatingDays(String daysString) {
+    this.repeatingDays = daysString;
   }
 
   public void setRepeatTimes(Integer repeatTimes) {
@@ -49,6 +51,10 @@ public class EventInput {
     this.location = location;
   }
 
+  public void setRecurring(boolean recurring) {
+    this.recurring = recurring;
+  }
+
   // ✅ Getters (used by CommandFactory)
   public String getSubject() {
     return subject;
@@ -62,7 +68,7 @@ public class EventInput {
     return end;
   }
 
-  public Set<DayOfWeek> getRepeatingDays() {
+  public String getRepeatingDays() {
     return repeatingDays;
   }
 
@@ -80,5 +86,9 @@ public class EventInput {
 
   public String getLocation() {
     return location;
+  }
+
+  public boolean isRecurring() {
+    return recurring;
   }
 }

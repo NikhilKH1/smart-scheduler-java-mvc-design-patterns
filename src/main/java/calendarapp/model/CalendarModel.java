@@ -347,15 +347,29 @@ public class CalendarModel implements ICalendarModel {
     List<ReadOnlyCalendarEvent> result = new ArrayList<>();
 
     for (ICalendarEvent event : events) {
-      ZonedDateTime eventStart = event.getStartDateTime();
-      ZonedDateTime eventEnd = event.getEndDateTime();
-      if (eventStart.isBefore(end) && eventEnd.isAfter(start)) {
-        result.add((ReadOnlyCalendarEvent) event); // cast is safe if all events implement it
+      if (event instanceof RecurringEvent) {
+        RecurringEvent recurring = (RecurringEvent) event;
+        List<SingleEvent> occurrences = recurring.generateOccurrences(null);
+
+        for (SingleEvent occurrence : occurrences) {
+          ZonedDateTime occurrenceStart = occurrence.getStartDateTime();
+          ZonedDateTime occurrenceEnd = occurrence.getEndDateTime();
+          if (occurrenceStart.isBefore(end) && occurrenceEnd.isAfter(start)) {
+            result.add(occurrence);
+          }
+        }
+      } else {
+        ZonedDateTime eventStart = event.getStartDateTime();
+        ZonedDateTime eventEnd = event.getEndDateTime();
+        if (eventStart.isBefore(end) && eventEnd.isAfter(start)) {
+          result.add((ReadOnlyCalendarEvent) event); // safe cast
+        }
       }
     }
 
     return result;
   }
+
 
 
   /**

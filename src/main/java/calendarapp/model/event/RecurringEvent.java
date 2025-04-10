@@ -5,6 +5,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Represents a recurring calendar event with specific recurring rules.
@@ -73,7 +74,7 @@ public class RecurringEvent extends AbstractCalendarEvent {
 
   @Override
   public boolean isRecurring() {
-    return false;
+    return true; // This is a RecurringEvent, so it's always recurring
   }
 
   public ZonedDateTime RepeatUntil() {
@@ -83,40 +84,34 @@ public class RecurringEvent extends AbstractCalendarEvent {
   public List<SingleEvent> generateOccurrences(String seriesId) {
     List<SingleEvent> occurrences = new ArrayList<>();
 
-    if (weekdays == null || weekdays.isEmpty()) {
-      return occurrences;
-    }
+    if (weekdays == null) return occurrences;
+    if (repeatCount <= 0 && repeatUntil == null) return occurrences;
 
-    if (repeatCount <= 0 && repeatUntil == null) {
-      return occurrences;
+    if (seriesId == null || seriesId.isEmpty()) {
+      seriesId = UUID.randomUUID().toString(); // 🎯 Generate if missing
     }
 
     ZonedDateTime currentStart = this.startDateTime;
     ZonedDateTime currentEnd = this.endDateTime;
-
     int created = 0;
 
     while (true) {
-      if (weekdays.indexOf(getDayChar(currentStart.getDayOfWeek())) >= 0) {
+      if (weekdays.isEmpty() || weekdays.indexOf(getDayChar(currentStart.getDayOfWeek())) >= 0) {
         occurrences.add(new SingleEvent(subject, currentStart, currentEnd, description,
                 location, isPublic, isAllDay, seriesId));
         created++;
-
-        if (repeatCount > 0 && created >= repeatCount) {
-          break;
-        }
       }
+
+      if (repeatCount > 0 && created >= repeatCount) break;
+      if (repeatUntil != null && currentStart.isAfter(repeatUntil)) break;
 
       currentStart = currentStart.plusDays(1);
       currentEnd = currentEnd.plusDays(1);
-
-      if (repeatUntil != null && currentStart.isAfter(repeatUntil)) {
-        break;
-      }
     }
 
     return occurrences;
   }
+
 
   private char getDayChar(DayOfWeek dayOfWeek) {
     switch (dayOfWeek) {

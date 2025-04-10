@@ -602,7 +602,13 @@ public class CommandParser {
       if (index >= tokens.size()) {
         throw new IllegalArgumentException("Missing weekdays after 'repeats'");
       }
-      result.weekdays = tokens.get(index++).toUpperCase();
+      String weekdaysStr = stripQuotes(tokens.get(index++)).toUpperCase();
+
+      if (weekdaysStr.isEmpty()) {
+        result.weekdays = "MTWRFSU"; // If no weekdays specified, assume every day
+      } else {
+        result.weekdays = weekdaysStr;
+      }
 
       if (index < tokens.size() && "for".equalsIgnoreCase(tokens.get(index))) {
         index++;
@@ -621,6 +627,9 @@ public class CommandParser {
       }
     }
 
+    System.out.println("DEBUG: ParsedRecurringEvent.weekdays = " + result.weekdays);
+    System.out.println("DEBUG: ParsedRecurringEvent.repeatCount = " + result.repeatCount);
+    System.out.println("DEBUG: ParsedRecurringEvent.repeatUntil = " + result.repeatUntil);
     result.index = index;
     return result;
   }

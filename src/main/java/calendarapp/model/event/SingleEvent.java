@@ -48,7 +48,7 @@ public class SingleEvent extends AbstractCalendarEvent {
 
   @Override
   public boolean isRecurring() {
-    return false;
+    return this.seriesId != null;
   }
 
   @Override

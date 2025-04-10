@@ -15,7 +15,7 @@ public interface ICommandFactory {
                                  LocalTime start,
                                  LocalTime end,
                                  boolean isRecurring,
-                                 Set<DayOfWeek> repeatingDays,
+                                 String repeatingDays,
                                  Integer repeatCount,
                                  LocalDate repeatUntil,
                                  String description,

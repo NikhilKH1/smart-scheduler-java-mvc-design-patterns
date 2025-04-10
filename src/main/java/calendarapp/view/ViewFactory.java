@@ -15,7 +15,6 @@ public class ViewFactory {
           throws Exception {
 
     if (args.length == 0) {
-      // GUI mode
       CalendarGUIView guiView = new CalendarGUIView(manager, controller);
       guiView.setCommandFactory(new DefaultCommandFactory());
       guiView.setController(controller);

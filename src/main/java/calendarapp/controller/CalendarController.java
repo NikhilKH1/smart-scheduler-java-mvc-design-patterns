@@ -128,20 +128,13 @@ public class CalendarController implements ICalendarController {
         view.displayMessage("Running in Headless mode with script: " + args[2]);
         ((HeadlessView) view).run();
 
-      } else if (args.length == 0) {
-        // 1. Create GUI View
-        CalendarGUIView guiView = new CalendarGUIView(calendarManager, this);
-
-        // 2. Set command factory before anything else to avoid NullPointerException
-        guiView.setCommandFactory(new DefaultCommandFactory());
-
-        // 3. Store the view reference for this controller
-        this.view = guiView;
-
-        // 4. Trigger safe post-initialization from controller
-        guiView.initialize();
-
-      } else {
+      }  else if (args.length == 0) {
+      CalendarGUIView guiView = new CalendarGUIView(calendarManager, this);
+      this.view = guiView;
+      guiView.setCommandFactory(new DefaultCommandFactory());
+      guiView.initialize();
+    }
+    else {
         System.err.println("Invalid arguments. Use:");
         System.err.println("--mode interactive");
         System.err.println("--mode headless <script-file>");
