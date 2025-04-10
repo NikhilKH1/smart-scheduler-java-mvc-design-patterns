@@ -37,6 +37,7 @@ public class CalendarGUIView implements ICalendarView {
   private String selectedCalendar;
   private JLabel calendarNameLabel;
   private JButton importButton;
+  private boolean suppressCreationMessages = false;
   private List<ReadOnlyCalendarEvent> events;
   private List<ReadOnlyCalendarEvent> lastRenderedEvents = new ArrayList<>();
 
@@ -219,7 +220,6 @@ public class CalendarGUIView implements ICalendarView {
     ZonedDateTime startZDT = currentMonth.atDay(1).atStartOfDay(zone);
     ZonedDateTime endZDT = currentMonth.atEndOfMonth().atTime(23, 59).atZone(zone);
 
-    System.out.println("DEBUG: Requesting events from " + startZDT + " to " + endZDT);
     String command = commandFactory.printEventsBetweenCommand(startZDT, endZDT);
     controller.processCommand(command);
 
@@ -238,7 +238,6 @@ public class CalendarGUIView implements ICalendarView {
   // We'll capture those and render them in that method now.
   @Override
   public void displayEvents(List<ReadOnlyCalendarEvent> events) {
-    System.out.println("DEBUG: displayEvents called with " + events.size() + " events");
     this.lastRenderedEvents = events;
 
     Map<LocalDate, List<ReadOnlyCalendarEvent>> dayEventMap = new HashMap<>();
@@ -246,11 +245,6 @@ public class CalendarGUIView implements ICalendarView {
 
     // 🔁 Expand recurring events into single events
     for (ReadOnlyCalendarEvent e : events) {
-      System.out.println("\nDEBUG: ========= Processing event: " + e.getSubject() + " =========");
-      System.out.println("DEBUG: Raw event data:");
-      System.out.println("DEBUG: Start: " + e.getStartDateTime());
-      System.out.println("DEBUG: End: " + e.getEndDateTime());
-      System.out.println("DEBUG: Is recurring: " + e.isRecurring());
 
       if (e.isRecurring() && e instanceof RecurringEvent) {
         List<SingleEvent> occurrences = ((RecurringEvent) e).generateOccurrences(null);
@@ -264,12 +258,10 @@ public class CalendarGUIView implements ICalendarView {
     for (ReadOnlyCalendarEvent event : flattenedEvents) {
       LocalDate date = event.getStartDateTime().toLocalDate();
       if (date.getMonth() == currentMonth.getMonth() && date.getYear() == currentMonth.getYear()) {
-        System.out.println("DEBUG: Adding event on: " + date);
         dayEventMap.computeIfAbsent(date, k -> new ArrayList<>()).add(event);
       }
     }
 
-    System.out.println("DEBUG: Final dayEventMap size: " + dayEventMap.size());
 
     // 🖼️ Update buttons with events
     Component[] components = calendarPanel.getComponents();
@@ -560,17 +552,14 @@ public class CalendarGUIView implements ICalendarView {
           input.setLocation(loc);
 
           if (recurringButton.isSelected()) {
-            System.out.println("DEBUG: Creating recurring event...");
             Set<DayOfWeek> repeatingDaysSet = new HashSet<>();
             for (JCheckBox box : dayChecks) {
               if (box.isSelected()) {
                 repeatingDaysSet.add(DayOfWeek.valueOf(box.getText().toUpperCase()));
-                System.out.println("DEBUG: Selected day: " + box.getText());
               }
             }
 
             if (repeatingDaysSet.isEmpty()) {
-              System.out.println("DEBUG: No weekdays selected!");
               JOptionPane.showMessageDialog(addDialog,
                       "Please select at least one day of the week for the recurring event.",
                       "Missing Information",
@@ -580,7 +569,6 @@ public class CalendarGUIView implements ICalendarView {
 
             // Convert the Set to a string (e.g., "MWF")
             String repeatingDaysString = daysToString(repeatingDaysSet);
-            System.out.println("DEBUG: Weekdays string: " + repeatingDaysString);
 
             // Now store the string in the EventInput
             input.setRepeatingDays(repeatingDaysString);
@@ -588,44 +576,33 @@ public class CalendarGUIView implements ICalendarView {
 
             boolean hasRepeatUntil = !repeatUntilField.getText().trim().isEmpty();
             boolean hasRepeatCount = !repeatCountField.getText().trim().isEmpty();
-            System.out.println("DEBUG: Has repeat until: " + hasRepeatUntil);
-            System.out.println("DEBUG: Has repeat count: " + hasRepeatCount);
 
             if (!hasRepeatUntil && !hasRepeatCount) {
-              // If neither is specified, default to repeating 4 times
-              System.out.println("DEBUG: Setting default repeat count to 4");
               input.setRepeatTimes(4);
             } else {
               if (hasRepeatUntil) {
                 ZonedDateTime repeatUntil = LocalDate.parse(repeatUntilField.getText().trim()).atStartOfDay(zone);
-                System.out.println("DEBUG: Setting repeat until: " + repeatUntil);
                 input.setRepeatUntil(repeatUntil);
               }
               if (hasRepeatCount) {
                 int repeatCount = Integer.parseInt(repeatCountField.getText().trim());
-                System.out.println("DEBUG: Setting repeat count: " + repeatCount);
                 input.setRepeatTimes(repeatCount);
               }
             }
           }
 
           String cmd = commandFactory.createEventCommand(input);
-          System.out.println("DEBUG: Generated command: " + cmd);
 
           if (controller.processCommand(cmd)) {
-            System.out.println("DEBUG: Command processed successfully");
             addDialog.dispose();
-            // Force a refresh of the calendar view
             ZoneId zoneMain = ZoneId.of(calendarTimezones.getOrDefault(selectedCalendar, ZoneId.systemDefault().toString()));
             ZonedDateTime startZDTMain = currentMonth.atDay(1).atStartOfDay(zoneMain);
             ZonedDateTime endZDTMain = currentMonth.atEndOfMonth().atTime(23, 59).atZone(zoneMain);
             String refreshCmd = commandFactory.printEventsBetweenCommand(startZDTMain, endZDTMain);
-            System.out.println("DEBUG: Refresh command: " + refreshCmd);
             controller.processCommand(refreshCmd);
             updateCalendarView();
             refreshDayEvents.run();
           } else {
-            System.out.println("DEBUG: Command processing failed!");
             JOptionPane.showMessageDialog(addDialog, "Failed to create event", "Error", JOptionPane.ERROR_MESSAGE);
           }
 
@@ -769,96 +746,134 @@ public class CalendarGUIView implements ICalendarView {
       }
 
       ReadOnlyCalendarEvent selectedEvent = dayEvents.get(selectedIndex);
-      JPanel inputPanel = new JPanel(new GridLayout(0, 2));
+      ZonedDateTime fromStart = selectedEvent.getStartDateTime();
+      ZonedDateTime fromEnd = selectedEvent.getEndDateTime();
 
-      JTextField nameField = new JTextField(selectedEvent.getSubject());
-      JTextField startField = new JTextField(selectedEvent.getStartDateTime().toLocalTime().toString());
-      JTextField endField = new JTextField(selectedEvent.getEndDateTime().toLocalTime().toString());
-      JTextField descField = new JTextField(selectedEvent.getDescription());
-      JTextField locField = new JTextField(selectedEvent.getLocation());
+      JPanel editPanel = new JPanel(new BorderLayout());
 
-      inputPanel.add(new JLabel("New Title:"));
-      inputPanel.add(nameField);
-      inputPanel.add(new JLabel("New Start Time (HH:mm):"));
-      inputPanel.add(startField);
-      inputPanel.add(new JLabel("New End Time (HH:mm):"));
-      inputPanel.add(endField);
-      inputPanel.add(new JLabel("New Description:"));
-      inputPanel.add(descField);
-      inputPanel.add(new JLabel("New Location:"));
-      inputPanel.add(locField);
+      String[] recurringProps = {"Title", "Start Time", "End Time", "Description", "Location", "Repeat Until", "Repeat Times", "Weekdays"};
+      JComboBox<String> propertyDropdown = new JComboBox<>(recurringProps);
 
-      int result = JOptionPane.showConfirmDialog(dialog, inputPanel, "Edit All Recurring Events", JOptionPane.OK_CANCEL_OPTION);
+      JPanel inputPanel = new JPanel(new GridLayout(0, 1));
+      JLabel inputLabel = new JLabel("New Value:");
+      JTextField inputField = new JTextField();
+
+      inputPanel.add(inputLabel);
+      inputPanel.add(inputField);
+
+      editPanel.add(new JLabel("Select property to edit:"), BorderLayout.NORTH);
+      editPanel.add(propertyDropdown, BorderLayout.CENTER);
+      editPanel.add(inputPanel, BorderLayout.SOUTH);
+
+      // Autofill value logic
+      Runnable updateInputField = () -> {
+        String selected = (String) propertyDropdown.getSelectedItem();
+        switch (selected) {
+          case "Title":
+            inputLabel.setText("New Title:");
+            inputField.setText(selectedEvent.getSubject());
+            break;
+          case "Start Time":
+            inputLabel.setText("New Start Time (HH:mm):");
+            inputField.setText(fromStart.toLocalTime().toString());
+            break;
+          case "End Time":
+            inputLabel.setText("New End Time (HH:mm):");
+            inputField.setText(fromEnd.toLocalTime().toString());
+            break;
+          case "Description":
+            inputLabel.setText("New Description:");
+            inputField.setText(selectedEvent.getDescription());
+            break;
+          case "Location":
+            inputLabel.setText("New Location:");
+            inputField.setText(selectedEvent.getLocation());
+            break;
+          case "Repeat Until":
+            inputLabel.setText("New Repeat Until (YYYY-MM-DD):");
+            inputField.setText(""); // No current value shown
+            break;
+          case "Repeat Times":
+            inputLabel.setText("New Repeat Times (integer):");
+            inputField.setText("");
+            break;
+          case "Weekdays":
+            inputLabel.setText("New Weekdays (e.g. MO,TU):");
+            inputField.setText("");
+            break;
+        }
+      };
+      updateInputField.run();
+      propertyDropdown.addActionListener(ev -> updateInputField.run());
+
+      int result = JOptionPane.showConfirmDialog(dialog, editPanel, "Edit Recurring Property",
+              JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
 
       if (result == JOptionPane.OK_OPTION) {
+        String newValue = inputField.getText().trim();
+        String selectedProp = (String) propertyDropdown.getSelectedItem();
+
+        if (newValue.isEmpty()) {
+          JOptionPane.showMessageDialog(dialog, "New value cannot be empty.", "Error", JOptionPane.ERROR_MESSAGE);
+          return;
+        }
+
+        String property = null;
+        String finalValue = newValue;
+
         try {
-          String newName = nameField.getText().trim();
-          LocalTime newStartTime = LocalTime.parse(startField.getText().trim());
-          LocalTime newEndTime = LocalTime.parse(endField.getText().trim());
-          String newDesc = descField.getText().trim();
-          String newLoc = locField.getText().trim();
-
-          ZonedDateTime oldStart = selectedEvent.getStartDateTime();
-          ZonedDateTime oldEnd = selectedEvent.getEndDateTime();
-
-          // Prepare EditInput
-          EditInput input = new EditInput();
-          input.setRecurring(true);
-          input.setEventName(selectedEvent.getSubject());
-          input.setFromStart(oldStart);
-          input.setFromEnd(oldEnd);
-
-          boolean anyChanged = false;
-
-          // Generate and execute individual property change commands
-          if (!newName.equals(selectedEvent.getSubject())) {
-            input.setProperty("name");
-            input.setNewValue(newName);
-            controller.processCommand(commandFactory.createEditRecurringEventCommand(input));
-            anyChanged = true;
+          switch (selectedProp) {
+            case "Title":
+              property = "name";
+              break;
+            case "Start Time":
+              LocalTime newStart = LocalTime.parse(newValue);
+              property = "startdatetime";
+              finalValue = fromStart.toLocalDate().atTime(newStart).toString();
+              break;
+            case "End Time":
+              LocalTime newEnd = LocalTime.parse(newValue);
+              property = "enddatetime";
+              finalValue = fromEnd.toLocalDate().atTime(newEnd).toString();
+              break;
+            case "Description":
+              property = "description";
+              break;
+            case "Location":
+              property = "location";
+              break;
+            case "Repeat Until":
+              LocalDate repeatUntil = LocalDate.parse(newValue);
+              property = "repeatuntil";
+              finalValue = repeatUntil.toString();
+              break;
+            case "Repeat Times":
+              Integer.parseInt(newValue); // Validate it's numeric
+              property = "repeattimes";
+              break;
+            case "Weekdays":
+              property = "repeatingdays";
+              break;
           }
 
-          if (!newStartTime.equals(oldStart.toLocalTime())) {
-            input.setProperty("startdatetime");
-            input.setNewValue(oldStart.toLocalDate().atTime(newStartTime).toString());
-            controller.processCommand(commandFactory.createEditRecurringEventCommand(input));
-            anyChanged = true;
-          }
-
-          if (!newEndTime.equals(oldEnd.toLocalTime())) {
-            input.setProperty("enddatetime");
-            input.setNewValue(oldEnd.toLocalDate().atTime(newEndTime).toString());
-            controller.processCommand(commandFactory.createEditRecurringEventCommand(input));
-            anyChanged = true;
-          }
-
-          if (!newDesc.equals(selectedEvent.getDescription())) {
-            input.setProperty("description");
-            input.setNewValue(newDesc);
-            controller.processCommand(commandFactory.createEditRecurringEventCommand(input));
-            anyChanged = true;
-          }
-
-          if (!newLoc.equals(selectedEvent.getLocation())) {
-            input.setProperty("location");
-            input.setNewValue(newLoc);
-            controller.processCommand(commandFactory.createEditRecurringEventCommand(input));
-            anyChanged = true;
-          }
-
-          controller.processCommand("print events on " + date);
-
-          if (anyChanged) {
-            dialog.dispose();
-          } else {
-            JOptionPane.showMessageDialog(dialog, "No changes made.", "Info", JOptionPane.INFORMATION_MESSAGE);
+          if (property != null) {
+            EditInput input = new EditInput(property, selectedEvent.getSubject(), fromStart, fromEnd, finalValue, true);
+            boolean success = controller.processCommand(commandFactory.createEditRecurringEventCommand(input));
+            if (success) {
+              controller.processCommand("print events on " + date);
+              refreshDayEvents.run();// refresh
+              dialog.dispose();
+            } else {
+              JOptionPane.showMessageDialog(dialog, "Failed to edit recurring event", "Error", JOptionPane.ERROR_MESSAGE);
+            }
           }
 
         } catch (Exception ex) {
-          JOptionPane.showMessageDialog(dialog, "Invalid input format: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+          JOptionPane.showMessageDialog(dialog, "Invalid input: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
       }
     });
+
 
 
     dialog.getContentPane().add(panel);
@@ -923,7 +938,7 @@ public class CalendarGUIView implements ICalendarView {
       sb.append("<p><b>Repeats on:</b> ").append(event.getWeekdays() == null ? "N/A" : event.getWeekdays()).append("</p>");
       if (event.RepeatUntil() != null) {
         sb.append("<p><b>Repeat Until:</b> ").append(event.RepeatUntil()).append("</p>");
-      } else if (event.getRepeatCount() != null) {
+      } else if (event.getRepeatCount() != null && event.getRepeatCount() > 0) {
         sb.append("<p><b>Repeat Count:</b> ").append(event.getRepeatCount()).append("</p>");
       }
     } else {
@@ -1001,6 +1016,7 @@ public class CalendarGUIView implements ICalendarView {
     DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
     DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
 
+    suppressCreationMessages = true;
     try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
       String header = reader.readLine();
       int addedCount = 0;
@@ -1066,6 +1082,9 @@ public class CalendarGUIView implements ICalendarView {
         } catch (Exception perLineError) {
           System.err.println("Skipping line " + lineNumber + ": " + perLineError.getMessage());
         }
+        finally {
+          suppressCreationMessages = false;
+        }
       }
 
       controller.processCommand("print events from " + currentMonth.atDay(1) + " to " + currentMonth.atEndOfMonth());
@@ -1098,11 +1117,21 @@ public class CalendarGUIView implements ICalendarView {
   @Override
   public void displayMessage(String message) {
 
-    if (message.contains("Calendar created: \"Default\"") ||
-            message.contains("Using calendar: \"Default\"") ||
-            message.contains("No events found in calendar \"Default\"")) {
+    if (message.startsWith("Events on") && message.endsWith(":")) {
       return;
     }
+    if (message.startsWith("Calendar created:") ||
+            message.startsWith("Using calendar:") ||
+            message.startsWith("No events found in calendar")||
+            message.startsWith("Calendar exported successfully to:")) {
+      return;
+    }
+
+
+    if (suppressCreationMessages && message.equals("Event created successfully")) {
+      return;
+    }
+
     JOptionPane.showMessageDialog(frame, message);
   }
 

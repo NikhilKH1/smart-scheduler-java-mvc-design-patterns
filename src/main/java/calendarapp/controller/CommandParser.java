@@ -626,10 +626,6 @@ public class CommandParser {
         throw new IllegalArgumentException("Expected 'for' or 'until' after weekdays");
       }
     }
-
-    System.out.println("DEBUG: ParsedRecurringEvent.weekdays = " + result.weekdays);
-    System.out.println("DEBUG: ParsedRecurringEvent.repeatCount = " + result.repeatCount);
-    System.out.println("DEBUG: ParsedRecurringEvent.repeatUntil = " + result.repeatUntil);
     result.index = index;
     return result;
   }
