@@ -49,12 +49,12 @@ public class QueryRangeDateTimeCommandTest {
 
     @Override
     public List<ICalendarEvent> getEventsOnDate(LocalDate date) {
-      return new ArrayList<>(); // Changed to return an empty list
+      return new ArrayList<>();
     }
 
     @Override
     public List<ICalendarEvent> getEventsBetween(ZonedDateTime start, ZonedDateTime end) {
-      return new ArrayList<>(); // Changed to return an empty list
+      return events;
     }
 
     @Override

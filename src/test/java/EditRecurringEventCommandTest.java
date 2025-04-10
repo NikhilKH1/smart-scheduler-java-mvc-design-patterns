@@ -181,7 +181,6 @@ public class EditRecurringEventCommandTest {
     assertTrue(output.contains("Recurring event modified successfully."));
   }
 
-
   @Test
   public void testEditRecurringEventCommandWithError() {
     ICalendarModel model = new TestCalendarModel() {

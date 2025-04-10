@@ -48,12 +48,20 @@ public class QueryByDateCommandTest {
 
     @Override
     public List<ICalendarEvent> getEventsOnDate(LocalDate date) {
-      return null;
+      List<ICalendarEvent> eventsOnDate = new ArrayList<>();
+      for (ICalendarEvent event : events) {
+        ZonedDateTime start = event.getStartDateTime();
+        if (start != null && start.toLocalDate().equals(date)) {
+          eventsOnDate.add(event);
+        }
+      }
+      return eventsOnDate;
     }
+
 
     @Override
     public List<ICalendarEvent> getEventsBetween(ZonedDateTime start, ZonedDateTime end) {
-      return null;
+      return events;
     }
     @Override
     public boolean isBusyAt(ZonedDateTime dateTime) {
@@ -154,9 +162,11 @@ public class QueryByDateCommandTest {
 
   private class DummyCalendarEvent implements ICalendarEvent {
     private String subject;
+    private ZonedDateTime startDateTime;
 
-    public DummyCalendarEvent(String subject) {
+    public DummyCalendarEvent(String subject, ZonedDateTime startDateTime) {
       this.subject = subject;
+      this.startDateTime = startDateTime;
     }
 
     @Override
@@ -166,7 +176,7 @@ public class QueryByDateCommandTest {
 
     @Override
     public ZonedDateTime getStartDateTime() {
-      return null;
+      return startDateTime;
     }
 
     @Override
@@ -216,9 +226,10 @@ public class QueryByDateCommandTest {
   @Test
   public void testQueryByDateWithEvents() {
     LocalDate date = LocalDate.of(2025, 6, 1);
+    ZonedDateTime eventStart = date.atStartOfDay(ZoneId.systemDefault());
     QueryByDateCommand cmd = new QueryByDateCommand(date);
     List<ICalendarEvent> events = new ArrayList<>();
-    DummyCalendarEvent event = new DummyCalendarEvent("Meeting");
+    DummyCalendarEvent event = new DummyCalendarEvent("Meeting", eventStart);
     events.add(event);
     TestCalendarModel model = new TestCalendarModel(events);
     TestCalendarView view = new TestCalendarView();

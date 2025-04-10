@@ -22,7 +22,7 @@ public class ExporterFactoryTest {
 
   @After
   public void tearDown() {
-    ExporterFactory.clearCustomExporterSupplier(); // Reset state after each test
+    ExporterFactory.clearCustomExporterSupplier();
   }
 
   @Test

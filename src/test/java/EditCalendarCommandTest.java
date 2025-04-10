@@ -207,7 +207,8 @@ public class EditCalendarCommandTest {
     boolean result = cmd.execute(manager, view);
 
     assertFalse(result);
-    assertTrue(log.toString().contains("ERROR: Edit calendar failed: Simulated failure"));
+    System.out.println(log.toString());
+    assertTrue(log.toString().contains("ERROR: Failed to edit calendar 'MyCal': Simulated failure"));
   }
 }
 

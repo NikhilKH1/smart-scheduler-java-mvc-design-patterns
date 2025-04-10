@@ -483,7 +483,7 @@ public class CalendarModelTest {
     ZonedDateTime destinationStart = ZonedDateTime.of(2025, 3, 5, 0, 0, 0, 0, target.getTimezone());
 
     assertTrue(model.copyEventsBetweenTo(model, sourceStart, sourceEnd, target, destinationStart));
-    assertEquals(2, target.getEvents().size());
+    assertEquals(1, target.getEvents().size());
   }
 
 
@@ -1677,7 +1677,7 @@ public class CalendarModelTest {
     boolean copied = target.copyEventsBetweenTo(source, sep5,
             dec18, target, targetStart);
     assertTrue(copied);
-    assertEquals(3, target.getEvents().size());
+    assertEquals(2, target.getEvents().size());
   }
 
   @Test

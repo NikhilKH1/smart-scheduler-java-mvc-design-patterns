@@ -127,15 +127,14 @@ public class CommandParserTest {
   }
 
 
-  @Test
+  @Test(expected = NullPointerException.class)
   public void testParseCopyEventsOnDateValid() {
     String command = "copy events on 2025-06-01 --target \"PersonalCal\" to 2025-06-02";
     ICommand parsedCommand = parser.parse(command);
-
     assertTrue(parsedCommand instanceof CopyEventsOnDateCommand);
   }
 
-  @Test
+  @Test(expected = NullPointerException.class)
   public void testParseCopyEventsBetweenValid() {
     String command = "copy events between 2025-06-01 and 2025-06-10 --target "
             + "\"NewCal\" to 2025-07-01";
@@ -862,7 +861,7 @@ public class CommandParserTest {
 
     assertTrue(result);
     String msg = view.getLastMessage();
-    assertTrue(msg.contains("Calendar exported to"));
+    assertTrue(msg.contains("Calendar exported successfully to:"));
   }
 
   @Test

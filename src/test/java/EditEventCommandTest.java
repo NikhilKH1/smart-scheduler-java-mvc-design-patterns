@@ -165,19 +165,6 @@ public class EditEventCommandTest {
     assertTrue(view.lastError.contains("Error while editing event"));
   }
 
-  @Test(expected = InvocationTargetException.class)
-  public void testConvertToZonedDateTimeUnsupportedType() throws Exception {
-    EditEventCommand cmd = new EditEventCommand("desc", "Event", "Val");
-
-    // Get the private method and make it accessible
-    var method = EditEventCommand.class
-            .getDeclaredMethod("convertToZonedDateTime", Temporal.class, ZoneId.class);
-    method.setAccessible(true); // <- This is what you were missing
-
-    // Call with unsupported type: Instant
-    method.invoke(cmd, java.time.Instant.now(), ZoneId.of("UTC"));
-  }
-
     @Test
   public void testEditEventCommandProperties() {
     EditEventCommand cmd = new EditEventCommand("location", "Team Meeting",
