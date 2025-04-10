@@ -1,6 +1,7 @@
 import calendarapp.controller.commands.EditEventCommand;
 import calendarapp.model.ICalendarModel;
 import calendarapp.model.event.ICalendarEvent;
+import calendarapp.model.event.ReadOnlyCalendarEvent;
 import calendarapp.model.event.RecurringEvent;
 import calendarapp.view.ICalendarView;
 
@@ -31,17 +32,17 @@ public class EditEventCommandTest {
     }
 
     @Override
-    public List<ICalendarEvent> getEvents() {
+    public List<ReadOnlyCalendarEvent> getEvents() {
       return List.of();
     }
 
     @Override
-    public List<ICalendarEvent> getEventsOnDate(LocalDate date)  {
+    public List<ReadOnlyCalendarEvent> getEventsOnDate(LocalDate date)  {
       return List.of();
     }
 
     @Override
-    public List<ICalendarEvent> getEventsBetween(ZonedDateTime start, ZonedDateTime end) {
+    public List<ReadOnlyCalendarEvent> getEventsBetween(ZonedDateTime start, ZonedDateTime end) {
       return List.of();
     }
 
@@ -110,14 +111,24 @@ public class EditEventCommandTest {
       return false;
     }
 
+    @Override
+    public List<ReadOnlyCalendarEvent> getReadOnlyEventsOnDate(LocalDate date) {
+      return List.of();
+    }
+
+    @Override
+    public List<ReadOnlyCalendarEvent> getAllReadOnlyEvents() {
+      return List.of();
+    }
+
   }
 
   private static class DummyView implements ICalendarView {
     public String lastError = null;
 
     @Override
-    public void displayEvents(List<ICalendarEvent> events) {
-
+    public void displayEvents(List<ReadOnlyCalendarEvent> events) {
+      return;
     }
 
     @Override public void displayMessage(String msg) {}

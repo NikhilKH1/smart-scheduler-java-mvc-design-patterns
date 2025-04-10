@@ -16,6 +16,7 @@ import calendarapp.model.CalendarManager;
 import calendarapp.model.CalendarModel;
 import calendarapp.model.ICalendarManager;
 import calendarapp.model.ICalendarModel;
+import calendarapp.model.event.ReadOnlyCalendarEvent;
 import calendarapp.view.ICalendarView;
 
 import org.junit.Before;
@@ -941,6 +942,15 @@ public class CommandParserTest {
     private String lastMessage = "";
 
     @Override
+    public void displayEvents(List<ReadOnlyCalendarEvent> events) {
+      if (events == null || events.isEmpty()) {
+        this.lastMessage = "No events found";
+      } else {
+        this.lastMessage = "Displaying " + events.size() + " events";
+      }
+    }
+
+    @Override
     public void displayMessage(String message) {
       this.lastMessage = message;
     }
@@ -948,15 +958,6 @@ public class CommandParserTest {
     @Override
     public void displayError(String error) {
       this.lastMessage = error;
-    }
-
-    @Override
-    public void displayEvents(java.util.List<calendarapp.model.event.ICalendarEvent> events) {
-      if (events == null || events.isEmpty()) {
-        this.lastMessage = "No events found";
-      } else {
-        this.lastMessage = "Displaying " + events.size() + " events";
-      }
     }
 
     public String getLastMessage() {

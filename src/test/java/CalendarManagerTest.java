@@ -12,7 +12,7 @@ import java.util.List;
 import calendarapp.model.CalendarManager;
 import calendarapp.model.CalendarModel;
 import calendarapp.model.ICalendarModel;
-import calendarapp.model.event.ICalendarEvent;
+import calendarapp.model.event.ReadOnlyCalendarEvent;
 import calendarapp.model.event.RecurringEvent;
 import calendarapp.model.event.SingleEvent;
 
@@ -290,7 +290,7 @@ public class CalendarManagerTest {
     );
 
     assertTrue(copied);
-    List<ICalendarEvent> springEvents = manager.getCalendar("Spring2025").getEvents();
+    List<ReadOnlyCalendarEvent> springEvents = manager.getCalendar("Spring2025").getEvents();
     assertEquals(1, springEvents.size());
     assertEquals("Lecture", springEvents.get(0).getSubject());
   }
@@ -376,7 +376,7 @@ public class CalendarManagerTest {
 
     manager.editCalendar("TZCal", "timezone", "Europe/Paris");
 
-    List<ICalendarEvent> updatedEvents = manager.getActiveCalendar().getEvents();
+    List<ReadOnlyCalendarEvent> updatedEvents = manager.getActiveCalendar().getEvents();
     assertEquals(1, updatedEvents.size());
     assertEquals("Europe/Paris", ZonedDateTime.from(updatedEvents.get(0)
             .getStartDateTime()).getZone().getId());
@@ -402,7 +402,7 @@ public class CalendarManagerTest {
             "Target", targetStart);
     assertTrue(result);
 
-    List<ICalendarEvent> eventsInTarget = manager.getCalendar("Target").getEvents();
+    List<ReadOnlyCalendarEvent> eventsInTarget = manager.getCalendar("Target").getEvents();
     assertEquals(1, eventsInTarget.size());
     assertEquals("Call", eventsInTarget.get(0).getSubject());
     assertEquals(targetStart, eventsInTarget.get(0).getStartDateTime());
@@ -435,8 +435,8 @@ public class CalendarManagerTest {
     boolean result = manager.getActiveCalendar().editEventsFrom("description",
             "Meeting", mid, "Updated");
     assertTrue(result);
-    List<ICalendarEvent> events = manager.getActiveCalendar().getEvents();
-    for (ICalendarEvent e : events) {
+    List<ReadOnlyCalendarEvent> events = manager.getActiveCalendar().getEvents();
+    for (ReadOnlyCalendarEvent e : events) {
       if (e.getStartDateTime().equals(early)) {
         assertEquals("A", e.getDescription());
       } else {
@@ -462,7 +462,7 @@ public class CalendarManagerTest {
     boolean result = manager.getActiveCalendar().editEventsAll("description",
             "Workshop", "New Desc");
     assertTrue(result);
-    for (ICalendarEvent e : manager.getActiveCalendar().getEvents()) {
+    for (ReadOnlyCalendarEvent e : manager.getActiveCalendar().getEvents()) {
       assertEquals("New Desc", e.getDescription());
     }
   }

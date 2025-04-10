@@ -2,6 +2,7 @@ import calendarapp.controller.commands.UseCalendarCommand;
 import calendarapp.model.ICalendarManager;
 import calendarapp.model.ICalendarModel;
 import calendarapp.model.event.ICalendarEvent;
+import calendarapp.model.event.ReadOnlyCalendarEvent;
 import calendarapp.model.event.RecurringEvent;
 import calendarapp.view.ICalendarView;
 
@@ -80,7 +81,7 @@ public class UseCalendarCommandTest {
            * @return a list of calendar events on the specified date
            */
           @Override
-          public List<ICalendarEvent> getEventsOnDate(LocalDate date) {
+          public List<ReadOnlyCalendarEvent> getEventsOnDate(LocalDate date) {
             return List.of();
           }
 
@@ -92,7 +93,7 @@ public class UseCalendarCommandTest {
            * @return a list of calendar events that fall within the specified range
            */
           @Override
-          public List<ICalendarEvent> getEventsBetween(ZonedDateTime start, ZonedDateTime end) {
+          public List<ReadOnlyCalendarEvent> getEventsBetween(ZonedDateTime start, ZonedDateTime end) {
             return List.of();
           }
 
@@ -259,6 +260,16 @@ public class UseCalendarCommandTest {
                                              ZonedDateTime targetStartDate) {
             return false;
           }
+
+          @Override
+          public List<ReadOnlyCalendarEvent> getReadOnlyEventsOnDate(LocalDate date) {
+            return List.of();
+          }
+
+          @Override
+          public List<ReadOnlyCalendarEvent> getAllReadOnlyEvents() {
+            return List.of();
+          }
         };
       }
 
@@ -334,12 +345,12 @@ public class UseCalendarCommandTest {
           }
 
           @Override
-          public List<ICalendarEvent> getEventsOnDate(LocalDate date) {
+          public List<ReadOnlyCalendarEvent> getEventsOnDate(LocalDate date) {
             return null;
           }
 
           @Override
-          public List<ICalendarEvent> getEventsBetween(ZonedDateTime start, ZonedDateTime end) {
+          public List<ReadOnlyCalendarEvent> getEventsBetween(ZonedDateTime start, ZonedDateTime end) {
             return null;
           }
 
@@ -409,6 +420,16 @@ public class UseCalendarCommandTest {
                                              ZonedDateTime endDate, ICalendarModel targetCalendar,
                                              ZonedDateTime targetStartDate) {
             return false;
+          }
+
+          @Override
+          public List<ReadOnlyCalendarEvent> getReadOnlyEventsOnDate(LocalDate date) {
+            return List.of();
+          }
+
+          @Override
+          public List<ReadOnlyCalendarEvent> getAllReadOnlyEvents() {
+            return List.of();
           }
         };
       }

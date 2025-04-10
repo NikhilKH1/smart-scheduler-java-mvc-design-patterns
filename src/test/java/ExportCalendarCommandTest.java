@@ -1,7 +1,7 @@
 import calendarapp.controller.commands.ExportCalendarCommand;
 import calendarapp.model.CalendarModel;
-import calendarapp.model.ICalendarModel;
 import calendarapp.model.event.ICalendarEvent;
+import calendarapp.model.event.ReadOnlyCalendarEvent;
 import calendarapp.utils.ExporterFactory;
 import calendarapp.utils.IExporter;
 import calendarapp.view.ICalendarView;
@@ -24,7 +24,7 @@ public class ExportCalendarCommandTest {
     }
 
     @Override
-    public List<ICalendarEvent> getEvents() {
+    public List<ReadOnlyCalendarEvent> getEvents() {
       return new ArrayList<>();
     }
   }
@@ -44,7 +44,7 @@ public class ExportCalendarCommandTest {
     }
 
     @Override
-    public void displayEvents(List<ICalendarEvent> events) {
+    public void displayEvents(List<ReadOnlyCalendarEvent> events) {
       // not needed
     }
   }

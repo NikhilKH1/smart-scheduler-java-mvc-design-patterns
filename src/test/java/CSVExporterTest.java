@@ -1,3 +1,4 @@
+import calendarapp.model.event.ReadOnlyCalendarEvent;
 import calendarapp.model.event.SingleEvent;
 import calendarapp.utils.CSVExporter;
 import calendarapp.model.event.ICalendarEvent;
@@ -54,7 +55,7 @@ public class CSVExporterTest {
 
   @Test
   public void testValidExport() throws Exception {
-    List<ICalendarEvent> events = Collections.singletonList(createSampleEvent());
+    List<ReadOnlyCalendarEvent> events = Collections.singletonList(createSampleEvent());
     tempFile = File.createTempFile("calendar_", ".csv");
 
     String exportedPath = exporter.export(events, tempFile.getAbsolutePath());
@@ -192,7 +193,7 @@ public class CSVExporterTest {
               "Event", ZonedDateTime.now(), ZonedDateTime.now().plusHours(1),
               "desc", "loc", true, false, null
       );
-      List<ICalendarEvent> events = Collections.singletonList(dummyEvent);
+      List<ReadOnlyCalendarEvent> events = Collections.singletonList(dummyEvent);
       assertThrows(IOException.class, () -> exporter.export(events, filePath));
     } catch (IOException e) {
       e.printStackTrace();

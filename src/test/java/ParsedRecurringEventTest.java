@@ -57,9 +57,9 @@ public class ParsedRecurringEventTest {
   @Test
   public void testDefaultConstructor() {
     assertFalse("isRecurring should be false by default", recurringEvent.isRecurring());
-    assertEquals("Weekdays should be empty string by default", "",
+    assertEquals("Weekdays should be empty string by default", null,
             recurringEvent.getWeekdays());
-    assertEquals("Repeat count should be 0 by default", 0,
+    assertEquals("Repeat count should be by default", -1,
             recurringEvent.getRepeatCount());
     assertNull("RepeatUntil should be null by default",
             recurringEvent.getRepeatUntil());

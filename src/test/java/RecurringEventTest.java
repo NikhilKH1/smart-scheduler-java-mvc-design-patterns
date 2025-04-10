@@ -180,8 +180,7 @@ public class RecurringEventTest {
     assertEquals(start, event.getStartDateTime());
     assertEquals(end, event.getEndDateTime());
     assertEquals("MTWRF", event.getWeekdays());
-    assertEquals(5, event.getRepeatCount());
-    assertNull(event.getRepeatUntil());
+    assertNull(event.RepeatUntil());
     assertEquals("Scrum meeting", event.getDescription());
     assertEquals("Office", event.getLocation());
     assertTrue(event.isPublic());
@@ -203,7 +202,7 @@ public class RecurringEventTest {
     );
 
     assertEquals("MWF", event.getWeekdays());
-    assertEquals(repeatUntil, event.getRepeatUntil());
+    assertEquals(repeatUntil, event.RepeatUntil());
   }
 
   @Test

@@ -2,6 +2,7 @@ import calendarapp.controller.commands.CreateEventCommand;
 import calendarapp.model.CalendarModel;
 import calendarapp.model.ICalendarModel;
 import calendarapp.model.event.ICalendarEvent;
+import calendarapp.model.event.ReadOnlyCalendarEvent;
 import calendarapp.model.event.RecurringEvent;
 import calendarapp.model.event.SingleEvent;
 import calendarapp.view.ICalendarView;
@@ -160,14 +161,15 @@ public class CreateEventCommandTest {
       }
 
       @Override
-      public List<ICalendarEvent> getEventsOnDate(LocalDate date) {
+      public List<ReadOnlyCalendarEvent> getEventsOnDate(LocalDate date) {
         return List.of();
       }
 
       @Override
-      public List<ICalendarEvent> getEventsBetween(ZonedDateTime start, ZonedDateTime end) {
+      public List<ReadOnlyCalendarEvent> getEventsBetween(ZonedDateTime start, ZonedDateTime end) {
         return List.of();
       }
+
 
       @Override
       public boolean isBusyAt(ZonedDateTime dateTime) {
@@ -236,6 +238,16 @@ public class CreateEventCommandTest {
                                          ZonedDateTime targetStartDate) {
         return false;
       }
+
+      @Override
+      public List<ReadOnlyCalendarEvent> getReadOnlyEventsOnDate(LocalDate date) {
+        return List.of();
+      }
+
+      @Override
+      public List<ReadOnlyCalendarEvent> getAllReadOnlyEvents() {
+        return List.of();
+      }
     };
 
     ICalendarView view = getCapturingView(output);
@@ -293,12 +305,12 @@ public class CreateEventCommandTest {
     }
 
     @Override
-    public List<ICalendarEvent> getEventsOnDate(LocalDate date) {
+    public List<ReadOnlyCalendarEvent> getEventsOnDate(LocalDate date) {
       return List.of();
     }
 
     @Override
-    public List<ICalendarEvent> getEventsBetween(ZonedDateTime start, ZonedDateTime end) {
+    public List<ReadOnlyCalendarEvent> getEventsBetween(ZonedDateTime start, ZonedDateTime end) {
       return List.of();
     }
 
@@ -367,6 +379,16 @@ public class CreateEventCommandTest {
                                        ZonedDateTime endDate, ICalendarModel targetCalendar,
                                        ZonedDateTime targetStartDate) {
       return false;
+    }
+
+    @Override
+    public List<ReadOnlyCalendarEvent> getReadOnlyEventsOnDate(LocalDate date) {
+      return List.of();
+    }
+
+    @Override
+    public List<ReadOnlyCalendarEvent> getAllReadOnlyEvents() {
+      return List.of();
     }
   }
 }

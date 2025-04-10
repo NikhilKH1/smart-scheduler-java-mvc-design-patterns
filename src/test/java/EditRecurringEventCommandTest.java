@@ -1,23 +1,19 @@
 import calendarapp.controller.commands.EditRecurringEventCommand;
 import calendarapp.model.ICalendarModel;
 import calendarapp.model.event.ICalendarEvent;
+import calendarapp.model.event.ReadOnlyCalendarEvent;
 import calendarapp.view.ICalendarView;
 
-import java.lang.reflect.Method;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.time.temporal.Temporal;
 import java.util.List;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -66,17 +62,17 @@ public class EditRecurringEventCommandTest {
     }
 
     @Override
-    public List<ICalendarEvent> getEvents() {
+    public List<ReadOnlyCalendarEvent> getEvents() {
       return null;
     }
 
     @Override
-    public List<ICalendarEvent> getEventsOnDate(LocalDate date) {
+    public List<ReadOnlyCalendarEvent> getEventsOnDate(LocalDate date) {
       return null;
     }
 
     @Override
-    public List<ICalendarEvent> getEventsBetween(ZonedDateTime start, ZonedDateTime end) {
+    public List<ReadOnlyCalendarEvent> getEventsBetween(ZonedDateTime start, ZonedDateTime end) {
       return null;
     }
 
@@ -139,11 +135,26 @@ public class EditRecurringEventCommandTest {
                                        ZonedDateTime targetStartDate) {
       return false;
     }
+
+    @Override
+    public List<ReadOnlyCalendarEvent> getReadOnlyEventsOnDate(LocalDate date) {
+      return List.of();
+    }
+
+    @Override
+    public List<ReadOnlyCalendarEvent> getAllReadOnlyEvents() {
+      return List.of();
+    }
   }
 
   private class TestCalendarViewImpl implements ICalendarView {
     private final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
     private final PrintStream ps = new PrintStream(outputStream);
+
+    @Override
+    public void displayEvents(List<ReadOnlyCalendarEvent> events) {
+      return;
+    }
 
     @Override
     public void displayMessage(String message) {
@@ -153,11 +164,6 @@ public class EditRecurringEventCommandTest {
     @Override
     public void displayError(String errorMessage) {
       ps.println(errorMessage);
-    }
-
-    @Override
-    public void displayEvents(List<ICalendarEvent> events) {
-      // No implementation of this is required
     }
 
     public String getOutput() {

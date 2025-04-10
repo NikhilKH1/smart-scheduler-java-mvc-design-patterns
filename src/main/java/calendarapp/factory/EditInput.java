@@ -48,6 +48,7 @@ public class EditInput {
     this(property, eventName, null, null, newValue, isRecurring);
   }
 
+
   /**
    * Gets the property being edited.
    *

@@ -2,6 +2,7 @@ import calendarapp.controller.commands.QueryByDateCommand;
 import calendarapp.model.CalendarModel;
 import calendarapp.model.ICalendarModel;
 import calendarapp.model.event.ICalendarEvent;
+import calendarapp.model.event.ReadOnlyCalendarEvent;
 import calendarapp.model.event.RecurringEvent;
 import calendarapp.view.ICalendarView;
 
@@ -13,6 +14,7 @@ import java.time.ZonedDateTime;
 import java.time.temporal.Temporal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -25,9 +27,9 @@ import static org.junit.Assert.assertTrue;
 public class QueryByDateCommandTest {
 
   private class TestCalendarModel implements ICalendarModel {
-    private List<ICalendarEvent> events;
+    private List<ReadOnlyCalendarEvent> events;
 
-    public TestCalendarModel(List<ICalendarEvent> events) {
+    public TestCalendarModel(List<ReadOnlyCalendarEvent> events) {
       this.events = events;
     }
 
@@ -42,14 +44,14 @@ public class QueryByDateCommandTest {
     }
 
     @Override
-    public List<ICalendarEvent> getEvents() {
+    public List<ReadOnlyCalendarEvent> getEvents() {
       return List.of();
     }
 
     @Override
-    public List<ICalendarEvent> getEventsOnDate(LocalDate date) {
-      List<ICalendarEvent> eventsOnDate = new ArrayList<>();
-      for (ICalendarEvent event : events) {
+    public List<ReadOnlyCalendarEvent> getEventsOnDate(LocalDate date) {
+      List<ReadOnlyCalendarEvent> eventsOnDate = new ArrayList<>();
+      for (ReadOnlyCalendarEvent event : events) {
         ZonedDateTime start = event.getStartDateTime();
         if (start != null && start.toLocalDate().equals(date)) {
           eventsOnDate.add(event);
@@ -58,11 +60,12 @@ public class QueryByDateCommandTest {
       return eventsOnDate;
     }
 
-
     @Override
-    public List<ICalendarEvent> getEventsBetween(ZonedDateTime start, ZonedDateTime end) {
-      return events;
+    public List<ReadOnlyCalendarEvent> getEventsBetween(ZonedDateTime start, ZonedDateTime end) {
+      return List.of();
     }
+
+
     @Override
     public boolean isBusyAt(ZonedDateTime dateTime) {
       return false;
@@ -130,11 +133,27 @@ public class QueryByDateCommandTest {
                                        ZonedDateTime targetStartDate) {
       return false;
     }
+
+    @Override
+    public List<ReadOnlyCalendarEvent> getReadOnlyEventsOnDate(LocalDate date) {
+      return events.stream()
+              .filter(event -> event.getStartDateTime().toLocalDate().equals(date))
+              .collect(Collectors.toList());
+    }
+    @Override
+    public List<ReadOnlyCalendarEvent> getAllReadOnlyEvents() {
+      return List.of();
+    }
   }
 
   private class TestCalendarView implements ICalendarView {
     private String message;
-    private List<ICalendarEvent> displayedEvents;
+    private List<ReadOnlyCalendarEvent> displayedEvents;
+
+    @Override
+    public void displayEvents(List<ReadOnlyCalendarEvent> events) {
+      this.displayedEvents = new ArrayList<>(events); // Store the events here
+    }
 
     @Override
     public void displayMessage(String message) {
@@ -146,19 +165,15 @@ public class QueryByDateCommandTest {
       // No implementation of this is required
     }
 
-    @Override
-    public void displayEvents(List<ICalendarEvent> events) {
-      this.displayedEvents = events;
-    }
-
     public String getMessage() {
       return message;
     }
 
-    public List<ICalendarEvent> getDisplayedEvents() {
+    public List<ReadOnlyCalendarEvent> getDisplayedEvents() {
       return displayedEvents;
     }
   }
+
 
   private class DummyCalendarEvent implements ICalendarEvent {
     private String subject;
@@ -182,6 +197,26 @@ public class QueryByDateCommandTest {
     @Override
     public ZonedDateTime getEndDateTime() {
       return null;
+    }
+
+    @Override
+    public boolean isRecurring() {
+      return false;
+    }
+
+    @Override
+    public String getWeekdays() {
+      return "";
+    }
+
+    @Override
+    public ZonedDateTime RepeatUntil() {
+      return null;
+    }
+
+    @Override
+    public Integer getRepeatCount() {
+      return 0;
     }
 
     @Override
@@ -214,7 +249,7 @@ public class QueryByDateCommandTest {
   public void testQueryByDateNoEvents() {
     LocalDate date = LocalDate.of(2025, 6, 1);
     QueryByDateCommand cmd = new QueryByDateCommand(date);
-    List<ICalendarEvent> emptyEvents = new ArrayList<>();
+    List<ReadOnlyCalendarEvent> emptyEvents = new ArrayList<>();
     TestCalendarModel model = new TestCalendarModel(emptyEvents);
     TestCalendarView view = new TestCalendarView();
     boolean result = cmd.execute(model, view);
@@ -228,7 +263,7 @@ public class QueryByDateCommandTest {
     LocalDate date = LocalDate.of(2025, 6, 1);
     ZonedDateTime eventStart = date.atStartOfDay(ZoneId.systemDefault());
     QueryByDateCommand cmd = new QueryByDateCommand(date);
-    List<ICalendarEvent> events = new ArrayList<>();
+    List<ReadOnlyCalendarEvent> events = new ArrayList<>();
     DummyCalendarEvent event = new DummyCalendarEvent("Meeting", eventStart);
     events.add(event);
     TestCalendarModel model = new TestCalendarModel(events);

@@ -1,7 +1,9 @@
 import calendarapp.controller.commands.BusyQueryCommand;
 import calendarapp.model.ICalendarModel;
 import calendarapp.model.event.ICalendarEvent;
+import calendarapp.model.event.ReadOnlyCalendarEvent;
 import calendarapp.view.ICalendarView;
+import jdk.jfr.Event;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -71,6 +73,7 @@ public class BusyQueryCommandTest {
       return query.equals(busyTime);
     }
 
+
     @Override
     public ZoneId getTimezone() {
       return zone;
@@ -98,18 +101,18 @@ public class BusyQueryCommandTest {
     }
 
     @Override
-    public List<ICalendarEvent> getEvents() {
-      return null;
+    public List<ReadOnlyCalendarEvent> getEvents() {
+      return List.of();
     }
 
     @Override
-    public List<ICalendarEvent> getEventsOnDate(LocalDate date) {
-      return null;
+    public List<ReadOnlyCalendarEvent> getEventsOnDate(LocalDate date) {
+      return List.of();
     }
 
     @Override
-    public List<ICalendarEvent> getEventsBetween(ZonedDateTime start, ZonedDateTime end) {
-      return null;
+    public List<ReadOnlyCalendarEvent> getEventsBetween(ZonedDateTime start, ZonedDateTime end) {
+      return List.of();
     }
 
     @Override
@@ -164,6 +167,16 @@ public class BusyQueryCommandTest {
                                ZonedDateTime targetStartDate) {
       return false;
     }
+
+    @Override
+    public List<ReadOnlyCalendarEvent> getReadOnlyEventsOnDate(LocalDate date) {
+      return List.of();
+    }
+
+    @Override
+    public List<ReadOnlyCalendarEvent> getAllReadOnlyEvents() {
+      return List.of();
+    }
   }
 
   private static class TestCalendarView implements ICalendarView {
@@ -171,14 +184,16 @@ public class BusyQueryCommandTest {
     private String lastError = null;
 
     @Override
+    public void displayEvents(List<ReadOnlyCalendarEvent> events) {
+
+    }
+
+    @Override
     public void displayMessage(String message) {
       this.lastMessage = message;
     }
 
-    @Override
-    public void displayEvents(List<ICalendarEvent> events) {
-      // No implementation of this is required
-    }
+
 
     @Override
     public void displayError(String errorMessage) {
@@ -189,8 +204,5 @@ public class BusyQueryCommandTest {
       return lastMessage;
     }
 
-    public String getLastError() {
-      return lastError;
-    }
   }
 }

@@ -3,6 +3,7 @@ import calendarapp.controller.CommandParser;
 import calendarapp.model.CalendarManager;
 import calendarapp.model.ICalendarManager;
 import calendarapp.model.event.ICalendarEvent;
+import calendarapp.model.event.ReadOnlyCalendarEvent;
 import calendarapp.view.ICalendarView;
 
 import org.junit.Before;
@@ -198,6 +199,13 @@ public class CalendarAppIntegrationTest {
   private static class TestCalendarView implements ICalendarView {
     private final List<String> messages = new ArrayList<>();
 
+
+    @Override
+    public void displayEvents(List<ReadOnlyCalendarEvent> events) {
+      messages.add("Displaying " + events.size() + " events");
+
+    }
+
     @Override
     public void displayMessage(String message) {
       messages.add(message);
@@ -206,11 +214,6 @@ public class CalendarAppIntegrationTest {
     @Override
     public void displayError(String error) {
       messages.add(error);
-    }
-
-    @Override
-    public void displayEvents(List<ICalendarEvent> events) {
-      messages.add("Displaying " + events.size() + " events");
     }
 
     public String getLastMessage() {

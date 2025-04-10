@@ -1,5 +1,6 @@
 import calendarapp.model.CalendarManager;
 import calendarapp.model.CalendarModel;
+import calendarapp.model.event.ReadOnlyCalendarEvent;
 import calendarapp.model.event.RecurringEvent;
 import calendarapp.model.event.SingleEvent;
 import calendarapp.model.event.ICalendarEvent;
@@ -12,7 +13,6 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeParseException;
-import java.time.temporal.Temporal;
 import java.time.zone.ZoneRulesException;
 import java.util.List;
 
@@ -183,7 +183,7 @@ public class CalendarModelTest {
 
     assertTrue(model.editEventsAll("description", "Lecture",
             "UpdatedDesc"));
-    for (ICalendarEvent e : model.getEvents()) {
+    for (ReadOnlyCalendarEvent e : model.getEvents()) {
       assertEquals("UpdatedDesc", e.getDescription());
     }
   }
@@ -216,7 +216,7 @@ public class CalendarModelTest {
     model.updateTimezone(ZoneId.of("America/New_York"));
     assertEquals(ZoneId.of("America/New_York"), model.getTimezone());
 
-    for (ICalendarEvent e : model.getEvents()) {
+    for (ReadOnlyCalendarEvent e : model.getEvents()) {
       assertEquals(ZoneId.of("America/New_York"),
               ZonedDateTime.from(e.getStartDateTime()).getZone());
     }
@@ -284,7 +284,7 @@ public class CalendarModelTest {
     assertTrue(model.editEventsAll("description", "Lecture",
             "Updated Description"));
 
-    for (ICalendarEvent e : model.getEvents()) {
+    for (ReadOnlyCalendarEvent e : model.getEvents()) {
       assertEquals("Updated Description", e.getDescription());
     }
   }
@@ -460,7 +460,7 @@ public class CalendarModelTest {
     model.updateTimezone(ZoneId.of("America/New_York"));
     assertEquals(ZoneId.of("America/New_York"), model.getTimezone());
 
-    for (ICalendarEvent event : model.getEvents()) {
+    for (ReadOnlyCalendarEvent event : model.getEvents()) {
       ZonedDateTime eventStart = ZonedDateTime.from(event.getStartDateTime());
       assertEquals("America/New_York", eventStart.getZone().toString());
     }
@@ -503,7 +503,7 @@ public class CalendarModelTest {
     assertTrue(model.editEventsFrom("description", "Class", editFrom,
             "Updated Desc"));
 
-    for (ICalendarEvent e : model.getEvents()) {
+    for (ReadOnlyCalendarEvent e : model.getEvents()) {
       ZonedDateTime eventStart = ZonedDateTime.from(e.getStartDateTime());
       if (!eventStart.isBefore(editFrom)) {
         assertEquals("Updated Desc", e.getDescription());
@@ -620,7 +620,7 @@ public class CalendarModelTest {
     boolean added = model.addRecurringEvent(recurring, false);
     assertTrue(added);
 
-    List<ICalendarEvent> events = model.getEvents();
+    List<ReadOnlyCalendarEvent> events = model.getEvents();
     assertEquals(2, events.size());
   }
 
@@ -663,7 +663,7 @@ public class CalendarModelTest {
             true, false, null);
     assertTrue(model.addEvent(event, false));
 
-    List<ICalendarEvent> events = model.getEventsOnDate(LocalDate.of(2025, 6,
+    List<ReadOnlyCalendarEvent> events = model.getEventsOnDate(LocalDate.of(2025, 6,
             1));
     assertEquals(1, events.size());
   }
@@ -682,7 +682,7 @@ public class CalendarModelTest {
     ZonedDateTime to = ZonedDateTime.of(2025, 6, 1, 11, 0,
             0, 0, model.getTimezone());
 
-    List<ICalendarEvent> events = model.getEventsBetween(from, to);
+    List<ReadOnlyCalendarEvent> events = model.getEventsBetween(from, to);
     assertEquals(1, events.size());
   }
 
@@ -722,7 +722,7 @@ public class CalendarModelTest {
     boolean edited = model.editEvent(oldEvent, newEvent);
     assertTrue(edited);
 
-    List<ICalendarEvent> events = model.getEvents();
+    List<ReadOnlyCalendarEvent> events = model.getEvents();
     assertTrue(events.contains(newEvent));
     assertFalse(events.contains(oldEvent));
   }
@@ -748,7 +748,7 @@ public class CalendarModelTest {
     boolean edited = model.editEvent(event1, newEvent);
     assertFalse(edited);
 
-    List<ICalendarEvent> events = model.getEvents();
+    List<ReadOnlyCalendarEvent> events = model.getEvents();
     assertTrue(events.contains(event1));
   }
 
@@ -791,7 +791,7 @@ public class CalendarModelTest {
             start, end, "New");
     assertTrue(edited);
 
-    for (ICalendarEvent e : model.getEvents()) {
+    for (ReadOnlyCalendarEvent e : model.getEvents()) {
       if (e.getSubject().equals("EditSingle")) {
         assertEquals("New", e.getDescription());
       }
@@ -811,7 +811,7 @@ public class CalendarModelTest {
             "New");
     assertTrue(edited);
 
-    for (ICalendarEvent e : model.getEvents()) {
+    for (ReadOnlyCalendarEvent e : model.getEvents()) {
       if (e.getSubject().equals("EditFrom")) {
         assertEquals("New", e.getDescription());
       }
@@ -839,7 +839,7 @@ public class CalendarModelTest {
             "Updated");
     assertTrue(edited);
 
-    for (ICalendarEvent e : model.getEvents()) {
+    for (ReadOnlyCalendarEvent e : model.getEvents()) {
       if (e.getSubject().equals("EditAll")) {
         assertEquals("Updated", e.getDescription());
       }
@@ -859,7 +859,7 @@ public class CalendarModelTest {
     assertTrue(model.editRecurringEvent("RecurringEdit", "description",
             "Updated"));
 
-    for (ICalendarEvent ev : model.getEvents()) {
+    for (ReadOnlyCalendarEvent ev : model.getEvents()) {
       if (ev instanceof SingleEvent && ev.getSubject().equals("RecurringEdit")) {
         assertEquals("Updated", ev.getDescription());
       }
@@ -906,8 +906,8 @@ public class CalendarModelTest {
             "Evening session");
     assertTrue(edited);
 
-    List<ICalendarEvent> events = model.getEvents();
-    for (ICalendarEvent e : events) {
+    List<ReadOnlyCalendarEvent> events = model.getEvents();
+    for (ReadOnlyCalendarEvent e : events) {
       if (e.getSubject().equals("Yoga")) {
         assertEquals("Evening session", e.getDescription());
       }
@@ -965,7 +965,7 @@ public class CalendarModelTest {
     boolean edited = model.editRecurringEvent("Training", "location",
             "Room 202");
     assertTrue(edited);
-    for (ICalendarEvent ev : model.getEvents()) {
+    for (ReadOnlyCalendarEvent ev : model.getEvents()) {
       assertEquals("Room 202", ev.getLocation());
     }
   }
@@ -982,7 +982,7 @@ public class CalendarModelTest {
 
     model.editRecurringEvent("Sprint Planning", "description",
             "Updated Daily Planning");
-    List<ICalendarEvent> events = model.getEvents();
+    List<ReadOnlyCalendarEvent> events = model.getEvents();
     assertEquals(5, events.size());
     assertEquals("Updated Daily Planning", events.get(0).getDescription());
   }
@@ -1109,7 +1109,7 @@ public class CalendarModelTest {
     model.addEvent(new SingleEvent("Event 2", start2, end2, "", "",
             true, false, null), true);
 
-    List<ICalendarEvent> events = model.getEventsOnDate(start1.toLocalDate());
+    List<ReadOnlyCalendarEvent> events = model.getEventsOnDate(start1.toLocalDate());
     assertEquals(2, events.size());
   }
 
@@ -1234,7 +1234,7 @@ public class CalendarModelTest {
     assertTrue(model.addRecurringEvent(seminar, true));
 
     assertFalse(model.getEvents().isEmpty());
-    for (ICalendarEvent e : model.getEvents()) {
+    for (ReadOnlyCalendarEvent e : model.getEvents()) {
       assertEquals("Seminar", e.getSubject());
     }
   }
@@ -1252,7 +1252,7 @@ public class CalendarModelTest {
             start, end, "Room B");
     assertTrue(edited);
 
-    for (ICalendarEvent e : model.getEvents()) {
+    for (ReadOnlyCalendarEvent e : model.getEvents()) {
       assertEquals("Room B", e.getLocation());
     }
   }
@@ -1323,7 +1323,7 @@ public class CalendarModelTest {
             target, targetStart));
 
     assertEquals(1, target.getEvents().size());
-    ICalendarEvent copied = target.getEvents().get(0);
+    ReadOnlyCalendarEvent copied = target.getEvents().get(0);
     assertEquals("Lecture", copied.getSubject());
     assertEquals(targetStart, copied.getStartDateTime());
     assertEquals(targetStart.plusHours(1), copied.getEndDateTime());
@@ -1413,7 +1413,7 @@ public class CalendarModelTest {
     calendar.updateTimezone(ZoneId.of("Asia/Kolkata"));
     assertEquals(ZoneId.of("Asia/Kolkata"), calendar.getTimezone());
 
-    ICalendarEvent updatedEvent = calendar.getEvents().get(0);
+    ReadOnlyCalendarEvent updatedEvent = calendar.getEvents().get(0);
     assertEquals("Meeting", updatedEvent.getSubject());
 
     assertEquals(start.toInstant(),
@@ -1439,7 +1439,7 @@ public class CalendarModelTest {
 
     assertEquals(ZoneId.of("Europe/Paris"), calendar.getTimezone());
 
-    for (ICalendarEvent ev : calendar.getEvents()) {
+    for (ReadOnlyCalendarEvent ev : calendar.getEvents()) {
       assertEquals("Europe/Paris",
               ZonedDateTime.from(ev.getStartDateTime()).getZone().getId());
     }
@@ -1526,7 +1526,7 @@ public class CalendarModelTest {
             "Updated");
     assertTrue(result);
 
-    for (ICalendarEvent e : model.getEvents()) {
+    for (ReadOnlyCalendarEvent e : model.getEvents()) {
       if (!ZonedDateTime.from(e.getStartDateTime()).isBefore(mid)) {
         assertEquals("Updated", e.getDescription());
       } else {
@@ -1553,7 +1553,7 @@ public class CalendarModelTest {
             "UpdatedDesc");
     assertTrue(result);
 
-    for (ICalendarEvent e : model.getEvents()) {
+    for (ReadOnlyCalendarEvent e : model.getEvents()) {
       if (e.getSubject().equals("EditAll")) {
         assertEquals("UpdatedDesc", e.getDescription());
       }
@@ -1572,7 +1572,7 @@ public class CalendarModelTest {
             start, end, "Changed");
     assertTrue(result);
 
-    ICalendarEvent updated = model.getEvents().stream()
+    ReadOnlyCalendarEvent updated = model.getEvents().stream()
             .filter(e -> e.getSubject().equals("EditMe"))
             .findFirst()
             .orElse(null);
@@ -1619,7 +1619,7 @@ public class CalendarModelTest {
             target, targetStart);
     assertTrue(copied);
 
-    ICalendarEvent copiedEvent = target.getEvents().get(0);
+    ReadOnlyCalendarEvent copiedEvent = target.getEvents().get(0);
     assertEquals(targetStart, copiedEvent.getStartDateTime());
     assertEquals("Timezones", copiedEvent.getDescription());
   }
@@ -1719,7 +1719,7 @@ public class CalendarModelTest {
 
     model.updateTimezone(ZoneId.of("Europe/Paris"));
 
-    ICalendarEvent updatedEvent = model.getEvents().get(0);
+    ReadOnlyCalendarEvent updatedEvent = model.getEvents().get(0);
     assertEquals(ZoneId.of("Europe/Paris"),
             ZonedDateTime.from(updatedEvent.getStartDateTime()).getZone());
     assertEquals(ZoneId.of("Europe/Paris"),
@@ -1738,10 +1738,10 @@ public class CalendarModelTest {
             false);
 
     assertTrue(model.addRecurringEvent(recurring, false));
-    List<ICalendarEvent> beforeUpdate = model.getEvents();
+    List<ReadOnlyCalendarEvent> beforeUpdate = model.getEvents();
 
     model.updateTimezone(ZoneId.of("Asia/Kolkata"));
-    List<ICalendarEvent> afterUpdate = model.getEvents();
+    List<ReadOnlyCalendarEvent> afterUpdate = model.getEvents();
 
     assertEquals(beforeUpdate.size(), afterUpdate.size());
 
@@ -1778,10 +1778,10 @@ public class CalendarModelTest {
             target, targetStart);
     assertTrue(copied);
 
-    List<ICalendarEvent> eventsInTarget = target.getEvents();
+    List<ReadOnlyCalendarEvent> eventsInTarget = target.getEvents();
     assertEquals(1, eventsInTarget.size());
 
-    ICalendarEvent copiedEvent = eventsInTarget.get(0);
+    ReadOnlyCalendarEvent copiedEvent = eventsInTarget.get(0);
     assertEquals("Standup", copiedEvent.getSubject());
     assertEquals(targetStart, copiedEvent.getStartDateTime());
     assertEquals(targetStart.plusHours(1), copiedEvent.getEndDateTime());
@@ -1858,7 +1858,7 @@ public class CalendarModelTest {
 
     model.updateTimezone(ZoneId.of("Europe/Paris"));
 
-    ICalendarEvent updatedEvent = model.getEvents().get(0);
+    ReadOnlyCalendarEvent updatedEvent = model.getEvents().get(0);
     assertEquals(ZoneId.of("Europe/Paris"),
             ZonedDateTime.from(updatedEvent.getStartDateTime()).getZone());
     assertEquals(15, ZonedDateTime.from(updatedEvent.getStartDateTime()).getHour());
@@ -1885,7 +1885,7 @@ public class CalendarModelTest {
             sourceTime, target, targetTime);
     assertTrue(copied);
 
-    ICalendarEvent copiedEvent = target.getEvents().get(0);
+    ReadOnlyCalendarEvent copiedEvent = target.getEvents().get(0);
     assertEquals(ZoneId.of("America/New_York"),
             ZonedDateTime.from(copiedEvent.getStartDateTime()).getZone());
     assertEquals(2, Duration.between(copiedEvent.getStartDateTime(),
@@ -1906,8 +1906,8 @@ public class CalendarModelTest {
 
     model.updateTimezone(ZoneId.of("Europe/Paris"));
 
-    List<ICalendarEvent> events = model.getEvents();
-    for (ICalendarEvent ev : events) {
+    List<ReadOnlyCalendarEvent> events = model.getEvents();
+    for (ReadOnlyCalendarEvent ev : events) {
       assertEquals(ZoneId.of("Europe/Paris"),
               ZonedDateTime.from(ev.getStartDateTime()).getZone());
     }
@@ -1931,7 +1931,7 @@ public class CalendarModelTest {
 
     calendar.updateTimezone(ZoneId.of("America/New_York"));
 
-    List<ICalendarEvent> events = calendar.getEvents();
+    List<ReadOnlyCalendarEvent> events = calendar.getEvents();
     assertEquals(2, events.size());
   }
 
