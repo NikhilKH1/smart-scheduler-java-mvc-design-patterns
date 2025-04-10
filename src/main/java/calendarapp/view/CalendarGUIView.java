@@ -11,6 +11,8 @@ import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.List;
+
+import calendarapp.controller.ICalendarController;
 import calendarapp.model.event.ReadOnlyCalendarEvent;
 import calendarapp.factory.EditInput;
 import calendarapp.factory.ICommandFactory;
@@ -41,9 +43,9 @@ public class CalendarGUIView implements ICalendarView {
   private List<ReadOnlyCalendarEvent> events;
   private List<ReadOnlyCalendarEvent> lastRenderedEvents = new ArrayList<>();
 
-  public CalendarGUIView(ICalendarManager manager, CalendarController controller) {
+  public CalendarGUIView(ICalendarManager manager, ICalendarController controller) {
     this.calendarManager = manager;
-    this.controller = controller;
+    this.controller = (CalendarController) controller;
 
     currentMonth = YearMonth.now();
     calendarColors = new HashMap<>();
