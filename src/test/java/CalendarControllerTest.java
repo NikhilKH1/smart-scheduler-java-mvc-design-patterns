@@ -788,6 +788,5 @@ public class CalendarControllerTest {
       messages.clear();
     }
   }
-
 }
 

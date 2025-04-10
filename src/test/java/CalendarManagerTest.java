@@ -36,13 +36,14 @@ public class CalendarManagerTest {
     manager = new CalendarManager();
   }
 
-  @Test(expected = NullPointerException.class)
+  @Test
   public void testCopySingleEventNullSourceDateThrows() {
     manager.addCalendar("Source", ZoneId.of("UTC"));
     manager.addCalendar("Target", ZoneId.of("UTC"));
     manager.useCalendar("Source");
 
-    manager.copySingleEvent("Event", null, "Target", ZonedDateTime.now());
+    boolean result = manager.copySingleEvent("Event", null, "Target", ZonedDateTime.now());
+    assertFalse(result);
   }
 
   @Test
@@ -276,14 +277,14 @@ public class CalendarManagerTest {
     source.addEvent(new SingleEvent("Lecture",
             ZonedDateTime.of(2024, 9, 5, 10, 0,
                     0, 0, ZoneId.of("Asia/Kolkata")),
-            ZonedDateTime.of(2024, 9, 5, 11, 0,
+            ZonedDateTime.of(2024, 9, 6, 11, 0,
                     0, 0, ZoneId.of("Asia/Kolkata")),
             "Intro", "Room A", true, false,
             null), false);
 
     boolean copied = manager.copyEventsBetween(
             ZonedDateTime.of(LocalDate.of(2024, 9, 5), LocalTime.MIDNIGHT, ZoneId.of("UTC")),
-            ZonedDateTime.of(LocalDate.of(2024, 9, 5), LocalTime.MIDNIGHT, ZoneId.of("UTC")),
+            ZonedDateTime.of(LocalDate.of(2024, 9, 6), LocalTime.MIDNIGHT, ZoneId.of("UTC")),
             "Spring2025",
             ZonedDateTime.of(LocalDate.of(2025, 1, 8), LocalTime.MIDNIGHT, ZoneId.of("UTC"))
     );

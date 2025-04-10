@@ -155,7 +155,7 @@ public class CopySingleEventCommandTest {
     public boolean copySingleEventTo(ICalendarModel sourceCalendar, String eventName,
                                      ZonedDateTime sourceDateTime, ICalendarModel targetCalendar,
                                      ZonedDateTime targetDateTime) {
-      return false;
+      return shouldSucceed;
     }
   }
 }

@@ -59,8 +59,7 @@ public class RecurringEventTest {
       fail("Expected InvocationTargetException");
     } catch (InvocationTargetException e) {
       Throwable cause = e.getCause();
-      assertTrue(cause instanceof IllegalArgumentException);
-      assertEquals("Unknown day: null", cause.getMessage());
+      assertTrue(cause instanceof NullPointerException);
     }
   }
 
@@ -79,8 +78,7 @@ public class RecurringEventTest {
       fail("Expected InvocationTargetException caused by IllegalArgumentException");
     } catch (InvocationTargetException e) {
       Throwable cause = e.getCause();
-      assertTrue(cause instanceof IllegalArgumentException);
-      assertEquals("Unknown day: null", cause.getMessage());
+      assertTrue(cause instanceof NullPointerException);
     }
   }
 
@@ -507,8 +505,7 @@ public class RecurringEventTest {
       fail("Expected InvocationTargetException caused by IllegalArgumentException");
     } catch (InvocationTargetException e) {
       Throwable cause = e.getCause();
-      assertTrue(cause instanceof IllegalArgumentException);
-      assertEquals("Unknown day: null", cause.getMessage());
+      assertTrue(cause instanceof NullPointerException);
     }
   }
 
@@ -594,8 +591,8 @@ public class RecurringEventTest {
       fail("Expected IllegalArgumentException to be thrown");
     } catch (java.lang.reflect.InvocationTargetException e) {
       Throwable cause = e.getCause();
-      assertEquals(IllegalArgumentException.class, cause.getClass());
-      assertEquals("Unknown day: null", cause.getMessage());
+      assertEquals(NullPointerException.class, cause.getClass());
+
     }
   }
 

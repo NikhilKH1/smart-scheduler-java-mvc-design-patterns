@@ -77,7 +77,7 @@ public class CalendarAppIntegrationTest {
     String msg = view.getLastMessage();
     assertNotNull(msg);
     System.out.println(msg);
-    assertTrue(msg.contains("Calendar exported to:"));
+    assertTrue(msg.contains("Calendar exported successfully to:"));
     assertTrue(msg.contains("output.csv"));
   }
 

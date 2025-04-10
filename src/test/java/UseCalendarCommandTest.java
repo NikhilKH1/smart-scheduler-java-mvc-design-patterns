@@ -1,5 +1,4 @@
 import calendarapp.controller.commands.UseCalendarCommand;
-import calendarapp.model.CalendarModel;
 import calendarapp.model.ICalendarManager;
 import calendarapp.model.ICalendarModel;
 import calendarapp.model.event.ICalendarEvent;
@@ -11,7 +10,6 @@ import org.junit.Test;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.time.temporal.Temporal;
 import java.util.Collections;
 import java.util.List;
 

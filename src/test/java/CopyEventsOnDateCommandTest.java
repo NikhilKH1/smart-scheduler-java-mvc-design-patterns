@@ -154,7 +154,7 @@ public class CopyEventsOnDateCommandTest {
     @Override
     public boolean copyEventsOnDateTo(ICalendarModel sourceCalendar, ZonedDateTime sourceDate,
                                       ICalendarModel targetCalendar, ZonedDateTime targetDate) {
-      return false;
+      return shouldSucceed;
     }
   }
 }
