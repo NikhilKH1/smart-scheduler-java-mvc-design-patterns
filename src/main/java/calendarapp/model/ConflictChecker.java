@@ -35,10 +35,11 @@ public class ConflictChecker {
    *
    * @param oldEvent the event that is being replaced or updated
    * @param newEvent the event to be checked for conflicts with other events
-   * @param events the list of all events in the calendar
+   * @param events   the list of all events in the calendar
    * @return true if a conflict is found with any other event, false otherwise
    */
-  public static boolean hasConflictExcept(ICalendarEvent oldEvent, ICalendarEvent newEvent, Iterable<ICalendarEvent> events) {
+  public static boolean hasConflictExcept(ICalendarEvent oldEvent, ICalendarEvent newEvent,
+                                          Iterable<ICalendarEvent> events) {
     for (ICalendarEvent existing : events) {
       if (!existing.equals(oldEvent) && hasConflict(existing, newEvent)) {
         return true;
@@ -56,7 +57,8 @@ public class ConflictChecker {
    * @param events    the list of all events in the calendar
    * @return true if a conflict is found with any other event, false otherwise
    */
-  public static boolean hasConflictExceptRecurring(String eventName, ICalendarEvent newEvent, Iterable<ICalendarEvent> events) {
+  public static boolean hasConflictExceptRecurring(String eventName, ICalendarEvent newEvent,
+                                                   Iterable<ICalendarEvent> events) {
     for (ICalendarEvent existing : events) {
       if (!existing.getSubject().equals(eventName)
               && hasConflict(existing, newEvent)) {

@@ -196,7 +196,6 @@ public class CommandParser {
     return new CopyEventsBetweenDatesCommand(startDate, endDate, targetCalendar, targetStartDate);
   }
 
-
   /**
    * Parses the "create" command, which creates events or calendars.
    *
@@ -268,7 +267,6 @@ public class CommandParser {
     }
   }
 
-
   /**
    * Parses the "edit calendar" command to modify the properties of an existing calendar.
    *
@@ -326,10 +324,9 @@ public class CommandParser {
    */
   private ICommand parseExportCommand(List<String> tokens) {
     if (tokens.size() < 3 || !"cal".equalsIgnoreCase(tokens.get(1))) {
-      throw new IllegalArgumentException("Invalid export format. Usage: export calendar <filePath.csv>");
+      throw new IllegalArgumentException("Invalid export format. Usage: export cal <filePath.csv>");
     }
 
-    // Reconstruct the file path (to handle spaces)
     StringBuilder pathBuilder = new StringBuilder();
     for (int i = 2; i < tokens.size(); i++) {
       pathBuilder.append(tokens.get(i));
@@ -341,7 +338,6 @@ public class CommandParser {
     String filePathRaw = pathBuilder.toString().trim();
     String filePath;
 
-    // Strip quotes if present
     if (filePathRaw.startsWith("\"") && filePathRaw.endsWith("\"")) {
       filePath = filePathRaw.substring(1, filePathRaw.length() - 1);
     } else {
@@ -623,7 +619,7 @@ public class CommandParser {
       String weekdaysStr = stripQuotes(tokens.get(index++)).toUpperCase();
 
       if (weekdaysStr.isEmpty()) {
-        result.weekdays = "MTWRFSU"; // If no weekdays specified, assume every day
+        result.weekdays = "MTWRFSU";
       } else {
         result.weekdays = weekdaysStr;
       }
@@ -647,7 +643,6 @@ public class CommandParser {
     result.index = index;
     return result;
   }
-
 
   /**
    * Parses additional event properties like description, location, and visibility (public/private).

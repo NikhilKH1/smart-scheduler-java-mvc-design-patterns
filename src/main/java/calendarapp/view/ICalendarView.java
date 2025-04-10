@@ -1,6 +1,5 @@
 package calendarapp.view;
 
-import calendarapp.model.event.ICalendarEvent;
 import calendarapp.model.event.ReadOnlyCalendarEvent;
 
 import java.util.List;
@@ -16,7 +15,7 @@ public interface ICalendarView {
    *
    * @param events the list of calendar events to display
    */
-  void displayEvents(List<ReadOnlyCalendarEvent> events);
+  public void displayEvents(List<ReadOnlyCalendarEvent> events);
 
   /**
    * Displays a normal message.

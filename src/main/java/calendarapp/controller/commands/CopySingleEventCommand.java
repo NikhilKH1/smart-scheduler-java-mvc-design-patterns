@@ -38,7 +38,7 @@ public class CopySingleEventCommand implements ICalendarManagerCommand {
    * Displays a message on success or an error if the event cannot be copied.
    *
    * @param calendarManager the calendar manager handling calendars
-   * @param view the view for displaying messages
+   * @param view            the view for displaying messages
    * @return true if the event was copied successfully, false otherwise
    */
   @Override
@@ -52,10 +52,7 @@ public class CopySingleEventCommand implements ICalendarManagerCommand {
     }
 
     boolean success = ((CalendarModel) source).copySingleEventTo(
-            (CalendarModel) source,
-            eventName,
-            sourceDateTime,
-            (CalendarModel) target,
+            (CalendarModel) source, eventName, sourceDateTime, (CalendarModel) target,
             targetDateTime
     );
 

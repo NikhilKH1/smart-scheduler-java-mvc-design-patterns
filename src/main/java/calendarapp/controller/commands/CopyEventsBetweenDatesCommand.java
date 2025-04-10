@@ -38,7 +38,7 @@ public class CopyEventsBetweenDatesCommand implements ICalendarManagerCommand {
    * starting at the specified target date. Displays success or error messages based on the result.
    *
    * @param calendarManager the calendar manager handling calendars
-   * @param view the view for displaying messages
+   * @param view            the view for displaying messages
    * @return true if events were copied successfully, false otherwise
    */
   @Override
@@ -52,11 +52,7 @@ public class CopyEventsBetweenDatesCommand implements ICalendarManagerCommand {
     }
 
     boolean success = ((CalendarModel) source).copyEventsBetweenTo(
-            (CalendarModel) source,
-            startDate,
-            endDate,
-            (CalendarModel) target,
-            targetStartDate
+            (CalendarModel) source, startDate, endDate, (CalendarModel) target, targetStartDate
     );
 
     if (success) {

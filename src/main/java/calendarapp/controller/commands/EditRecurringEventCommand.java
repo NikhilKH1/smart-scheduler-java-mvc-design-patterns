@@ -21,9 +21,9 @@ public class EditRecurringEventCommand implements ICalendarModelCommand {
   /**
    * Constructs an EditRecurringEventCommand for properties that require a string value.
    *
-   * @param property the property to be modified
+   * @param property  the property to be modified
    * @param eventName the name of the event
-   * @param newValue the new value for the property
+   * @param newValue  the new value for the property
    */
   public EditRecurringEventCommand(String property, String eventName, String newValue) {
     this.property = property;
@@ -35,8 +35,8 @@ public class EditRecurringEventCommand implements ICalendarModelCommand {
   /**
    * Constructs an EditRecurringEventCommand for properties that require a temporal value.
    *
-   * @param property the property to be modified
-   * @param eventName the name of the event
+   * @param property      the property to be modified
+   * @param eventName     the name of the event
    * @param temporalValue the new temporal value for the property
    */
   public EditRecurringEventCommand(String property, String eventName, Temporal temporalValue) {
@@ -50,7 +50,7 @@ public class EditRecurringEventCommand implements ICalendarModelCommand {
    * Executes the command to edit a recurring event in the calendar.
    *
    * @param model the calendar model where the event exists
-   * @param view the view used to display messages
+   * @param view  the view used to display messages
    * @return true if the event was successfully modified, false otherwise
    */
   @Override
@@ -80,7 +80,7 @@ public class EditRecurringEventCommand implements ICalendarModelCommand {
    * Converts a temporal value to a ZonedDateTime based on the given timezone.
    *
    * @param input the temporal value to convert
-   * @param zone the timezone to apply
+   * @param zone  the timezone to apply
    * @return the converted ZonedDateTime
    */
   private ZonedDateTime toZonedDateTime(Temporal input, ZoneId zone) {

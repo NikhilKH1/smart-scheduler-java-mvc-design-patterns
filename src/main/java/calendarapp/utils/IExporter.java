@@ -1,6 +1,5 @@
 package calendarapp.utils;
 
-import calendarapp.model.event.ICalendarEvent;
 import calendarapp.model.event.ReadOnlyCalendarEvent;
 
 import java.io.IOException;

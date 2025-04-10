@@ -23,7 +23,7 @@ public interface ICalendarController {
    *
    * @param args the command-line arguments used to configure the application's mode of operation
    */
-  void run(String[] args);
+  public void run(String[] args);
 
   /**
    * Sets the view to be used by the controller.
@@ -32,5 +32,5 @@ public interface ICalendarController {
    *
    * @param view the view used for displaying information to the user
    */
-  void setView(ICalendarView view);
+  public void setView(ICalendarView view);
 }

@@ -48,10 +48,7 @@ public class CopyEventsOnDateCommand implements ICalendarManagerCommand {
     }
 
     boolean success = ((CalendarModel) source).copyEventsOnDateTo(
-            (CalendarModel) source,
-            sourceDate,
-            (CalendarModel) target,
-            targetDate
+            (CalendarModel) source, sourceDate, (CalendarModel) target, targetDate
     );
 
     if (success) {

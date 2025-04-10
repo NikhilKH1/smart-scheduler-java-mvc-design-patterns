@@ -134,7 +134,7 @@ public class CalendarController implements ICalendarController {
    * Interactive CLI mode: Launches an interactive command-line interface.
    * Headless mode: Runs without a graphical interface, using a script file for automation.
    * GUI mode: Launches the graphical user interface if no arguments are provided.
-   *
+   * <p>
    * If the arguments are invalid, an error message is displayed with usage instructions.
    *
    * @param args the command-line arguments that specify the mode of operation
@@ -152,13 +152,12 @@ public class CalendarController implements ICalendarController {
         view.displayMessage("Running in Headless mode with script: " + args[2]);
         ((HeadlessView) view).run();
 
-      }  else if (args.length == 0) {
-      CalendarGUIView guiView = new CalendarGUIView(calendarManager, this);
-      this.view = guiView;
-      guiView.setCommandFactory(new DefaultCommandFactory());
-      guiView.initialize();
-    }
-    else {
+      } else if (args.length == 0) {
+        CalendarGUIView guiView = new CalendarGUIView(calendarManager, this);
+        this.view = guiView;
+        guiView.setCommandFactory(new DefaultCommandFactory());
+        guiView.initialize();
+      } else {
         System.err.println("Invalid arguments. Use:");
         System.err.println("--mode interactive");
         System.err.println("--mode headless <script-file>");

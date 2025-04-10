@@ -15,12 +15,20 @@ import java.util.Scanner;
 public class InteractiveCLIView implements ICalendarView, Runnable {
   private ICalendarController controller;
 
+  /**
+   * Constructs an InteractiveCLIView with the specified controller.
+   *
+   * @param controller the controller that processes commands and manages the calendar
+   */
   public InteractiveCLIView(ICalendarController controller) {
     this.controller = controller;
   }
 
   /**
-   * Runs the interactive command input loop.
+   * Runs the interactive command input loop. The user is prompted to enter commands
+   * through the command-line interface. The loop continues until the user types 'exit'.
+   *
+   * @see ICalendarController#processCommand(String)
    */
   public void run() {
     Scanner scanner = new Scanner(System.in);
@@ -37,16 +45,34 @@ public class InteractiveCLIView implements ICalendarView, Runnable {
     }
   }
 
+  /**
+   * Displays a general message to the user through the console.
+   *
+   * @param message the message to be displayed
+   */
   @Override
   public void displayMessage(String message) {
     System.out.println(message);
   }
 
+  /**
+   * Displays an error message to the user through the console. This method is called
+   * when an error occurs during command processing or other operations.
+   *
+   * @param errorMessage the error message to be displayed
+   */
   @Override
   public void displayError(String errorMessage) {
     System.err.println("Error: " + errorMessage);
   }
 
+  /**
+   * Displays a list of read-only calendar events to the user. Each event's details are
+   * printed to the console, including subject, start and end times, description, location,
+   * and other relevant information. If no events are found, a message is displayed indicating so.
+   *
+   * @param events a list of read-only calendar events to be displayed
+   */
   @Override
   public void displayEvents(List<ReadOnlyCalendarEvent> events) {
     if (events.isEmpty()) {

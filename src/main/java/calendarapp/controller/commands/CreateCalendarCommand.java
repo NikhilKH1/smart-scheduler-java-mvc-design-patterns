@@ -16,7 +16,7 @@ public class CreateCalendarCommand implements ICalendarManagerCommand {
    * Constructs a CreateCalendarCommand.
    *
    * @param calendarName the name of the new calendar
-   * @param timezone the timezone of the new calendar
+   * @param timezone     the timezone of the new calendar
    * @throws IllegalArgumentException if the calendar name is empty or the timezone is null
    */
   public CreateCalendarCommand(String calendarName, ZoneId timezone) {
@@ -54,7 +54,7 @@ public class CreateCalendarCommand implements ICalendarManagerCommand {
    * If a calendar with the same name already exists, an error message is displayed.
    *
    * @param calendarManager the calendar manager used to create the calendar
-   * @param view the view used to display messages
+   * @param view            the view used to display messages
    * @return true if the calendar was created successfully, false otherwise
    */
   @Override

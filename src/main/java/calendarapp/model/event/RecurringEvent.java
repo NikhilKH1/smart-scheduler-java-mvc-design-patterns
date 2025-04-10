@@ -64,31 +64,57 @@ public class RecurringEvent extends AbstractCalendarEvent {
     this.isAllDay = isAllDay;
   }
 
+  /**
+   * Returns the weekdays on which the event repeats.
+   *
+   * @return the weekdays on which the event repeats
+   */
   public String getWeekdays() {
     return weekdays;
   }
 
+  /**
+   * Returns the number of times the event repeats.
+   *
+   * @return the repeat count
+   */
   public Integer getRepeatCount() {
     return repeatCount;
   }
 
+  /**
+   * Indicates whether the event is recurring.
+   *
+   * @return true if the event is recurring, false otherwise
+   */
   @Override
   public boolean isRecurring() {
-    return true; // This is a RecurringEvent, so it's always recurring
+    return true;
   }
 
+  /**
+   * Returns the date until which the event repeats.
+   *
+   * @return the repeat-until date, or null if the event repeats indefinitely
+   */
   public ZonedDateTime RepeatUntil() {
     return repeatUntil;
   }
 
+  /**
+   * Generates the occurrences of the recurring event based on the repeating rules.
+   *
+   * @param seriesId the unique ID for the series of events
+   * @return a list of SingleEvent occurrences for the recurring event
+   */
   public List<SingleEvent> generateOccurrences(String seriesId) {
     List<SingleEvent> occurrences = new ArrayList<>();
 
-    if (weekdays == null) return occurrences;
+    if (weekdays == null || weekdays.isEmpty()) return occurrences;
     if (repeatCount <= 0 && repeatUntil == null) return occurrences;
 
     if (seriesId == null || seriesId.isEmpty()) {
-      seriesId = UUID.randomUUID().toString(); // 🎯 Generate if missing
+      seriesId = UUID.randomUUID().toString();
     }
 
     ZonedDateTime currentStart = this.startDateTime;
@@ -96,23 +122,26 @@ public class RecurringEvent extends AbstractCalendarEvent {
     int created = 0;
 
     while (true) {
-      if (weekdays.isEmpty() || weekdays.indexOf(getDayChar(currentStart.getDayOfWeek())) >= 0) {
-        occurrences.add(new SingleEvent(subject, currentStart, currentEnd, description,
-                location, isPublic, isAllDay, seriesId));
-        created++;
-      }
-
-      if (repeatCount > 0 && created >= repeatCount) break;
       if (repeatUntil != null && currentStart.isAfter(repeatUntil)) break;
-
+      if (weekdays.indexOf(getDayChar(currentStart.getDayOfWeek())) >= 0) {
+        occurrences.add(new SingleEvent(subject, currentStart, currentEnd,
+                description, location, isPublic, isAllDay, seriesId));
+        created++;
+        if (repeatCount > 0 && created >= repeatCount) break;
+      }
       currentStart = currentStart.plusDays(1);
       currentEnd = currentEnd.plusDays(1);
     }
-
     return occurrences;
   }
 
-
+  /**
+   * Returns the character representing the given day of the week (e.g., "M" for Monday).
+   *
+   * @param dayOfWeek the DayOfWeek to convert
+   * @return the character representing the given day of the week
+   * @throws IllegalArgumentException if the DayOfWeek is unknown
+   */
   private char getDayChar(DayOfWeek dayOfWeek) {
     switch (dayOfWeek) {
       case MONDAY:
@@ -134,6 +163,16 @@ public class RecurringEvent extends AbstractCalendarEvent {
     }
   }
 
+  /**
+   * Creates a new instance of the recurring event with an updated property.
+   * This method allows modifying specific properties of the event, such as
+   * the repeat count, repeat until date, weekdays, description, location, etc.
+   *
+   * @param property the property to be updated
+   * @param newValue the new value for the specified property
+   * @return a new RecurringEvent with the updated property
+   * @throws IllegalArgumentException if the property is unknown or the new value is invalid
+   */
   public RecurringEvent withUpdatedProperty(String property, String newValue) {
     String updatedWeekdays = this.weekdays;
     int updatedRepeatCount = this.repeatCount;

@@ -97,7 +97,6 @@ public class EditEventCommand implements ICalendarModelCommand {
    * @param view  the calendar view for displaying messages or errors
    * @return true if the edit was successful, false otherwise
    */
-
   @Override
   public boolean execute(ICalendarModel model, ICalendarView view) {
     boolean success = false;
@@ -107,19 +106,14 @@ public class EditEventCommand implements ICalendarModelCommand {
     try {
       switch (mode) {
         case SINGLE:
-          success = model.editSingleEvent(
-                  property,
-                  eventName,
-                  originalStart.withZoneSameInstant(zone),
-                  originalEnd.withZoneSameInstant(zone),
+          success = model.editSingleEvent(property, eventName,
+                  originalStart.withZoneSameInstant(zone), originalEnd.withZoneSameInstant(zone),
                   convertValueIfDateTime(propLower, newValue, zone)
           );
           break;
 
         case FROM:
-          success = model.editEventsFrom(
-                  property,
-                  eventName,
+          success = model.editEventsFrom(property, eventName,
                   filterDateTime.withZoneSameInstant(zone),
                   convertValueIfDateTime(propLower, newValue, zone)
           );

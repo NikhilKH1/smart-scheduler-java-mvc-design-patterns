@@ -46,21 +46,42 @@ public class SingleEvent extends AbstractCalendarEvent {
     return seriesId;
   }
 
+  /**
+   * Returns true if the event is recurring.
+   * A single event is considered non-recurring unless it is part of a recurring series.
+   *
+   * @return true if the event is recurring, false otherwise
+   */
   @Override
   public boolean isRecurring() {
     return this.seriesId != null;
   }
 
+  /**
+   * Returns an empty string for weekdays, as single events do not have recurring weekdays.
+   *
+   * @return an empty string
+   */
   @Override
   public String getWeekdays() {
     return "";
   }
 
+  /**
+   * Returns null as there is no repeat until date for single events.
+   *
+   * @return null
+   */
   @Override
   public ZonedDateTime RepeatUntil() {
     return null;
   }
 
+  /**
+   * Returns zero as there is no repeat count for single events.
+   *
+   * @return 0
+   */
   @Override
   public Integer getRepeatCount() {
     return 0;
