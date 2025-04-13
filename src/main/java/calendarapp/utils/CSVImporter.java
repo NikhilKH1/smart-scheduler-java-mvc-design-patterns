@@ -19,12 +19,16 @@ import java.util.Set;
 
 public class CSVImporter implements IImporter {
 
+  private static final DateTimeFormatter[] DATE_FORMATS = new DateTimeFormatter[]{
+          DateTimeFormatter.ofPattern("MM/dd/yyyy"),
+          DateTimeFormatter.ISO_LOCAL_DATE
+  };
+
   @Override
   public void importInto(ICalendarModel model, String filePath) throws IOException {
     try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
       String header = reader.readLine(); // Skip header
       String line;
-      DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("MM/dd/yyyy");
       DateTimeFormatter timeFormat = DateTimeFormatter.ofPattern("HH:mm");
 
       while ((line = reader.readLine()) != null) {
@@ -32,9 +36,9 @@ public class CSVImporter implements IImporter {
         if (parts.length < 7) continue;
 
         String name = parts[0].replace("\"", "").trim();
-        LocalDate startDate = LocalDate.parse(parts[1].trim(), dateFormat);
+        LocalDate startDate = tryParseDate(parts[1].trim());
         LocalTime startTime = LocalTime.parse(parts[2].trim(), timeFormat);
-        LocalDate endDate = LocalDate.parse(parts[3].trim(), dateFormat);
+        LocalDate endDate = tryParseDate(parts[3].trim());
         LocalTime endTime = LocalTime.parse(parts[4].trim(), timeFormat);
         String desc = parts[6].trim();
         String loc = parts[7].trim();
@@ -68,7 +72,7 @@ public class CSVImporter implements IImporter {
             repeatCount = Integer.parseInt(repeatCountStr);
           }
           if (!repeatUntilStr.isEmpty()) {
-            repeatUntil = LocalDate.parse(repeatUntilStr, dateFormat).atStartOfDay(model.getTimezone());
+            repeatUntil = tryParseDate(repeatUntilStr).atStartOfDay(model.getTimezone());
           }
 
           event = new RecurringEvent(name, start, end, weekdays, repeatCount, repeatUntil, desc, loc, true,
@@ -82,6 +86,15 @@ public class CSVImporter implements IImporter {
         model.addEvent(event, true);
       }
     }
+  }
+
+  private LocalDate tryParseDate(String input) {
+    for (DateTimeFormatter fmt : DATE_FORMATS) {
+      try {
+        return LocalDate.parse(input, fmt);
+      } catch (Exception ignored) {}
+    }
+    throw new IllegalArgumentException("Invalid date format: " + input);
   }
 
   private Set<DayOfWeek> parseWeekdays(String input) {

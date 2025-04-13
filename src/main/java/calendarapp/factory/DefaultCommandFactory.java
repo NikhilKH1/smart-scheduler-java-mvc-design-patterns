@@ -205,4 +205,9 @@ public class DefaultCommandFactory implements ICommandFactory {
     }
   }
 
+  @Override
+  public String importCalendarCommand(String filePath) {
+    return "import cal \"" + filePath + "\"";
+  }
+
 }

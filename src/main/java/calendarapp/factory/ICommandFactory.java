@@ -69,4 +69,7 @@ public interface ICommandFactory {
    */
   public String printEventsBetweenCommand(ZonedDateTime start, ZonedDateTime end);
 
+
+  public String importCalendarCommand(String filePath);
+
 }

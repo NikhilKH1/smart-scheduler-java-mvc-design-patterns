@@ -1268,98 +1268,17 @@ public class CalendarGUIView implements ICalendarView {
       return;
     }
 
-    DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
-    DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
+    String filePath = file.getAbsolutePath();
+    String command = commandFactory.importCalendarCommand(filePath);
+    boolean success = controller.processCommand(command);
 
-    suppressCreationMessages = true;
-    try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
-      String header = reader.readLine();
-      int addedCount = 0;
-      String line;
-      int lineNumber = 1;
-
-      while ((line = reader.readLine()) != null) {
-        lineNumber++;
-        try {
-          String[] parts = line.split(",", -1);
-          if (parts.length < 7) continue;
-
-          String name = parts[0].replace("\"", "").trim();
-          LocalDate startDate = tryParseDate(parts[1].trim());
-          LocalTime startTime = LocalTime.parse(parts[2].trim(), timeFormatter);
-          LocalDate endDate = tryParseDate(parts[3].trim());
-          LocalTime endTime = LocalTime.parse(parts[4].trim(), timeFormatter);
-          String desc = parts[6].trim();
-          String loc = parts[7].trim();
-
-          boolean isRecurring = false;
-          String weekdays = "";
-          String repeatUntilStr = "";
-          String repeatCountStr = "";
-
-          if (parts.length >= 10) {
-            weekdays = parts[9].trim().toUpperCase();
-            isRecurring = !weekdays.isEmpty();
-            if (parts.length >= 11) {
-              repeatUntilStr = parts[10].trim();
-            }
-            if (parts.length >= 12) {
-              repeatCountStr = parts[11].trim();
-            }
-          }
-
-          if (!startDate.equals(endDate)) continue;
-
-          ZoneId zone = ZoneId.of(calendarTimezones.getOrDefault(selectedCalendar,
-                  ZoneId.systemDefault().toString()));
-          ZonedDateTime start = startDate.atTime(startTime).atZone(zone);
-          ZonedDateTime end = endDate.atTime(endTime).atZone(zone);
-
-          EventInput input = new EventInput();
-          input.setSubject(name);
-          input.setStart(start);
-          input.setEnd(end);
-          input.setDescription(desc);
-          input.setLocation(loc);
-
-          if (isRecurring) {
-            input.setRecurring(true);
-            input.setRepeatingDays(weekdays);
-            if (!repeatUntilStr.isEmpty()) {
-              ZonedDateTime until = LocalDate.parse(repeatUntilStr,
-                      dateFormatter).atStartOfDay(zone);
-              input.setRepeatUntil(until);
-            }
-            if (!repeatCountStr.isEmpty()) {
-              int count = Integer.parseInt(repeatCountStr);
-              input.setRepeatTimes(count);
-            }
-            if (repeatUntilStr.isEmpty() && repeatCountStr.isEmpty()) {
-              input.setRepeatTimes(4);
-            }
-          }
-
-          String cmd = commandFactory.createEventCommand(input);
-          if (controller.processCommand(cmd)) {
-            addedCount++;
-          }
-
-        } catch (Exception perLineError) {
-          System.err.println("Skipping line " + lineNumber + ": " + perLineError.getMessage());
-        }
-      }
-
-      suppressCreationMessages = false;
-
-      controller.processCommand("print events from "
-              + currentMonth.atDay(1) + " to " + currentMonth.atEndOfMonth());
-      JOptionPane.showMessageDialog(frame, "Imported " + addedCount
-                      + " events into '" + selectedCalendar + "'.", "Import Success",
-              JOptionPane.INFORMATION_MESSAGE);
-
-    } catch (Exception ex) {
-      JOptionPane.showMessageDialog(frame, "Error importing calendar: "
-              + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+    if (success) {
+      JOptionPane.showMessageDialog(frame, "Calendar imported from: " + filePath,
+              "Import Success", JOptionPane.INFORMATION_MESSAGE);
+      refreshMainView();
+    } else {
+      JOptionPane.showMessageDialog(frame, "Failed to import calendar from file.",
+              "Import Error", JOptionPane.ERROR_MESSAGE);
     }
   }
 
