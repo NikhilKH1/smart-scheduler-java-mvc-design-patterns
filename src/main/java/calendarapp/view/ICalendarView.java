@@ -40,6 +40,7 @@ public interface ICalendarView {
    * @param in the input source
    */
   default void setInput(Readable in) {
+    return;
   }
 
   /**
@@ -47,5 +48,6 @@ public interface ICalendarView {
    * @param out the output destination
    */
   default void setOutput(Appendable out) {
+    return;
   }
 }

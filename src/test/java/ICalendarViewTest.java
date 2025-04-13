@@ -86,16 +86,24 @@ public class ICalendarViewTest {
       }
 
       @Override
-      public void displayEvents(List<ReadOnlyCalendarEvent> events) {}
+      public void displayEvents(List<ReadOnlyCalendarEvent> events) {
+        return;
+      }
 
       @Override
-      public void displayMessage(String message) {}
+      public void displayMessage(String message) {
+        return;
+      }
 
       @Override
-      public void displayError(String errorMessage) {}
+      public void displayError(String errorMessage) {
+        return;
+      }
 
       @Override
-      public void run() {}
+      public void run() {
+        return;
+      }
     };
 
     StringReader reader = new StringReader("hello");
