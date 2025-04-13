@@ -10,6 +10,7 @@ import calendarapp.controller.commands.EditEventCommand;
 import calendarapp.controller.commands.EditRecurringEventCommand;
 import calendarapp.controller.commands.ExportCalendarCommand;
 import calendarapp.controller.commands.ICommand;
+import calendarapp.controller.commands.ImportCalendarCommand;
 import calendarapp.controller.commands.QueryByDateCommand;
 import calendarapp.controller.commands.QueryRangeDateTimeCommand;
 import calendarapp.model.CalendarManager;
@@ -34,6 +35,7 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -56,6 +58,54 @@ public class CommandParserTest {
     controller.processCommand("create calendar --name testCal --timezone UTC");
     controller.processCommand("use calendar --name testCal");
   }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testParseImportCommandJustEnoughTokens() {
+    parser.parse("import cal \"\"");
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testParseCopyCommandBoundary() {
+    parser.parse("copy");
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testParseCopyEventsOnDateBoundary() {
+    parser.parse("copy events on 2025-06-01 --target calendar");
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testParseCreateCommandBoundary() {
+    parser.parse("create");
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testParseEditCommandBoundary() {
+    parser.parse("edit");
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testParseUseCommandBoundary() {
+    parser.parse("use");
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testParseCreateEventBoundary() {
+    parser.parse("create event");
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testParseRecurringSectionBoundaryWeekdaysMissing() {
+    parser.parse("create event \"Test Event\" from 2025-06-01T09:00 repeats");
+  }
+
+  @Test
+  public void testParseRecurringSectionBoundaryEmptyWeekdays() {
+    ICommand command = parser.parse("create event \"Test Event\" from 2025-06-01T09:00 "
+            + "repeats \"\" until 2025-06-30");
+    assertNotNull(command);
+  }
+
 
 
   @Test(expected = DateTimeParseException.class)
@@ -86,6 +136,50 @@ public class CommandParserTest {
             + "to  2025-04-01T11:00  ");
     assertTrue(cmd instanceof CreateEventCommand);
   }
+
+  @Test
+  public void testParseImportCommandValid() {
+    ICommand cmd = parser.parse("import cal \"calendar.csv\"");
+    assertTrue(cmd instanceof ImportCalendarCommand);
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testParseImportCommandMissingCalKeyword() {
+    parser.parse("import file.csv");
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testParseImportCommandMissingFilePath() {
+    parser.parse("import cal");
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testParseImportCommandInvalidFileExtension() {
+    parser.parse("import cal file.txt");
+  }
+
+  @Test
+  public void testParseImportCommandWithSpacesInFilePath() {
+    ICommand cmd = parser.parse("import cal \"my calendar file.csv\"");
+    assertTrue(cmd instanceof ImportCalendarCommand);
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testParseCopyEventsInvalidSpecifier() {
+    parser.parse("copy events during 2025-06-01");
+  }
+
+
+  @Test
+  public void testParseImportCommandWithoutQuotes() {
+    ICommand cmd = parser.parse("import cal calendar.csv");
+    assertTrue(cmd instanceof ImportCalendarCommand);
+  }
+
+
+
+
+
 
 
   @Test

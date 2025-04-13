@@ -13,7 +13,7 @@ import calendarapp.view.ICalendarView;
  */
 public class ImportCalendarCommand implements ICalendarModelCommand {
 
-  private final String filePath;
+  protected final String filePath;
 
   /**
    * Creates a new ImportCalendarCommand with the specified file path.

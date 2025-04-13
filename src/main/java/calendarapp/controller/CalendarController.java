@@ -159,7 +159,6 @@ public class CalendarController implements ICalendarController {
         System.err.println("Invalid arguments. Use:");
         System.err.println("--mode interactive");
         System.err.println("--mode headless <script-file>");
-        System.err.println("(or run with no arguments for GUI mode)");
       }
     } catch (IOException e) {
       System.err.println("Error: " + e.getMessage());

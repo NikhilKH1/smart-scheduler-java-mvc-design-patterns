@@ -37,6 +37,62 @@ public class CalendarModelTest {
   }
 
   @Test
+  public void testGetReadOnlyEventsOnDate_Matches() {
+    ZonedDateTime start = ZonedDateTime.of(2025, 6, 10, 9, 0, 0, 0, model.getTimezone());
+    ZonedDateTime end = start.plusHours(1);
+    SingleEvent event = new SingleEvent("Daily", start, end, "", "", true, false, null);
+
+    model.addEvent(event, true);
+
+    List<ReadOnlyCalendarEvent> results = model.getReadOnlyEventsOnDate(LocalDate.of(2025, 6, 10));
+    assertEquals(1, results.size());
+    assertEquals("Daily", results.get(0).getSubject());
+  }
+
+  @Test
+  public void testGetReadOnlyEventsOnDate_NoMatchBeforeStart() {
+    ZonedDateTime start = ZonedDateTime.of(2025, 6, 10, 9, 0, 0, 0, model.getTimezone());
+    ZonedDateTime end = start.plusHours(1);
+    SingleEvent event = new SingleEvent("Meeting", start, end, "", "", true, false, null);
+
+    model.addEvent(event, true);
+
+    List<ReadOnlyCalendarEvent> results = model.getReadOnlyEventsOnDate(LocalDate.of(2025, 6, 9));
+    assertTrue(results.isEmpty());
+  }
+
+  @Test
+  public void testGetReadOnlyEventsOnDate_NoMatchAfterEnd() {
+    ZonedDateTime start = ZonedDateTime.of(2025, 6, 10, 9, 0, 0, 0, model.getTimezone());
+    ZonedDateTime end = start.plusHours(1);
+    SingleEvent event = new SingleEvent("Meeting", start, end, "", "", true, false, null);
+
+    model.addEvent(event, true);
+
+    List<ReadOnlyCalendarEvent> results = model.getReadOnlyEventsOnDate(LocalDate.of(2025, 6, 11));
+    assertTrue(results.isEmpty());
+  }
+
+  @Test
+  public void testGetAllReadOnlyEvents() {
+    ZonedDateTime start1 = ZonedDateTime.of(2025, 6, 10, 9, 0, 0, 0, model.getTimezone());
+    ZonedDateTime end1 = start1.plusHours(1);
+    SingleEvent e1 = new SingleEvent("Event A", start1, end1, "", "", true, false, null);
+
+    ZonedDateTime start2 = ZonedDateTime.of(2025, 6, 11, 10, 0, 0, 0, model.getTimezone());
+    ZonedDateTime end2 = start2.plusHours(1);
+    SingleEvent e2 = new SingleEvent("Event B", start2, end2, "", "", true, false, null);
+
+    model.addEvent(e1, true);
+    model.addEvent(e2, true);
+
+    List<ReadOnlyCalendarEvent> result = model.getAllReadOnlyEvents();
+    assertEquals(2, result.size());
+  }
+
+
+
+  @Test
   public void testRecurringEventWithNoRepeatingDaysGeneratesNothing() {
     ZonedDateTime start = ZonedDateTime.of(2025, 7, 1, 10,
             0, 0, 0, model.getTimezone());
