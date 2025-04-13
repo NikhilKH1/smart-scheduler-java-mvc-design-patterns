@@ -11,6 +11,7 @@ import calendarapp.controller.commands.EditEventCommand;
 import calendarapp.controller.commands.EditRecurringEventCommand;
 import calendarapp.controller.commands.ExportCalendarCommand;
 import calendarapp.controller.commands.ICommand;
+import calendarapp.controller.commands.ImportCalendarCommand;
 import calendarapp.controller.commands.QueryByDateCommand;
 import calendarapp.controller.commands.QueryRangeDateTimeCommand;
 import calendarapp.controller.commands.UseCalendarCommand;
@@ -54,6 +55,43 @@ public class CommandParser {
     parsers.put("export", this::parseExportCommand);
     parsers.put("use", this::parseUseCommand);
     parsers.put("copy", this::parseCopyCommand);
+    parsers.put("import", this::parseImportCommand);
+  }
+
+  /**
+   * Parses the "import cal" command to import calendar events from a specified CSV file.
+   * The expected format is import cal <filePath.csv>, where filePath.csv
+   * can be quoted or unquoted. This method validates the command structure, ensures
+   * the file has a ".csv" extension, and constructs an ImportCalendarCommand
+   * to process the import using a suitable IImporter.
+   *
+   * @param tokens the list of tokens representing the command
+   * @return the ICommand object that performs the import operation
+   * @throws IllegalArgumentException if the command format is invalid or the file extension
+   *                     is not ".csv"
+   */
+  private ICommand parseImportCommand(List<String> tokens) {
+    if (tokens.size() < 3 || !"cal".equalsIgnoreCase(tokens.get(1))) {
+      throw new IllegalArgumentException("Invalid import format. Usage: import cal <filePath.csv>");
+    }
+
+    StringBuilder pathBuilder = new StringBuilder();
+    for (int i = 2; i < tokens.size(); i++) {
+      pathBuilder.append(tokens.get(i));
+      if (i != tokens.size() - 1) {
+        pathBuilder.append(" ");
+      }
+    }
+
+    String raw = pathBuilder.toString().trim();
+    String filePath = (raw.startsWith("\"") && raw.endsWith("\""))
+            ? raw.substring(1, raw.length() - 1) : raw;
+
+    if (!filePath.toLowerCase().endsWith(".csv")) {
+      throw new IllegalArgumentException("Imported file must have a .csv extension");
+    }
+
+    return new ImportCalendarCommand(filePath);
   }
 
   /**
