@@ -24,7 +24,8 @@ public class CreateCalendarCommandTest {
 
   @Test(expected = IllegalArgumentException.class)
   public void testConstructor_NullTimezone() {
-    new CreateCalendarCommand("MyCal", null);
+    new CreateCalendarCommand("MyCal",
+            null);
   }
 
   @Test

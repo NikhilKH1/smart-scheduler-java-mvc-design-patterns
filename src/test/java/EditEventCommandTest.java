@@ -7,15 +7,19 @@ import calendarapp.view.ICalendarView;
 
 import org.junit.Test;
 
-import java.lang.reflect.InvocationTargetException;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.time.temporal.Temporal;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
+/**
+ * Test file for Edit Event Command.
+ */
 public class EditEventCommandTest {
 
   private static class DummyModel implements ICalendarModel {
@@ -37,7 +41,7 @@ public class EditEventCommandTest {
     }
 
     @Override
-    public List<ReadOnlyCalendarEvent> getEventsOnDate(LocalDate date)  {
+    public List<ReadOnlyCalendarEvent> getEventsOnDate(LocalDate date) {
       return List.of();
     }
 
@@ -61,19 +65,22 @@ public class EditEventCommandTest {
       return false;
     }
 
-    @Override public boolean editSingleEvent(String property, String eventName,
-                                             ZonedDateTime originalStart, ZonedDateTime originalEnd,
-                                             String newValue) {
+    @Override
+    public boolean editSingleEvent(String property, String eventName,
+                                   ZonedDateTime originalStart, ZonedDateTime originalEnd,
+                                   String newValue) {
       throw new RuntimeException("Simulated failure");
     }
 
-    @Override public boolean editEventsFrom(String property, String eventName, ZonedDateTime fromDateTime,
-                                            String newValue)
-    {
+    @Override
+    public boolean editEventsFrom(String property, String eventName,
+                                  ZonedDateTime fromDateTime,
+                                  String newValue) {
       throw new RuntimeException("Simulated failure");
     }
 
-    @Override public boolean editEventsAll(String prop, String name, String value) {
+    @Override
+    public boolean editEventsAll(String prop, String name, String value) {
       throw new RuntimeException("Simulated failure");
     }
 
@@ -82,13 +89,14 @@ public class EditEventCommandTest {
       return "";
     }
 
-    @Override public ZoneId getTimezone() {
+    @Override
+    public ZoneId getTimezone() {
       return zone;
     }
 
     @Override
     public void updateTimezone(ZoneId newTimezone) {
-
+      return;
     }
 
     @Override
@@ -131,9 +139,30 @@ public class EditEventCommandTest {
       return;
     }
 
-    @Override public void displayMessage(String msg) {}
-    @Override public void displayError(String msg) {
+    @Override
+    public void displayMessage(String msg) {
+      return;
+    }
+
+    @Override
+    public void displayError(String msg) {
       lastError = msg;
+    }
+
+    @Override
+    public void run() {
+      return;
+
+    }
+
+    @Override
+    public void setInput(Readable in) {
+      ICalendarView.super.setInput(in);
+    }
+
+    @Override
+    public void setOutput(Appendable out) {
+      ICalendarView.super.setOutput(out);
     }
   }
 
@@ -176,7 +205,7 @@ public class EditEventCommandTest {
     assertTrue(view.lastError.contains("Error while editing event"));
   }
 
-    @Test
+  @Test
   public void testEditEventCommandProperties() {
     EditEventCommand cmd = new EditEventCommand("location", "Team Meeting",
             "New Room");

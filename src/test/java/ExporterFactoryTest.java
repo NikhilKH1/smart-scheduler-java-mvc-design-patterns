@@ -1,14 +1,16 @@
 import calendarapp.utils.CSVExporter;
 import calendarapp.utils.ExporterFactory;
 import calendarapp.utils.IExporter;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.util.function.Function;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * JUnit test class for ExporterFactory class with full coverage and mutation killing.
@@ -56,14 +58,16 @@ public class ExporterFactoryTest {
 
   @Test
   public void testSetCustomExporterSupplierOverridesDefaultLogic() throws IOException {
-    ExporterFactory.setCustomExporterSupplier(path -> (events, file) -> "custom-output.csv");
+    ExporterFactory.setCustomExporterSupplier(path -> (events,
+                                                       file) -> "custom-output.csv");
     IExporter exporter = ExporterFactory.getExporter("any.txt");
     assertEquals("custom-output.csv", exporter.export(null, null));
   }
 
   @Test
   public void testClearCustomExporterSupplierRestoresDefaultBehavior() {
-    ExporterFactory.setCustomExporterSupplier(path -> (events, file) -> "custom-output.csv");
+    ExporterFactory.setCustomExporterSupplier(path -> (events,
+                                                       file) -> "custom-output.csv");
     ExporterFactory.clearCustomExporterSupplier();
     IExporter exporter = ExporterFactory.getExporter("calendar.csv");
     assertTrue(exporter instanceof CSVExporter);

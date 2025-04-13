@@ -87,8 +87,23 @@ public class EditCalendarCommandTest {
       }
 
       @Override
+      public void run() {
+        return;
+      }
+
+      @Override
+      public void setInput(Readable in) {
+        ICalendarView.super.setInput(in);
+      }
+
+      @Override
+      public void setOutput(Appendable out) {
+        ICalendarView.super.setOutput(out);
+      }
+
+      @Override
       public void displayEvents(java.util.List events) {
-        // No implementation of this is required
+        return;
       }
     };
 
@@ -142,8 +157,23 @@ public class EditCalendarCommandTest {
       }
 
       @Override
+      public void run() {
+        return;
+      }
+
+      @Override
+      public void setInput(Readable in) {
+        ICalendarView.super.setInput(in);
+      }
+
+      @Override
+      public void setOutput(Appendable out) {
+        ICalendarView.super.setOutput(out);
+      }
+
+      @Override
       public void displayEvents(java.util.List events) {
-        // No implementation of this is required
+        return;
       }
     };
 
@@ -197,8 +227,23 @@ public class EditCalendarCommandTest {
       }
 
       @Override
+      public void run() {
+        return;
+      }
+
+      @Override
+      public void setInput(Readable in) {
+        ICalendarView.super.setInput(in);
+      }
+
+      @Override
+      public void setOutput(Appendable out) {
+        ICalendarView.super.setOutput(out);
+      }
+
+      @Override
       public void displayEvents(java.util.List events) {
-        // No implementation of this is required
+        return;
       }
     };
 
@@ -208,7 +253,8 @@ public class EditCalendarCommandTest {
 
     assertFalse(result);
     System.out.println(log.toString());
-    assertTrue(log.toString().contains("ERROR: Failed to edit calendar 'MyCal': Simulated failure"));
+    assertTrue(log.toString().contains("ERROR: Failed to edit "
+            + "calendar 'MyCal': Simulated failure"));
   }
 }
 

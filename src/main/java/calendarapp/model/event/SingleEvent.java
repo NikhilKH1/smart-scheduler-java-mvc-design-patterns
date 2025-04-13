@@ -73,7 +73,7 @@ public class SingleEvent extends AbstractCalendarEvent {
    * @return null
    */
   @Override
-  public ZonedDateTime RepeatUntil() {
+  public ZonedDateTime repeatUntil() {
     return null;
   }
 

@@ -3,13 +3,14 @@ import calendarapp.controller.CommandParser;
 import calendarapp.controller.commands.ICommand;
 import calendarapp.model.CalendarManager;
 import calendarapp.model.ICalendarManager;
-import calendarapp.model.event.ICalendarEvent;
 import calendarapp.model.event.ReadOnlyCalendarEvent;
 import calendarapp.view.ICalendarView;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -614,7 +615,8 @@ public class CalendarControllerTest {
 
   @Test
   public void testProcessCommandUnsupportedCommand() {
-    ICommand unsupportedCommand = new ICommand() {};
+    ICommand unsupportedCommand = new ICommand() {
+    };
 
     CommandParser dummyParser = new CommandParser(manager) {
       @Override
@@ -756,6 +758,68 @@ public class CalendarControllerTest {
     assertNotNull("Active calendar should not be null", controller.getActiveCalendar());
   }
 
+  @Test
+  public void testRunWithInjectedInputAndOutput() {
+    StringBuilder output = new StringBuilder();
+    String input = "exit\n";
+    Readable reader = new java.io.StringReader(input);
+
+    CalendarController injectedController = new
+            CalendarController(manager, new CommandParser(manager));
+    injectedController.run(reader, output);
+
+    String result = output.toString();
+    assertTrue(result.contains("Starting in Interactive CLI mode"));
+    assertTrue(result.contains("Exiting"));
+  }
+
+  @Test
+  public void testSetView() {
+    ICalendarView newView = new CalendarControllerTest.TestView();
+    controller.setView(newView);
+    assertSame(newView, controller.getView());
+  }
+
+  @Test
+  public void testProcessCommandWhenNoActiveCalendarSelected() {
+    ICalendarManager freshManager = new CalendarManager();
+    TestView testView = new TestView();
+    CommandParser parser = new CommandParser(freshManager);
+    CalendarController ctrl = new CalendarController(freshManager, testView, parser);
+
+    boolean result = ctrl.processCommand("create event "
+            + "\"Meeting\" from 2025-06-01T10:00 to 2025-06-01T11:00");
+
+    assertFalse(result);
+    assertEquals("Execution Error: null", testView.getLastMessage());
+  }
+
+  @Test
+  public void testRunInteractiveMode_InjectMockView() {
+    String[] args = {"--mode", "interactive"};
+
+    InputStreamReader dummyIn = new
+            InputStreamReader(new java.io.ByteArrayInputStream("exit\n".getBytes()));
+    java.io.ByteArrayOutputStream dummyOut = new java.io.ByteArrayOutputStream();
+
+    ICalendarManager dummyManager = new CalendarManager();
+    CommandParser dummyParser = new CommandParser(dummyManager);
+
+    CalendarController ctrl = new CalendarController(dummyManager, dummyParser) {
+      @Override
+      public void setView(ICalendarView view) {
+        super.setView(view);
+      }
+    };
+
+    System.setIn(new java.io.ByteArrayInputStream("exit\n".getBytes()));
+    System.setOut(new java.io.PrintStream(dummyOut));
+
+    ctrl.run(args);
+
+    String output = dummyOut.toString();
+    assertTrue(output.contains("Starting in Interactive CLI mode"));
+  }
 
 
   @Test
@@ -780,6 +844,21 @@ public class CalendarControllerTest {
     @Override
     public void displayError(String error) {
       messages.add(error);
+    }
+
+    @Override
+    public void run() {
+      return;
+    }
+
+    @Override
+    public void setInput(Readable in) {
+      ICalendarView.super.setInput(in);
+    }
+
+    @Override
+    public void setOutput(Appendable out) {
+      ICalendarView.super.setOutput(out);
     }
 
     public String getLastMessage() {

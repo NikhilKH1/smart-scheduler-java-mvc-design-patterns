@@ -29,6 +29,27 @@ public class SingleEventTest {
   }
 
   @Test
+  public void testIsRecurringWithSeriesId() {
+    ZonedDateTime start = ZonedDateTime.of(2025, 6, 1, 9,
+            0, 0, 0, zone);
+    ZonedDateTime end = ZonedDateTime.of(2025, 6, 1, 10,
+            0, 0, 0, zone);
+
+    SingleEvent recurringEvent = new SingleEvent("Yoga", start, end,
+            "Weekly session", "Studio", true, false,
+            "weekly-series");
+
+    assertTrue(recurringEvent.isRecurring());
+  }
+
+  @Test
+  public void testIsRecurringWithoutSeriesId() {
+    SingleEvent nonRecurringEvent = createSampleEvent();
+    assertFalse(nonRecurringEvent.isRecurring());
+  }
+
+
+  @Test
   public void testCreateSingleEvent() {
     ZonedDateTime start = ZonedDateTime.of(2025, 6, 1, 9, 0,
             0, 0, zone);

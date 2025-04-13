@@ -1,5 +1,4 @@
 import calendarapp.controller.commands.CreateEventCommand;
-import calendarapp.model.CalendarModel;
 import calendarapp.model.ICalendarModel;
 import calendarapp.model.event.ICalendarEvent;
 import calendarapp.model.event.ReadOnlyCalendarEvent;
@@ -216,7 +215,7 @@ public class CreateEventCommandTest {
 
       @Override
       public void updateTimezone(ZoneId newTimezone) {
-        // No implementation of this is required
+        return;
       }
 
       @Override
@@ -270,8 +269,23 @@ public class CreateEventCommandTest {
       }
 
       @Override
+      public void run() {
+        return;
+      }
+
+      @Override
+      public void setInput(Readable in) {
+        ICalendarView.super.setInput(in);
+      }
+
+      @Override
+      public void setOutput(Appendable out) {
+        ICalendarView.super.setOutput(out);
+      }
+
+      @Override
       public void displayEvents(List events) {
-        // not needed
+        return;
       }
     };
   }
@@ -358,7 +372,7 @@ public class CreateEventCommandTest {
 
     @Override
     public void updateTimezone(ZoneId newTimezone) {
-      // No implementation of this is required
+      return;
     }
 
     @Override

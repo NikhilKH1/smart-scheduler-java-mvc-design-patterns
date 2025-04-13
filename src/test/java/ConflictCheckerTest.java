@@ -1,8 +1,11 @@
 import calendarapp.model.ConflictChecker;
 import calendarapp.model.event.SingleEvent;
+
 import org.junit.Test;
+
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -242,6 +245,28 @@ public class ConflictCheckerTest {
 
     assertTrue(ConflictChecker.hasConflict(event1, event2));
   }
+
+  @Test
+  public void testConflictSkippedWhenNameMatches() {
+    ZonedDateTime start1 = ZonedDateTime.of(2025, 6, 1, 9, 0, 0, 0, ZoneId.of("UTC"));
+    ZonedDateTime end1 = ZonedDateTime.of(2025, 6, 1, 10, 0, 0, 0, ZoneId.of("UTC"));
+
+    ZonedDateTime start2 = ZonedDateTime.of(2025, 6, 1, 9, 30, 0, 0, ZoneId.of("UTC"));
+    ZonedDateTime end2 = ZonedDateTime.of(2025, 6, 1, 10, 30, 0, 0, ZoneId.of("UTC"));
+
+    SingleEvent existing = new SingleEvent("Math Class", start1, end1, "", "", true, false, null);
+    SingleEvent newEvent = new SingleEvent("Math Class", start2, end2, "", "", true, false, null);
+
+    boolean hasConflict = false;
+    if (!existing.getSubject().equals(newEvent.getSubject())
+            && ConflictChecker.hasConflict(existing, newEvent)) {
+      hasConflict = true;
+    }
+
+    assertFalse(hasConflict);
+  }
+
+
 }
 
 

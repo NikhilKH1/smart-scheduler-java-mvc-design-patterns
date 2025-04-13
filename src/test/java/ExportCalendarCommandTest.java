@@ -1,11 +1,13 @@
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
 import calendarapp.controller.commands.ExportCalendarCommand;
 import calendarapp.model.CalendarModel;
-import calendarapp.model.event.ICalendarEvent;
 import calendarapp.model.event.ReadOnlyCalendarEvent;
 import calendarapp.utils.ExporterFactory;
 import calendarapp.utils.IExporter;
 import calendarapp.view.ICalendarView;
-import org.junit.*;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -14,8 +16,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
+/**
+ * Junit test file for testing Export Calendar Command Test.
+ */
 public class ExportCalendarCommandTest {
 
   private static final class DummyModel extends CalendarModel {
@@ -44,8 +51,23 @@ public class ExportCalendarCommandTest {
     }
 
     @Override
+    public void run() {
+      return;
+    }
+
+    @Override
+    public void setInput(Readable in) {
+      ICalendarView.super.setInput(in);
+    }
+
+    @Override
+    public void setOutput(Appendable out) {
+      ICalendarView.super.setOutput(out);
+    }
+
+    @Override
     public void displayEvents(List<ReadOnlyCalendarEvent> events) {
-      // not needed
+      return;
     }
   }
 
@@ -95,7 +117,8 @@ public class ExportCalendarCommandTest {
 
   @Test
   public void testExportCatchesIllegalArgument() throws Exception {
-    ExporterFactory.setCustomExporterSupplier(path -> (events, file) -> {
+    ExporterFactory.setCustomExporterSupplier(path -> (events,
+                                                       file) -> {
       throw new IllegalArgumentException("Invalid!");
     });
 

@@ -2,7 +2,6 @@ import calendarapp.controller.CalendarController;
 import calendarapp.controller.CommandParser;
 import calendarapp.model.CalendarManager;
 import calendarapp.model.ICalendarManager;
-import calendarapp.model.event.ICalendarEvent;
 import calendarapp.model.event.ReadOnlyCalendarEvent;
 import calendarapp.view.ICalendarView;
 
@@ -214,6 +213,21 @@ public class CalendarAppIntegrationTest {
     @Override
     public void displayError(String error) {
       messages.add(error);
+    }
+
+    @Override
+    public void run() {
+      return;
+    }
+
+    @Override
+    public void setInput(Readable in) {
+      ICalendarView.super.setInput(in);
+    }
+
+    @Override
+    public void setOutput(Appendable out) {
+      ICalendarView.super.setOutput(out);
     }
 
     public String getLastMessage() {

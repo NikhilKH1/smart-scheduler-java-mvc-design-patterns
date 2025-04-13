@@ -1,10 +1,18 @@
 import org.junit.Test;
-import static org.junit.Assert.*;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
 import java.time.ZonedDateTime;
 import java.time.ZoneId;
 
 import calendarapp.factory.EventInput;
 
+/**
+ * JUnit Test file for EventInput.
+ */
 public class EventInputTest {
 
   @Test
@@ -24,14 +32,17 @@ public class EventInputTest {
   @Test
   public void testSettersAndGetters() {
     EventInput eventInput = new EventInput();
-    ZonedDateTime start = ZonedDateTime.of(2025, 6, 1, 9, 0, 0, 0, ZoneId.systemDefault());
-    ZonedDateTime end = ZonedDateTime.of(2025, 6, 1, 10, 0, 0, 0, ZoneId.systemDefault());
+    ZonedDateTime start = ZonedDateTime.of(2025, 6, 1, 9,
+            0, 0, 0, ZoneId.systemDefault());
+    ZonedDateTime end = ZonedDateTime.of(2025, 6, 1, 10,
+            0, 0, 0, ZoneId.systemDefault());
     eventInput.setSubject("Meeting");
     eventInput.setStart(start);
     eventInput.setEnd(end);
     eventInput.setRepeatingDays("Mon,Wed,Fri");
     eventInput.setRepeatTimes(10);
-    eventInput.setRepeatUntil(ZonedDateTime.of(2025, 6, 30, 9, 0, 0, 0, ZoneId.systemDefault()));
+    eventInput.setRepeatUntil(ZonedDateTime.of(2025, 6, 30,
+            9, 0, 0, 0, ZoneId.systemDefault()));
     eventInput.setDescription("Team meeting for project updates");
     eventInput.setLocation("Room 101");
     eventInput.setRecurring(true);
@@ -41,7 +52,8 @@ public class EventInputTest {
     assertEquals(end, eventInput.getEnd());
     assertEquals("Mon,Wed,Fri", eventInput.getRepeatingDays());
     assertEquals(Integer.valueOf(10), eventInput.getRepeatTimes());
-    assertEquals(ZonedDateTime.of(2025, 6, 30, 9, 0, 0, 0, ZoneId.systemDefault()), eventInput.getRepeatUntil());
+    assertEquals(ZonedDateTime.of(2025, 6, 30, 9, 0,
+            0, 0, ZoneId.systemDefault()), eventInput.getRepeatUntil());
     assertEquals("Team meeting for project updates", eventInput.getDescription());
     assertEquals("Room 101", eventInput.getLocation());
     assertTrue(eventInput.isRecurring());
@@ -71,7 +83,8 @@ public class EventInputTest {
   @Test
   public void testSetRepeatUntil() {
     EventInput eventInput = new EventInput();
-    ZonedDateTime repeatUntil = ZonedDateTime.of(2025, 12, 31, 9, 0, 0, 0, ZoneId.systemDefault());
+    ZonedDateTime repeatUntil = ZonedDateTime.of(2025, 12, 31,
+            9, 0, 0, 0, ZoneId.systemDefault());
     eventInput.setRepeatUntil(repeatUntil);
     assertEquals(repeatUntil, eventInput.getRepeatUntil());
   }
@@ -93,8 +106,10 @@ public class EventInputTest {
   @Test
   public void testSetStartAndEnd() {
     EventInput eventInput = new EventInput();
-    ZonedDateTime start = ZonedDateTime.of(2025, 6, 1, 9, 0, 0, 0, ZoneId.systemDefault());
-    ZonedDateTime end = ZonedDateTime.of(2025, 6, 1, 10, 0, 0, 0, ZoneId.systemDefault());
+    ZonedDateTime start = ZonedDateTime.of(2025, 6, 1, 9,
+            0, 0, 0, ZoneId.systemDefault());
+    ZonedDateTime end = ZonedDateTime.of(2025, 6, 1, 10,
+            0, 0, 0, ZoneId.systemDefault());
     eventInput.setStart(start);
     eventInput.setEnd(end);
     assertEquals(start, eventInput.getStart());

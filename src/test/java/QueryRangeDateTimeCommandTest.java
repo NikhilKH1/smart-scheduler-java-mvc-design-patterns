@@ -1,5 +1,4 @@
 import calendarapp.controller.commands.QueryRangeDateTimeCommand;
-import calendarapp.model.CalendarModel;
 import calendarapp.model.ICalendarModel;
 import calendarapp.model.event.ICalendarEvent;
 import calendarapp.model.event.ReadOnlyCalendarEvent;
@@ -7,10 +6,8 @@ import calendarapp.model.event.RecurringEvent;
 import calendarapp.view.ICalendarView;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.time.temporal.Temporal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -18,7 +15,6 @@ import java.util.stream.Collectors;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
@@ -110,7 +106,7 @@ public class QueryRangeDateTimeCommandTest {
 
     @Override
     public void updateTimezone(ZoneId newTimezone) {
-      // No implementation of this is required
+      return;
     }
 
     @Override
@@ -136,7 +132,8 @@ public class QueryRangeDateTimeCommandTest {
     @Override
     public List<ReadOnlyCalendarEvent> getReadOnlyEventsOnDate(LocalDate date) {
       return events.stream()
-              .filter(event -> event.getStartDateTime().toLocalDate().equals(date))
+              .filter(event -> event.getStartDateTime().
+                      toLocalDate().equals(date))
               .collect(Collectors.toList());
     }
 
@@ -163,7 +160,22 @@ public class QueryRangeDateTimeCommandTest {
 
     @Override
     public void displayError(String errorMessage) {
-      // No implementation of this is required
+      return;
+    }
+
+    @Override
+    public void run() {
+      return;
+    }
+
+    @Override
+    public void setInput(Readable in) {
+      ICalendarView.super.setInput(in);
+    }
+
+    @Override
+    public void setOutput(Appendable out) {
+      ICalendarView.super.setOutput(out);
     }
 
     public String getMessage() {
@@ -212,7 +224,7 @@ public class QueryRangeDateTimeCommandTest {
     }
 
     @Override
-    public ZonedDateTime RepeatUntil() {
+    public ZonedDateTime repeatUntil() {
       return null;
     }
 
@@ -242,7 +254,7 @@ public class QueryRangeDateTimeCommandTest {
     }
 
     @Override
-    public ICalendarEvent withUpdatedProperty(String property, String newValue){
+    public ICalendarEvent withUpdatedProperty(String property, String newValue) {
       return null;
     }
   }
@@ -250,8 +262,10 @@ public class QueryRangeDateTimeCommandTest {
 
   @Test
   public void testQueryRangeNoEvents() {
-    ZonedDateTime start = ZonedDateTime.of(2025, 6, 1, 9, 0, 0, 0, ZoneId.of("America/New_York"));
-    ZonedDateTime end = ZonedDateTime.of(2025, 6, 1, 11, 0, 0, 0, ZoneId.of("America/New_York"));
+    ZonedDateTime start = ZonedDateTime.of(2025, 6, 1,
+            9, 0, 0, 0, ZoneId.of("America/New_York"));
+    ZonedDateTime end = ZonedDateTime.of(2025, 6, 1,
+            11, 0, 0, 0, ZoneId.of("America/New_York"));
     QueryRangeDateTimeCommand cmd = new QueryRangeDateTimeCommand(start, end);
     List<ReadOnlyCalendarEvent> emptyList = new ArrayList<>();
     TestCalendarModel model = new TestCalendarModel(emptyList);
@@ -264,39 +278,12 @@ public class QueryRangeDateTimeCommandTest {
   }
 
 
-//  @Test
-//  public void testQueryRangeWithEvents() {
-//    ZonedDateTime start = ZonedDateTime.of(2025, 6, 1, 9, 0, 0, 0, ZoneId.of("Asia/Kolkata"));
-//    ZonedDateTime end = ZonedDateTime.of(2025, 6, 1, 11, 0, 0, 0, ZoneId.of("Asia/Kolkata"));
-//    QueryRangeDateTimeCommand cmd = new QueryRangeDateTimeCommand(start, end);
-//
-//    ZonedDateTime eventStart = ZonedDateTime.of(2025, 6, 1, 9, 30, 0, 0, ZoneId.of("Asia/Kolkata"));
-//    ZonedDateTime eventEnd = ZonedDateTime.of(2025, 6, 1, 10, 30, 0, 0, ZoneId.of("Asia/Kolkata"));
-//    DummyCalendarEvent event = new DummyCalendarEvent("Meeting", eventStart, eventEnd);
-//
-//    List<ReadOnlyCalendarEvent> events = new ArrayList<>();
-//    events.add(event);
-//
-//    TestCalendarModel model = new TestCalendarModel(events);
-//    TestCalendarView view = new TestCalendarView();
-//
-//    boolean result = cmd.execute(model, view);
-//    assertTrue(result);
-//
-//    String expected = "Events from " + start + " to " + end + ":";
-//    assertEquals(expected, view.getMessage());
-//
-//    List<ReadOnlyCalendarEvent> displayed = view.getDisplayedEvents();
-//    assertNotNull(displayed);
-//    assertEquals(1, displayed.size());
-//    assertEquals("Meeting", displayed.get(0).getSubject());
-//  }
-
-
   @Test
   public void testGetters() {
-    ZonedDateTime start = ZonedDateTime.of(2025, 6, 1, 9, 0, 0, 0, ZoneId.of("Australia/Sydney"));
-    ZonedDateTime end = ZonedDateTime.of(2025, 6, 1, 11, 0, 0, 0, ZoneId.of("Australia/Sydney"));
+    ZonedDateTime start = ZonedDateTime.of(2025, 6, 1, 9,
+            0, 0, 0, ZoneId.of("Australia/Sydney"));
+    ZonedDateTime end = ZonedDateTime.of(2025, 6, 1, 11,
+            0, 0, 0, ZoneId.of("Australia/Sydney"));
     QueryRangeDateTimeCommand cmd = new QueryRangeDateTimeCommand(start, end);
     assertEquals(start, cmd.getStartDateTime());
     assertEquals(end, cmd.getEndDateTime());

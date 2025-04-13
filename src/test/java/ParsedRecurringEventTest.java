@@ -61,7 +61,7 @@ public class ParsedRecurringEventTest {
             recurringEvent.getWeekdays());
     assertEquals("Repeat count should be by default", -1,
             recurringEvent.getRepeatCount());
-    assertNull("RepeatUntil should be null by default",
+    assertNull("repeatUntil should be null by default",
             recurringEvent.getRepeatUntil());
     assertEquals("Index should be -1 by default", -1, recurringEvent.getIndex());
   }
@@ -105,11 +105,11 @@ public class ParsedRecurringEventTest {
   public void testSetAndGetRepeatUntil() {
     Temporal repeatUntilDate = LocalDate.of(2025, 12, 31);
     recurringEvent.setRepeatUntil(repeatUntilDate);
-    assertEquals("RepeatUntil should be set correctly", repeatUntilDate,
+    assertEquals("repeatUntil should be set correctly", repeatUntilDate,
             recurringEvent.getRepeatUntil());
 
     recurringEvent.setRepeatUntil(null);
-    assertNull("RepeatUntil should be null after setting null",
+    assertNull("repeatUntil should be null after setting null",
             recurringEvent.getRepeatUntil());
   }
 
@@ -124,4 +124,47 @@ public class ParsedRecurringEventTest {
     recurringEvent.setIndex(0);
     assertEquals("Index should be set to 0", 0, recurringEvent.getIndex());
   }
+
+  @Test
+  public void testSettersConsistency() {
+    ParsedRecurringEvent event = new ParsedRecurringEvent();
+    Temporal untilDate = LocalDate.of(2025, 12, 31);
+
+    event.setRecurring(true);
+    event.setWeekdays("MTWRF");
+    event.setRepeatCount(10);
+    event.setRepeatUntil(untilDate);
+    event.setIndex(7);
+
+    assertTrue(event.isRecurring());
+    assertEquals("MTWRF", event.getWeekdays());
+    assertEquals(10, event.getRepeatCount());
+    assertEquals(untilDate, event.getRepeatUntil());
+    assertEquals(7, event.getIndex());
+  }
+
+  @Test
+  public void testCopyValuesToNewObject() {
+    ParsedRecurringEvent original = new ParsedRecurringEvent();
+    original.setRecurring(true);
+    original.setWeekdays("SU");
+    original.setRepeatCount(3);
+    Temporal until = LocalDate.of(2030, 1, 1);
+    original.setRepeatUntil(until);
+    original.setIndex(2);
+
+    ParsedRecurringEvent copy = new ParsedRecurringEvent();
+    copy.setRecurring(original.isRecurring());
+    copy.setWeekdays(original.getWeekdays());
+    copy.setRepeatCount(original.getRepeatCount());
+    copy.setRepeatUntil(original.getRepeatUntil());
+    copy.setIndex(original.getIndex());
+
+    assertEquals(original.isRecurring(), copy.isRecurring());
+    assertEquals(original.getWeekdays(), copy.getWeekdays());
+    assertEquals(original.getRepeatCount(), copy.getRepeatCount());
+    assertEquals(original.getRepeatUntil(), copy.getRepeatUntil());
+    assertEquals(original.getIndex(), copy.getIndex());
+  }
+
 }

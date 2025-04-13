@@ -2,7 +2,6 @@ package calendarapp.view;
 
 import calendarapp.controller.ICalendarController;
 import calendarapp.model.event.ReadOnlyCalendarEvent;
-
 import java.io.IOException;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;

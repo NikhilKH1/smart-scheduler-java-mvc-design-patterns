@@ -93,7 +93,8 @@ public class UseCalendarCommandTest {
            * @return a list of calendar events that fall within the specified range
            */
           @Override
-          public List<ReadOnlyCalendarEvent> getEventsBetween(ZonedDateTime start, ZonedDateTime end) {
+          public List<ReadOnlyCalendarEvent> getEventsBetween(ZonedDateTime start,
+                                                              ZonedDateTime end) {
             return List.of();
           }
 
@@ -161,8 +162,8 @@ public class UseCalendarCommandTest {
            * @return true if successfully edited
            */
           @Override
-          public boolean editEventsFrom(String property, String eventName, ZonedDateTime fromDateTime,
-                                        String newValue){
+          public boolean editEventsFrom(String property, String eventName,
+                                        ZonedDateTime fromDateTime, String newValue) {
             return false;
           }
 
@@ -206,7 +207,7 @@ public class UseCalendarCommandTest {
            */
           @Override
           public void updateTimezone(ZoneId newTimezone) {
-            // No implementation of this is required
+            return;
           }
 
           /**
@@ -222,7 +223,8 @@ public class UseCalendarCommandTest {
            */
           @Override
           public boolean copySingleEventTo(ICalendarModel sourceCalendar, String eventName,
-                                           ZonedDateTime sourceDateTime, ICalendarModel targetCalendar,
+                                           ZonedDateTime sourceDateTime,
+                                           ICalendarModel targetCalendar,
                                            ZonedDateTime targetDateTime) {
             return false;
           }
@@ -238,8 +240,10 @@ public class UseCalendarCommandTest {
            * @return true if all events were copied successfully, false otherwise
            */
           @Override
-          public boolean copyEventsOnDateTo(ICalendarModel sourceCalendar, ZonedDateTime sourceDate,
-                                            ICalendarModel targetCalendar, ZonedDateTime targetDate) {
+          public boolean copyEventsOnDateTo(ICalendarModel sourceCalendar,
+                                            ZonedDateTime sourceDate,
+                                            ICalendarModel targetCalendar,
+                                            ZonedDateTime targetDate) {
             return false;
           }
 
@@ -302,6 +306,21 @@ public class UseCalendarCommandTest {
       }
 
       @Override
+      public void run() {
+        return;
+      }
+
+      @Override
+      public void setInput(Readable in) {
+        ICalendarView.super.setInput(in);
+      }
+
+      @Override
+      public void setOutput(Appendable out) {
+        ICalendarView.super.setOutput(out);
+      }
+
+      @Override
       public void displayEvents(java.util.List events) {
         output.append("Displaying events: ").append(events);
       }
@@ -350,7 +369,8 @@ public class UseCalendarCommandTest {
           }
 
           @Override
-          public List<ReadOnlyCalendarEvent> getEventsBetween(ZonedDateTime start, ZonedDateTime end) {
+          public List<ReadOnlyCalendarEvent> getEventsBetween(ZonedDateTime start,
+                                                              ZonedDateTime end) {
             return null;
           }
 
@@ -377,10 +397,12 @@ public class UseCalendarCommandTest {
           }
 
           @Override
-          public boolean editEventsFrom(String property, String eventName, ZonedDateTime fromDateTime,
+          public boolean editEventsFrom(String property, String eventName,
+                                        ZonedDateTime fromDateTime,
                                         String newValue) {
             return false;
           }
+
           @Override
           public boolean editEventsAll(String property, String eventName, String newValue) {
             return false;
@@ -399,19 +421,21 @@ public class UseCalendarCommandTest {
 
           @Override
           public void updateTimezone(ZoneId newTimezone) {
-            // No implementation of this is required
+            return;
           }
 
           @Override
           public boolean copySingleEventTo(ICalendarModel sourceCalendar, String eventName,
-                                           ZonedDateTime sourceDateTime, ICalendarModel targetCalendar,
+                                           ZonedDateTime sourceDateTime,
+                                           ICalendarModel targetCalendar,
                                            ZonedDateTime targetDateTime) {
             return false;
           }
 
           @Override
           public boolean copyEventsOnDateTo(ICalendarModel sourceCalendar, ZonedDateTime sourceDate,
-                                            ICalendarModel targetCalendar, ZonedDateTime targetDate) {
+                                            ICalendarModel targetCalendar,
+                                            ZonedDateTime targetDate) {
             return false;
           }
 
@@ -460,6 +484,22 @@ public class UseCalendarCommandTest {
       @Override
       public void displayError(String msg) {
         output.append("ERROR: ").append(msg);
+      }
+
+      @Override
+      public void run() {
+        return;
+
+      }
+
+      @Override
+      public void setInput(Readable in) {
+        ICalendarView.super.setInput(in);
+      }
+
+      @Override
+      public void setOutput(Appendable out) {
+        ICalendarView.super.setOutput(out);
       }
 
       @Override
@@ -517,6 +557,21 @@ public class UseCalendarCommandTest {
       @Override
       public void displayError(String msg) {
         output.append("ERROR: ").append(msg);
+      }
+
+      @Override
+      public void run() {
+        return;
+      }
+
+      @Override
+      public void setInput(Readable in) {
+        ICalendarView.super.setInput(in);
+      }
+
+      @Override
+      public void setOutput(Appendable out) {
+        ICalendarView.super.setOutput(out);
       }
 
       @Override

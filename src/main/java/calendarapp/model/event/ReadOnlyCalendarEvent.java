@@ -64,7 +64,7 @@ public interface ReadOnlyCalendarEvent {
    *
    * @return the date until which the event repeats, or null if not applicable
    */
-  public ZonedDateTime RepeatUntil();
+  public ZonedDateTime repeatUntil();
 
   /**
    * Returns the number of times the event will repeat. This method is only relevant

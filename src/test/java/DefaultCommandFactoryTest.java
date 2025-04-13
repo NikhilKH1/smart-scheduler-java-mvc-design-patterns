@@ -1,6 +1,8 @@
 import static org.junit.Assert.assertEquals;
+
 import org.junit.Before;
 import org.junit.Test;
+
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
@@ -30,7 +32,8 @@ public class DefaultCommandFactoryTest {
     private Integer repeatTimes;
     private ZonedDateTime repeatUntil;
 
-    public DummyEventInput(String subject, ZonedDateTime start, ZonedDateTime end,
+    public DummyEventInput(String subject, ZonedDateTime start,
+                           ZonedDateTime end,
                            String description, String location,
                            String repeatingDays, Integer repeatTimes, ZonedDateTime repeatUntil) {
       this.subject = subject;
@@ -97,7 +100,8 @@ public class DefaultCommandFactoryTest {
     private String newValue;
     private boolean recurring;
 
-    public DummyEditInput(String property, String eventName, ZonedDateTime fromStart, ZonedDateTime fromEnd,
+    public DummyEditInput(String property, String eventName, ZonedDateTime fromStart,
+                          ZonedDateTime fromEnd,
                           String newValue, boolean recurring) {
       super(property, eventName, fromStart, fromEnd, newValue, recurring);
       this.property = property;
@@ -162,9 +166,12 @@ public class DefaultCommandFactoryTest {
 
   @Test
   public void testCreateEventCommand_Single() {
-    ZonedDateTime start = ZonedDateTime.of(2025, 6, 1, 9, 0, 0, 0, ZoneId.systemDefault());
+    ZonedDateTime start = ZonedDateTime.of(2025, 6, 1, 9,
+            0, 0, 0, ZoneId.systemDefault());
     ZonedDateTime end = start.plusHours(1);
-    DummyEventInput input = new DummyEventInput("Meeting", start, end, "Discuss plan", "Room 101", "", null, null);
+    DummyEventInput input = new DummyEventInput("Meeting", start, end,
+            "Discuss plan", "Room 101", "", null,
+            null);
     String command = factory.createEventCommand(input);
     String expected = "create event \"Meeting\" from " + start.toLocalDateTime() +
             " to " + end.toLocalDateTime() +
@@ -174,9 +181,12 @@ public class DefaultCommandFactoryTest {
 
   @Test
   public void testCreateEventCommand_Recurring_WithRepeatTimes() {
-    ZonedDateTime start = ZonedDateTime.of(2025, 6, 1, 9, 0, 0, 0, ZoneId.systemDefault());
+    ZonedDateTime start = ZonedDateTime.of(2025, 6, 1, 9,
+            0, 0, 0, ZoneId.systemDefault());
     ZonedDateTime end = start.plusHours(1);
-    DummyEventInput input = new DummyEventInput("Meeting", start, end, "Weekly sync", "Room 202", "MTW", 5, null);
+    DummyEventInput input = new DummyEventInput("Meeting", start, end,
+            "Weekly sync", "Room 202", "MTW", 5,
+            null);
     String command = factory.createEventCommand(input);
     String expected = "create event \"Meeting\" from " + start.toLocalDateTime() +
             " to " + end.toLocalDateTime() +
@@ -186,10 +196,12 @@ public class DefaultCommandFactoryTest {
 
   @Test
   public void testCreateEventCommand_Recurring_WithRepeatUntil() {
-    ZonedDateTime start = ZonedDateTime.of(2025, 6, 1, 9, 0, 0, 0, ZoneId.systemDefault());
+    ZonedDateTime start = ZonedDateTime.of(2025, 6, 1, 9,
+            0, 0, 0, ZoneId.systemDefault());
     ZonedDateTime end = start.plusHours(1);
     ZonedDateTime repeatUntil = start.plusWeeks(4);
-    DummyEventInput input = new DummyEventInput("Training", start, end, "Monthly Training", "Auditorium", "MTWRFSU", null, repeatUntil);
+    DummyEventInput input = new DummyEventInput("Training", start, end,
+            "Monthly Training", "Auditorium", "MTWRFSU", null, repeatUntil);
     String command = factory.createEventCommand(input);
     String expected = "create event \"Training\" from " + start.toLocalDateTime() +
             " to " + end.toLocalDateTime() +
@@ -202,7 +214,8 @@ public class DefaultCommandFactoryTest {
   public void testCreateEditCommand_NonRecurring() {
     ZonedDateTime fromStart = ZonedDateTime.of(2025, 6, 1, 9, 0, 0, 0, ZoneId.systemDefault());
     ZonedDateTime fromEnd = fromStart.plusHours(1);
-    EditInput input = new DummyEditInput("description", "Meeting", fromStart, fromEnd, "Updated description", false);
+    EditInput input = new DummyEditInput("description", "Meeting",
+            fromStart, fromEnd, "Updated description", false);
     String command = factory.createEditCommand(input);
     String expected = "edit event description \"Meeting\" from " + fromStart.toLocalDateTime() +
             " to " + fromEnd.toLocalDateTime() + " with \"Updated description\"";
@@ -211,9 +224,11 @@ public class DefaultCommandFactoryTest {
 
   @Test
   public void testCreateEditCommand_Recurring_RepeatingDays() {
-    ZonedDateTime fromStart = ZonedDateTime.of(2025, 6, 1, 9, 0, 0, 0, ZoneId.systemDefault());
+    ZonedDateTime fromStart = ZonedDateTime.of(2025, 6, 1, 9,
+            0, 0, 0, ZoneId.systemDefault());
     ZonedDateTime fromEnd = fromStart.plusHours(1);
-    DummyEditInput input = new DummyEditInput("repeatingdays", "Meeting", fromStart, fromEnd, "MTWRF", true);
+    DummyEditInput input = new DummyEditInput("repeatingdays", "Meeting",
+            fromStart, fromEnd, "MTWRF", true);
     String command = factory.createEditCommand(input);
     String expected = "edit events repeatingdays \"Meeting\" MTWRF";
     assertEquals(expected, command);
@@ -221,8 +236,10 @@ public class DefaultCommandFactoryTest {
 
   @Test
   public void testCreateEditCommand_Recurring_RepeatUntil() {
-    ZonedDateTime fromStart = ZonedDateTime.of(2025, 6, 1, 9, 0, 0, 0, ZoneId.systemDefault());
-    DummyEditInput input = new DummyEditInput("repeatuntil", "Meeting", fromStart, null, "2025-06-30T09:00:00Z", true);
+    ZonedDateTime fromStart = ZonedDateTime.of(2025, 6, 1, 9,
+            0, 0, 0, ZoneId.systemDefault());
+    DummyEditInput input = new DummyEditInput("repeatuntil", "Meeting",
+            fromStart, null, "2025-06-30T09:00:00Z", true);
     String command = factory.createEditCommand(input);
     String expected = "edit events repeatuntil \"Meeting\" \"2025-06-30T09:00:00Z\"";
     assertEquals(expected, command);
@@ -230,8 +247,10 @@ public class DefaultCommandFactoryTest {
 
   @Test
   public void testCreateEditCommand_Recurring_OtherProperty() {
-    ZonedDateTime fromStart = ZonedDateTime.of(2025, 6, 1, 9, 0, 0, 0, ZoneId.systemDefault());
-    DummyEditInput input = new DummyEditInput("location", "Meeting", fromStart, null, "Room 404", true);
+    ZonedDateTime fromStart = ZonedDateTime.of(2025, 6, 1, 9,
+            0, 0, 0, ZoneId.systemDefault());
+    DummyEditInput input = new DummyEditInput("location", "Meeting",
+            fromStart, null, "Room 404", true);
     String command = factory.createEditCommand(input);
     String expected = "edit events location \"Meeting\" from " + fromStart.toLocalDateTime() +
             " with \"Room 404\"";
@@ -240,18 +259,22 @@ public class DefaultCommandFactoryTest {
 
   @Test
   public void testPrintEventsBetweenCommand() {
-    ZonedDateTime start = ZonedDateTime.of(2025, 6, 1, 9, 0, 0, 0, ZoneId.systemDefault());
+    ZonedDateTime start = ZonedDateTime.of(2025, 6, 1, 9,
+            0, 0, 0, ZoneId.systemDefault());
     ZonedDateTime end = start.plusHours(2);
     String command = factory.printEventsBetweenCommand(start, end);
-    String expected = "print events from " + start.toLocalDateTime() + " to " + end.toLocalDateTime();
+    String expected = "print events from " + start.toLocalDateTime()
+            + " to " + end.toLocalDateTime();
     assertEquals(expected, command);
   }
 
   @Test
   public void testCreateEditRecurringEventCommand_RepeatingDays() {
-    ZonedDateTime fromStart = ZonedDateTime.of(2025, 6, 1, 9, 0, 0, 0, ZoneId.systemDefault());
+    ZonedDateTime fromStart = ZonedDateTime.of(2025, 6, 1,
+            9, 0, 0, 0, ZoneId.systemDefault());
     ZonedDateTime fromEnd = fromStart.plusHours(1);
-    DummyEditInput input = new DummyEditInput("repeatingdays", "Meeting", fromStart, fromEnd, "MTWRF", true);
+    DummyEditInput input = new DummyEditInput("repeatingdays",
+            "Meeting", fromStart, fromEnd, "MTWRF", true);
     String command = factory.createEditRecurringEventCommand(input);
     String expected = "edit events repeatingdays \"Meeting\" MTWRF";
     assertEquals(expected, command);
@@ -259,9 +282,11 @@ public class DefaultCommandFactoryTest {
 
   @Test
   public void testCreateEditRecurringEventCommand_RepeatTimes() {
-    ZonedDateTime fromStart = ZonedDateTime.of(2025, 6, 1, 9, 0, 0, 0, ZoneId.systemDefault());
+    ZonedDateTime fromStart = ZonedDateTime.of(2025, 6, 1,
+            9, 0, 0, 0, ZoneId.systemDefault());
     ZonedDateTime fromEnd = fromStart.plusHours(1);
-    DummyEditInput input = new DummyEditInput("repeattimes", "Meeting", fromStart, fromEnd, "10", true);
+    DummyEditInput input = new DummyEditInput("repeattimes", "Meeting",
+            fromStart, fromEnd, "10", true);
     String command = factory.createEditRecurringEventCommand(input);
     String expected = "edit events repeattimes \"Meeting\" \"10\"";
     assertEquals(expected, command);
@@ -269,9 +294,11 @@ public class DefaultCommandFactoryTest {
 
   @Test
   public void testCreateEditRecurringEventCommand_RepeatUntil() {
-    ZonedDateTime fromStart = ZonedDateTime.of(2025, 6, 1, 9, 0, 0, 0, ZoneId.systemDefault());
+    ZonedDateTime fromStart = ZonedDateTime.of(2025, 6, 1, 9,
+            0, 0, 0, ZoneId.systemDefault());
     ZonedDateTime fromEnd = fromStart.plusHours(1);
-    DummyEditInput input = new DummyEditInput("repeatuntil", "Meeting", fromStart, fromEnd, "2025-06-30", true);
+    DummyEditInput input = new DummyEditInput("repeatuntil", "Meeting",
+            fromStart, fromEnd, "2025-06-30", true);
     String command = factory.createEditRecurringEventCommand(input);
     String expected = "edit events repeatuntil \"Meeting\" \"2025-06-30\"";
     assertEquals(expected, command);

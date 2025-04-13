@@ -3,16 +3,12 @@ import calendarapp.model.ICalendarModel;
 import calendarapp.model.event.ICalendarEvent;
 import calendarapp.model.event.ReadOnlyCalendarEvent;
 import calendarapp.view.ICalendarView;
-import jdk.jfr.Event;
-
 import org.junit.Before;
 import org.junit.Test;
-
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.List;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -86,7 +82,7 @@ public class BusyQueryCommandTest {
      */
     @Override
     public void updateTimezone(ZoneId newTimezone) {
-      // No implementation of this is required
+      return;
     }
 
     @Override
@@ -163,8 +159,8 @@ public class BusyQueryCommandTest {
 
     @Override
     public boolean copyEventsBetweenTo(ICalendarModel sourceCalendar, ZonedDateTime startDate,
-                               ZonedDateTime endDate, ICalendarModel targetCalendar,
-                               ZonedDateTime targetStartDate) {
+                                       ZonedDateTime endDate, ICalendarModel targetCalendar,
+                                       ZonedDateTime targetStartDate) {
       return false;
     }
 
@@ -185,7 +181,7 @@ public class BusyQueryCommandTest {
 
     @Override
     public void displayEvents(List<ReadOnlyCalendarEvent> events) {
-
+      return;
     }
 
     @Override
@@ -194,10 +190,24 @@ public class BusyQueryCommandTest {
     }
 
 
-
     @Override
     public void displayError(String errorMessage) {
       this.lastError = errorMessage;
+    }
+
+    @Override
+    public void run() {
+      return;
+    }
+
+    @Override
+    public void setInput(Readable in) {
+      ICalendarView.super.setInput(in);
+    }
+
+    @Override
+    public void setOutput(Appendable out) {
+      ICalendarView.super.setOutput(out);
     }
 
     public String getLastMessage() {

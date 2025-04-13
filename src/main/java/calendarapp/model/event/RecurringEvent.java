@@ -97,7 +97,7 @@ public class RecurringEvent extends AbstractCalendarEvent {
    *
    * @return the repeat-until date, or null if the event repeats indefinitely
    */
-  public ZonedDateTime RepeatUntil() {
+  public ZonedDateTime repeatUntil() {
     return repeatUntil;
   }
 
@@ -110,8 +110,12 @@ public class RecurringEvent extends AbstractCalendarEvent {
   public List<SingleEvent> generateOccurrences(String seriesId) {
     List<SingleEvent> occurrences = new ArrayList<>();
 
-    if (weekdays == null || weekdays.isEmpty()) return occurrences;
-    if (repeatCount <= 0 && repeatUntil == null) return occurrences;
+    if (weekdays == null || weekdays.isEmpty()) {
+      return occurrences;
+    }
+    if (repeatCount <= 0 && repeatUntil == null) {
+      return occurrences;
+    }
 
     if (seriesId == null || seriesId.isEmpty()) {
       seriesId = UUID.randomUUID().toString();
@@ -122,12 +126,16 @@ public class RecurringEvent extends AbstractCalendarEvent {
     int created = 0;
 
     while (true) {
-      if (repeatUntil != null && currentStart.isAfter(repeatUntil)) break;
+      if (repeatUntil != null && currentStart.isAfter(repeatUntil)) {
+        break;
+      }
       if (weekdays.indexOf(getDayChar(currentStart.getDayOfWeek())) >= 0) {
         occurrences.add(new SingleEvent(subject, currentStart, currentEnd,
                 description, location, isPublic, isAllDay, seriesId));
         created++;
-        if (repeatCount > 0 && created >= repeatCount) break;
+        if (repeatCount > 0 && created >= repeatCount) {
+          break;
+        }
       }
       currentStart = currentStart.plusDays(1);
       currentEnd = currentEnd.plusDays(1);

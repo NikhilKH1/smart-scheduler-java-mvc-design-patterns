@@ -1,17 +1,27 @@
 import org.junit.Test;
-import static org.junit.Assert.*;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
 import java.time.ZonedDateTime;
 import java.time.ZoneId;
 
 import calendarapp.factory.EditInput;
 
+/**
+ * Junit test file for Edit Input.
+ */
 public class EditInputTest {
 
   @Test
   public void testConstructorWithTime() {
-    ZonedDateTime start = ZonedDateTime.of(2025, 6, 1, 9, 0, 0, 0, ZoneId.systemDefault());
+    ZonedDateTime start = ZonedDateTime.of(2025, 6, 1, 9,
+            0, 0, 0, ZoneId.systemDefault());
     ZonedDateTime end = start.plusHours(1);
-    EditInput input = new EditInput("repeatingdays", "Meeting", start, end, "MTWRF", true);
+    EditInput input = new EditInput("repeatingdays", "Meeting", start,
+            end, "MTWRF", true);
 
     assertEquals("repeatingdays", input.getProperty());
     assertEquals("Meeting", input.getEventName());
@@ -23,7 +33,8 @@ public class EditInputTest {
 
   @Test
   public void testConstructorWithoutTime() {
-    EditInput input = new EditInput("repeattimes", "Meeting", "10", true);
+    EditInput input = new EditInput("repeattimes", "Meeting",
+            "10", true);
 
     assertEquals("repeattimes", input.getProperty());
     assertEquals("Meeting", input.getEventName());
@@ -36,9 +47,11 @@ public class EditInputTest {
   @Test
   public void testGetters() {
 
-    ZonedDateTime start = ZonedDateTime.of(2025, 6, 1, 9, 0, 0, 0, ZoneId.systemDefault());
+    ZonedDateTime start = ZonedDateTime.of(2025, 6, 1,
+            9, 0, 0, 0, ZoneId.systemDefault());
     ZonedDateTime end = start.plusHours(1);
-    EditInput input = new EditInput("repeatuntil", "Meeting", start, end, "2025-06-30", true);
+    EditInput input = new EditInput("repeatuntil", "Meeting",
+            start, end, "2025-06-30", true);
 
     assertEquals("repeatuntil", input.getProperty());
     assertEquals("Meeting", input.getEventName());
@@ -50,7 +63,8 @@ public class EditInputTest {
 
   @Test
   public void testSetters() {
-    EditInput input = new EditInput("repeatingdays", "Meeting", null, null, "MTWRF", true);
+    EditInput input = new EditInput("repeatingdays", "Meeting",
+            null, null, "MTWRF", true);
 
     input.setProperty("repeattimes");
     input.setEventName("Work Meeting");
@@ -67,9 +81,11 @@ public class EditInputTest {
 
   @Test
   public void testConstructorAndSettersCombined() {
-    ZonedDateTime start = ZonedDateTime.of(2025, 6, 1, 9, 0, 0, 0, ZoneId.systemDefault());
+    ZonedDateTime start = ZonedDateTime.of(2025, 6, 1, 9,
+            0, 0, 0, ZoneId.systemDefault());
     ZonedDateTime end = start.plusHours(1);
-    EditInput input = new EditInput("repeatuntil", "Meeting", start, end, "2025-06-30", true);
+    EditInput input = new EditInput("repeatuntil", "Meeting", start,
+            end, "2025-06-30", true);
 
     input.setProperty("repeatingdays");
     input.setEventName("Team Meeting");

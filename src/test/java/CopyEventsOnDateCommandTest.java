@@ -9,7 +9,6 @@ import org.junit.Test;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.time.temporal.Temporal;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertFalse;
@@ -69,8 +68,23 @@ public class CopyEventsOnDateCommandTest {
       }
 
       @Override
+      public void run() {
+        return;
+      }
+
+      @Override
+      public void setInput(Readable in) {
+        ICalendarView.super.setInput(in);
+      }
+
+      @Override
+      public void setOutput(Appendable out) {
+        ICalendarView.super.setOutput(out);
+      }
+
+      @Override
       public void displayEvents(java.util.List events) {
-        // No implementation of this is required
+        return;
       }
     };
 
@@ -124,8 +138,23 @@ public class CopyEventsOnDateCommandTest {
       }
 
       @Override
+      public void run() {
+        return;
+      }
+
+      @Override
+      public void setInput(Readable in) {
+        ICalendarView.super.setInput(in);
+      }
+
+      @Override
+      public void setOutput(Appendable out) {
+        ICalendarView.super.setOutput(out);
+      }
+
+      @Override
       public void displayEvents(java.util.List events) {
-        // No implementation of this is required
+        return;
       }
     };
 

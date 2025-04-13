@@ -47,7 +47,7 @@ public class EditRecurringEventCommandTest {
      */
     @Override
     public void updateTimezone(ZoneId newTimezone) {
-      // No implementation of this is required
+      return;
     }
 
     @Override
@@ -166,6 +166,21 @@ public class EditRecurringEventCommandTest {
       ps.println(errorMessage);
     }
 
+    @Override
+    public void run() {
+      return;
+    }
+
+    @Override
+    public void setInput(Readable in) {
+      ICalendarView.super.setInput(in);
+    }
+
+    @Override
+    public void setOutput(Appendable out) {
+      ICalendarView.super.setOutput(out);
+    }
+
     public String getOutput() {
       return outputStream.toString();
     }
@@ -178,7 +193,8 @@ public class EditRecurringEventCommandTest {
 
     ZonedDateTime repeatUntil = ZonedDateTime.parse("2025-12-31T00:00Z");
 
-    EditRecurringEventCommand cmd = new EditRecurringEventCommand("repeatuntil", "Daily Standup", repeatUntil);
+    EditRecurringEventCommand cmd = new EditRecurringEventCommand("repeatuntil",
+            "Daily Standup", repeatUntil);
 
     boolean result = cmd.execute(model, view);
 
@@ -207,6 +223,7 @@ public class EditRecurringEventCommandTest {
   @Test
   public void testEditRecurringEventCommandThrowsException() {
     ICalendarModel model = new TestCalendarModel() {
+
       @Override
       public boolean editRecurringEvent(String eventName, String property, String newValue) {
         throw new RuntimeException("Simulated failure");

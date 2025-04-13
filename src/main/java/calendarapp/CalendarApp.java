@@ -18,7 +18,7 @@ public class CalendarApp {
    * starts the application by running the controller with the given arguments.
    *
    * @param args command-line arguments that are passed to the controller's run method
-   * @see CalendarController#run(String[])
+   * @see CalendarController run(String[])
    */
   public static void main(String[] args) {
     ICalendarManager manager = new CalendarManager();

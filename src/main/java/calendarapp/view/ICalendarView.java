@@ -1,7 +1,6 @@
 package calendarapp.view;
 
 import calendarapp.model.event.ReadOnlyCalendarEvent;
-
 import java.util.List;
 
 /**

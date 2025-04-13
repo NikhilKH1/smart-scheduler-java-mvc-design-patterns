@@ -69,8 +69,6 @@ public class CommandParserTest {
   }
 
 
-
-
   @Test
   public void testEditRecurringEventEmptyNewValue_ManualCheck() {
     try {
@@ -958,6 +956,21 @@ public class CommandParserTest {
     @Override
     public void displayError(String error) {
       this.lastMessage = error;
+    }
+
+    @Override
+    public void run() {
+      return;
+    }
+
+    @Override
+    public void setInput(Readable in) {
+      ICalendarView.super.setInput(in);
+    }
+
+    @Override
+    public void setOutput(Appendable out) {
+      ICalendarView.super.setOutput(out);
     }
 
     public String getLastMessage() {

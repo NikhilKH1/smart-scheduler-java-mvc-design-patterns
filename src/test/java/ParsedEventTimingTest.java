@@ -33,7 +33,8 @@ public class ParsedEventTimingTest {
 
   @Test
   public void testSetAndGetStart() {
-    ZonedDateTime start = ZonedDateTime.of(2025, 5, 10, 14, 30, 0, 0, ZoneId.of("UTC"));
+    ZonedDateTime start = ZonedDateTime.of(2025, 5, 10, 14,
+            30, 0, 0, ZoneId.of("UTC"));
     timing.setStart(start);
     assertEquals("Start time should be set correctly", start, timing.getStart());
     timing.setStart(null);
@@ -43,7 +44,8 @@ public class ParsedEventTimingTest {
 
   @Test
   public void testSetAndGetEnd() {
-    ZonedDateTime end = ZonedDateTime.of(2025, 5, 10, 16, 0, 0, 0, ZoneId.of("UTC"));
+    ZonedDateTime end = ZonedDateTime.of(2025, 5, 10, 16,
+            0, 0, 0, ZoneId.of("UTC"));
     timing.setEnd(end);
     assertEquals("End time should be set correctly", end, timing.getEnd());
     timing.setEnd(null);

@@ -2,7 +2,6 @@ package calendarapp.view;
 
 import calendarapp.controller.ICalendarController;
 import calendarapp.model.event.ReadOnlyCalendarEvent;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Reader;

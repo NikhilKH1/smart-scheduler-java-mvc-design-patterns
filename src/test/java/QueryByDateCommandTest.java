@@ -1,5 +1,4 @@
 import calendarapp.controller.commands.QueryByDateCommand;
-import calendarapp.model.CalendarModel;
 import calendarapp.model.ICalendarModel;
 import calendarapp.model.event.ICalendarEvent;
 import calendarapp.model.event.ReadOnlyCalendarEvent;
@@ -11,7 +10,6 @@ import org.junit.Test;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.time.temporal.Temporal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -111,7 +109,7 @@ public class QueryByDateCommandTest {
 
     @Override
     public void updateTimezone(ZoneId newTimezone) {
-      // No implementation of this is required
+      return;
     }
 
     @Override
@@ -136,10 +134,11 @@ public class QueryByDateCommandTest {
 
     @Override
     public List<ReadOnlyCalendarEvent> getReadOnlyEventsOnDate(LocalDate date) {
-      return events.stream()
-              .filter(event -> event.getStartDateTime().toLocalDate().equals(date))
+      return events.stream().filter(event -> event.getStartDateTime()
+                      .toLocalDate().equals(date))
               .collect(Collectors.toList());
     }
+
     @Override
     public List<ReadOnlyCalendarEvent> getAllReadOnlyEvents() {
       return List.of();
@@ -152,7 +151,7 @@ public class QueryByDateCommandTest {
 
     @Override
     public void displayEvents(List<ReadOnlyCalendarEvent> events) {
-      this.displayedEvents = new ArrayList<>(events); // Store the events here
+      this.displayedEvents = new ArrayList<>(events);
     }
 
     @Override
@@ -162,7 +161,22 @@ public class QueryByDateCommandTest {
 
     @Override
     public void displayError(String errorMessage) {
-      // No implementation of this is required
+      return;
+    }
+
+    @Override
+    public void run() {
+      return;
+    }
+
+    @Override
+    public void setInput(Readable in) {
+      ICalendarView.super.setInput(in);
+    }
+
+    @Override
+    public void setOutput(Appendable out) {
+      ICalendarView.super.setOutput(out);
     }
 
     public String getMessage() {
@@ -210,7 +224,7 @@ public class QueryByDateCommandTest {
     }
 
     @Override
-    public ZonedDateTime RepeatUntil() {
+    public ZonedDateTime repeatUntil() {
       return null;
     }
 
@@ -240,7 +254,7 @@ public class QueryByDateCommandTest {
     }
 
     @Override
-    public ICalendarEvent withUpdatedProperty(String property, String newValue){
+    public ICalendarEvent withUpdatedProperty(String property, String newValue) {
       return null;
     }
   }

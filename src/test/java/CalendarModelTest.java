@@ -38,10 +38,12 @@ public class CalendarModelTest {
 
   @Test
   public void testRecurringEventWithNoRepeatingDaysGeneratesNothing() {
-    ZonedDateTime start = ZonedDateTime.of(2025, 7, 1, 10, 0, 0, 0, model.getTimezone());
+    ZonedDateTime start = ZonedDateTime.of(2025, 7, 1, 10,
+            0, 0, 0, model.getTimezone());
     ZonedDateTime end = start.plusHours(1);
     RecurringEvent event = new RecurringEvent("NoRepeatDays", start, end,
-            "", 3, null, "Desc", "Loc", true, false);
+            "", 3, null, "Desc", "Loc",
+            true, false);
 
     boolean added = model.addRecurringEvent(event, false);
     assertTrue(added);
@@ -62,27 +64,33 @@ public class CalendarModelTest {
 
   @Test
   public void testEditEventSameFieldValueDoesNotDuplicateOrChange() {
-    ZonedDateTime start = ZonedDateTime.of(2025, 6, 1, 10, 0, 0, 0, model.getTimezone());
+    ZonedDateTime start = ZonedDateTime.of(2025, 6, 1, 10,
+            0, 0, 0, model.getTimezone());
     ZonedDateTime end = start.plusHours(1);
-    SingleEvent event = new SingleEvent("Workshop", start, end, "Topic", "Room A", true, false, null);
+    SingleEvent event = new SingleEvent("Workshop", start, end, "Topic",
+            "Room A", true, false, null);
     assertTrue(model.addEvent(event, false));
 
-    boolean edited = model.editSingleEvent("description", "Workshop", start, end, "Topic"); // no change
+    boolean edited = model.editSingleEvent("description", "Workshop",
+            start, end, "Topic");
     assertTrue(edited);
     assertEquals(1, model.getEvents().size());
   }
 
   @Test
   public void testCopyEventToDateBeforeEpoch() {
-    ZonedDateTime start = ZonedDateTime.of(2025, 6, 1, 10, 0, 0, 0, model.getTimezone());
+    ZonedDateTime start = ZonedDateTime.of(2025, 6, 1, 10,
+            0, 0, 0, model.getTimezone());
     ZonedDateTime end = start.plusHours(1);
-    assertTrue(model.addEvent(new SingleEvent("History", start, end, "", "", true, false, null), false));
+    assertTrue(model.addEvent(new SingleEvent("History", start, end, "",
+            "", true, false, null), false));
 
-    ZonedDateTime ancientDate = ZonedDateTime.of(1800, 1, 1, 10, 0, 0, 0, model.getTimezone());
-    boolean copied = model.copySingleEventTo(model, "History", start, model, ancientDate);
+    ZonedDateTime ancientDate = ZonedDateTime.of(1800, 1, 1,
+            10, 0, 0, 0, model.getTimezone());
+    boolean copied = model.copySingleEventTo(model, "History", start, model,
+            ancientDate);
     assertTrue(copied);
   }
-
 
 
   @Test
@@ -90,7 +98,7 @@ public class CalendarModelTest {
     ZonedDateTime start1 = ZonedDateTime.of(2025, 6, 10, 9,
             0, 0, 0, model.getTimezone());
     ZonedDateTime end1 = start1.plusHours(1);
-    ZonedDateTime start2 = end1; // starts exactly at previous end
+    ZonedDateTime start2 = end1;
     ZonedDateTime end2 = start2.plusHours(1);
 
     SingleEvent event1 = new SingleEvent("Session A", start1, end1, "",
@@ -221,6 +229,7 @@ public class CalendarModelTest {
               ZonedDateTime.from(e.getStartDateTime()).getZone());
     }
   }
+
 
   @Test
   public void testTimezoneUpdate() {
@@ -468,24 +477,27 @@ public class CalendarModelTest {
 
   @Test
   public void testCopyEventsBetweenDatesSuccessfully() {
-    ZonedDateTime base = ZonedDateTime.of(2025, 3, 1, 10, 0, 0, 0, model.getTimezone());
+    ZonedDateTime base = ZonedDateTime.of(2025, 3, 1, 10,
+            0, 0, 0, model.getTimezone());
 
     model.addEvent(new SingleEvent("E1", base, base.plusHours(1), "",
             "", true, false, null), true);
     model.addEvent(new SingleEvent("E2", base.plusDays(1), base.plusDays(1).plusHours(1),
             "", "", true, false, null), true);
 
-    CalendarModel target = new CalendarModel("TargetCal", ZoneId.of("America/New_York"));
+    CalendarModel target = new CalendarModel("TargetCal",
+            ZoneId.of("America/New_York"));
 
-    // Updated ZonedDateTime ranges
-    ZonedDateTime sourceStart = ZonedDateTime.of(2025, 3, 1, 0, 0, 0, 0, model.getTimezone());
-    ZonedDateTime sourceEnd = ZonedDateTime.of(2025, 3, 2, 0, 0, 0, 0, model.getTimezone());
-    ZonedDateTime destinationStart = ZonedDateTime.of(2025, 3, 5, 0, 0, 0, 0, target.getTimezone());
+    ZonedDateTime sourceStart = ZonedDateTime.of(2025, 3, 1, 0,
+            0, 0, 0, model.getTimezone());
+    ZonedDateTime sourceEnd = ZonedDateTime.of(2025, 3, 2, 0,
+            0, 0, 0, model.getTimezone());
+    ZonedDateTime destinationStart = ZonedDateTime.of(2025, 3, 5,
+            0, 0, 0, 0, target.getTimezone());
 
     assertTrue(model.copyEventsBetweenTo(model, sourceStart, sourceEnd, target, destinationStart));
     assertEquals(1, target.getEvents().size());
   }
-
 
 
   @Test
@@ -1334,16 +1346,23 @@ public class CalendarModelTest {
     CalendarModel source = new CalendarModel("Fall", ZoneId.of("America/New_York"));
     CalendarModel target = new CalendarModel("Spring", ZoneId.of("Europe/Paris"));
 
-    ZonedDateTime event1Start = ZonedDateTime.of(2025, 3, 9, 10, 0, 0, 0, source.getTimezone());
-    ZonedDateTime event2Start = ZonedDateTime.of(2025, 3, 9, 14, 0, 0, 0, source.getTimezone());
+
+    ZonedDateTime event1Start = ZonedDateTime.of(2025, 3, 9, 10,
+            0, 0, 0, source.getTimezone());
+    ZonedDateTime event2Start = ZonedDateTime.of(2025, 3, 9, 14,
+            0, 0, 0, source.getTimezone());
 
     assertTrue(source.addEvent(new SingleEvent("Lecture A", event1Start,
-            event1Start.plusHours(1), "", "", true, false, null), false));
+            event1Start.plusHours(1), "", "", true, false,
+            null), false));
     assertTrue(source.addEvent(new SingleEvent("Lecture B", event2Start,
-            event2Start.plusHours(1), "", "", true, false, null), false));
+            event2Start.plusHours(1), "", "", true, false,
+            null), false));
 
-    ZonedDateTime sourceDate = ZonedDateTime.of(2025, 3, 9, 0, 0, 0, 0, source.getTimezone());
-    ZonedDateTime targetDate = ZonedDateTime.of(2025, 4, 1, 0, 0, 0, 0, target.getTimezone());
+    ZonedDateTime sourceDate = ZonedDateTime.of(2025, 3, 9, 0,
+            0, 0, 0, source.getTimezone());
+    ZonedDateTime targetDate = ZonedDateTime.of(2025, 4, 1, 0,
+            0, 0, 0, target.getTimezone());
 
     assertTrue(target.copyEventsOnDateTo(source, sourceDate, target, targetDate));
 
@@ -1356,17 +1375,22 @@ public class CalendarModelTest {
     CalendarModel source = new CalendarModel("Fall", ZoneId.of("America/New_York"));
     CalendarModel target = new CalendarModel("Spring", ZoneId.of("Asia/Kolkata"));
 
-    ZonedDateTime startA = ZonedDateTime.of(2024, 9, 5, 10, 0, 0, 0, source.getTimezone());
-    ZonedDateTime startB = ZonedDateTime.of(2024, 12, 18, 14, 0, 0, 0, source.getTimezone());
+    ZonedDateTime startA = ZonedDateTime.of(2024, 9, 5, 10,
+            0, 0, 0, source.getTimezone());
+    ZonedDateTime startB = ZonedDateTime.of(2024, 12, 18, 14,
+            0, 0, 0, source.getTimezone());
 
     source.addEvent(new SingleEvent("Lecture A", startA, startA.plusHours(1),
             "", "", true, false, null), false);
     source.addEvent(new SingleEvent("Lecture B", startB, startB.plusHours(2),
             "", "", true, false, null), false);
 
-    ZonedDateTime startRange = ZonedDateTime.of(2024, 9, 5, 0, 0, 0, 0, source.getTimezone());
-    ZonedDateTime endRange = ZonedDateTime.of(2024, 12, 18, 23, 59, 59, 999999999, source.getTimezone());
-    ZonedDateTime targetDate = ZonedDateTime.of(2025, 1, 8, 0, 0, 0, 0, target.getTimezone());
+    ZonedDateTime startRange = ZonedDateTime.of(2024, 9, 5, 0,
+            0, 0, 0, source.getTimezone());
+    ZonedDateTime endRange = ZonedDateTime.of(2024, 12, 18, 23,
+            59, 59, 999999999, source.getTimezone());
+    ZonedDateTime targetDate = ZonedDateTime.of(2025, 1, 8, 0,
+            0, 0, 0, target.getTimezone());
 
     boolean copied = target.copyEventsBetweenTo(
             source,
@@ -1629,21 +1653,24 @@ public class CalendarModelTest {
     CalendarModel source = new CalendarModel("TeachingCal", ZoneId.of("Europe/Paris"));
     CalendarModel target = new CalendarModel("ClonedCal", ZoneId.of("Asia/Kolkata"));
 
-    ZonedDateTime event1 = ZonedDateTime.of(2025, 6, 1, 9, 0, 0, 0, source.getTimezone());
-    ZonedDateTime event2 = ZonedDateTime.of(2025, 6, 1, 14, 0, 0, 0, source.getTimezone());
+    ZonedDateTime event1 = ZonedDateTime.of(2025, 6, 1, 9, 0,
+            0, 0, source.getTimezone());
+    ZonedDateTime event2 = ZonedDateTime.of(2025, 6, 1, 14,
+            0, 0, 0, source.getTimezone());
 
-    source.addEvent(new SingleEvent("Lecture 1", event1, event1.plusHours(1), "", "", true, false, null), false);
-    source.addEvent(new SingleEvent("Lecture 2", event2, event2.plusHours(1), "", "", true, false, null), false);
+    source.addEvent(new SingleEvent("Lecture 1", event1, event1.plusHours(1),
+            "", "", true, false, null), false);
+    source.addEvent(new SingleEvent("Lecture 2", event2, event2.plusHours(1),
+            "", "", true, false, null), false);
 
-    // Use ZonedDateTime for target date as well
-    ZonedDateTime targetDate = ZonedDateTime.of(2025, 7, 1, 0, 0, 0, 0, target.getTimezone());
+    ZonedDateTime targetDate = ZonedDateTime.of(2025, 7, 1,
+            0, 0, 0, 0, target.getTimezone());
 
-    // Modify the method to accept ZonedDateTime, passing ZonedDateTime instead of LocalDate
     boolean copied = target.copyEventsOnDateTo(
             source,
-            event1,  // Use ZonedDateTime directly
+            event1,
             target,
-            targetDate  // Use ZonedDateTime directly
+            targetDate
     );
 
     assertTrue(copied);
@@ -1914,7 +1941,6 @@ public class CalendarModelTest {
   }
 
 
-
   @Test
   public void testEventRemovalFromList() {
     CalendarModel calendar = new CalendarModel("Test Calendar", ZoneId.of("UTC"));
@@ -1938,8 +1964,9 @@ public class CalendarModelTest {
   @Test
   public void testEditEventsAllReturnsFalseWhenNoMatch() {
     CalendarModel model = new CalendarModel("Test", ZoneId.of("UTC"));
-    boolean result = model.editEventsAll("description", "NonExistentEvent", "Updated");
-    assertFalse(result); // Covers mutation: replaced return with true
+    boolean result = model.editEventsAll("description", "NonExistentEvent",
+            "Updated");
+    assertFalse(result);
   }
 
   @Test
@@ -1947,11 +1974,13 @@ public class CalendarModelTest {
     CalendarModel model = new CalendarModel("Test", ZoneId.of("UTC"));
     ZonedDateTime start = ZonedDateTime.now();
     ZonedDateTime end = start.plusHours(1);
-    SingleEvent e = new SingleEvent("Meeting", start, end, "desc", "loc", true, false, null);
+    SingleEvent e = new SingleEvent("Meeting", start, end, "desc",
+            "loc", true, false, null);
     model.addEvent(e, true);
 
-    boolean result = model.editEventsAll("description", "Meeting", "Updated Desc");
-    assertTrue(result); // Covers mutation: replaced return with false
+    boolean result = model.editEventsAll("description", "Meeting",
+            "Updated Desc");
+    assertTrue(result);
   }
 
   @Test
@@ -1959,30 +1988,21 @@ public class CalendarModelTest {
     CalendarModel model = new CalendarModel("Test", ZoneId.of("UTC"));
     ZonedDateTime start = ZonedDateTime.now();
     ZonedDateTime end = start.plusHours(1);
-    RecurringEvent re = new RecurringEvent("Daily Standup", start, end, "MTWRF", 5, null,
+    RecurringEvent re = new RecurringEvent("Daily Standup", start, end,
+            "MTWRF", 5, null,
             "desc", "room", true, false);
     model.addRecurringEvent(re, true);
 
-    boolean result = model.editRecurringEvent("Daily Standup", "description", "Updated");
-    assertTrue(result); // Covers mutations 556, 567
+    boolean result = model.editRecurringEvent("Daily Standup",
+            "description", "Updated");
+    assertTrue(result);
   }
 
   @Test
   public void testEditRecurringEventReturnsFalseWhenNoMatch() {
     CalendarModel model = new CalendarModel("Test", ZoneId.of("UTC"));
-    boolean result = model.editRecurringEvent("UnknownEvent", "description", "New");
-    assertFalse(result); // Covers mutation 556
+    boolean result = model.editRecurringEvent("UnknownEvent", "description",
+            "New");
+    assertFalse(result);
   }
-
-//  @Test
-//  public void testHasConflictExceptReturnsTrue() {
-//    CalendarModel model = new CalendarModel("Test", ZoneId.of("UTC"));
-//    ZonedDateTime start = ZonedDateTime.now();
-//    ZonedDateTime end = start.plusHours(1);
-//    SingleEvent e1 = new SingleEvent("e1", start, end, "", "", true, false, null);
-//    SingleEvent e2 = new SingleEvent("e2", start, end, "", "", true, false, null);
-//
-//    model.addEvent(e1, true);
-//    assertTrue(model.hasConflictExcept(e2, e1)); // Covers mutation 596
-//  }
 }
