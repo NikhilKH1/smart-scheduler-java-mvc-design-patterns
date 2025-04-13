@@ -212,9 +212,11 @@ public class DefaultCommandFactory implements ICommandFactory {
 
   @Override
   public String editCalendarTimezoneCommand(String name, ZoneId newZone) {
+    if (name == null || newZone == null) {
+      throw new NullPointerException("Name and ZoneId must not be null");
+    }
     return "edit calendar --name \"" + name + "\" --property timezone " + newZone;
   }
-
 
 
 }
