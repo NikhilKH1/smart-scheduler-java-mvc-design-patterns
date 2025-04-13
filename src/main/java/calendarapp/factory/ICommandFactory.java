@@ -69,9 +69,22 @@ public interface ICommandFactory {
    */
   public String printEventsBetweenCommand(ZonedDateTime start, ZonedDateTime end);
 
-
+  /**
+   * Returns a formatted command string to import a calendar from the specified file path.
+   *
+   * @param filePath the path to the calendar file to import
+   * @return the command string to perform the import operation
+   */
   public String importCalendarCommand(String filePath);
 
+  /**
+   * Returns a formatted command string to edit the timezone of a calendar.
+   *
+   * @param name the name of the calendar to modify
+   * @param newZone the new timezone to set for the calendar
+   * @return the command string to change the calendar's timezone
+   * @throws NullPointerException if name or newZone is null
+   */
   public String editCalendarTimezoneCommand(String name, ZoneId newZone);
 
 }

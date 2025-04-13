@@ -48,7 +48,6 @@ public class EditInput {
     this(property, eventName, null, null, newValue, isRecurring);
   }
 
-
   /**
    * Gets the property being edited.
    *
@@ -120,7 +119,6 @@ public class EditInput {
   public void setEventName(String eventName) {
     this.eventName = eventName;
   }
-
 
   /**
    * Sets the new value for the event property.

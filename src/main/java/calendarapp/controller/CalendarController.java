@@ -30,11 +30,11 @@ public class CalendarController implements ICalendarController {
    * are essential for managing calendar data, displaying the view, and parsing user input commands.
    *
    * @param calendarManager An instance of `ICalendarManager`
-   *                              responsible for managing calendar data.
+   *                        responsible for managing calendar data.
    * @param view            An instance of `ICalendarView`
-   *                                 how the calendar is presented to the user.
+   *                        how the calendar is presented to the user.
    * @param parser          An instance of `CommandParser` used to parse and
-   *                              process user input commands.
+   *                        process user input commands.
    */
   public CalendarController(ICalendarManager calendarManager, ICalendarView view,
                             CommandParser parser) {
@@ -50,9 +50,9 @@ public class CalendarController implements ICalendarController {
    * are essential for managing calendar data and parsing user input commands.
    *
    * @param manager An instance of `ICalendarManager`
-   *                              responsible for managing calendar data.
-   * @param parser          An instance of `CommandParser` used to parse and
-   *                              process user input commands.
+   *                responsible for managing calendar data.
+   * @param parser  An instance of `CommandParser` used to parse and
+   *                process user input commands.
    */
   public CalendarController(ICalendarManager manager, CommandParser parser) {
     this.calendarManager = manager;

@@ -16,13 +16,32 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * A CSV-based implementation of the IImporter interface.
+ * This class reads calendar events from a CSV file and imports them into the given calendar model.
+ * Supports both single and recurring events based on CSV structure.
+ */
 public class CSVImporter implements IImporter {
 
+  /**
+   * An array of DateTimeFormatter objects used for parsing date strings in various formats.
+   * These formats are used when attempting to parse a date string from the CSV file.
+   */
   private static final DateTimeFormatter[] DATE_FORMATS = new DateTimeFormatter[]{
           DateTimeFormatter.ofPattern("MM/dd/yyyy"),
           DateTimeFormatter.ISO_LOCAL_DATE
   };
 
+  /**
+   * Imports events from a CSV file into the specified calendar model.
+   * The CSV must have the following structure in order:
+   * name, startDate, startTime, endDate, endTime, calendarName (optional), description, location,
+   * , weekdays (optional), repeatUntil (optional), repeatCount (optional)
+   *
+   * @param model the calendar model to import the events into
+   * @param filePath the path to the CSV file
+   * @throws IOException if an error occurs while reading the file
+   */
   @Override
   public void importInto(ICalendarModel model, String filePath) throws IOException {
     try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
@@ -90,6 +109,14 @@ public class CSVImporter implements IImporter {
     }
   }
 
+  /**
+   * Attempts to parse a date string using supported date formats.
+   * Supported formats include MM/dd/yyyy and ISO_LOCAL_DATE (yyyy-MM-dd).
+   *
+   * @param input the date string to parse
+   * @return the parsed LocalDate
+   * @throws IllegalArgumentException if the date format is invalid
+   */
   private LocalDate tryParseDate(String input) {
     for (DateTimeFormatter fmt : DATE_FORMATS) {
       try {
@@ -99,6 +126,14 @@ public class CSVImporter implements IImporter {
     throw new IllegalArgumentException("Invalid date format: " + input);
   }
 
+  /**
+   * Parses a string of characters representing weekdays into a set of DayOfWeek values.
+   * For example, "MTWRF" will return Monday through Friday.
+   * M = Monday, T = Tuesday, W = Wednesday, R = Thursday, F = Friday, S = Saturday, U = Sunday.
+   *
+   * @param input the weekday characters string
+   * @return a set of DayOfWeek values representing the weekdays
+   */
   private Set<DayOfWeek> parseWeekdays(String input) {
     Set<DayOfWeek> result = new HashSet<>();
     for (char c : input.toUpperCase().toCharArray()) {

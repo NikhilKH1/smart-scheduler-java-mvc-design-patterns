@@ -205,11 +205,26 @@ public class DefaultCommandFactory implements ICommandFactory {
     }
   }
 
+  /**
+   * Constructs the import calendar command string using the given file path.
+   *
+   * @param filePath the path of the file to be imported
+   * @return a formatted command string to import the calendar
+   */
   @Override
   public String importCalendarCommand(String filePath) {
     return "import cal \"" + filePath + "\"";
   }
 
+  /**
+   * Constructs the command string to edit the timezone of a calendar.
+   * Throws a NullPointerException if either the name or the new timezone is null.
+   *
+   * @param name the name of the calendar to edit
+   * @param newZone the new timezone to set for the calendar
+   * @return a formatted command string to update the calendar's timezone
+   * @throws NullPointerException if name or newZone is null
+   */
   @Override
   public String editCalendarTimezoneCommand(String name, ZoneId newZone) {
     if (name == null || newZone == null) {

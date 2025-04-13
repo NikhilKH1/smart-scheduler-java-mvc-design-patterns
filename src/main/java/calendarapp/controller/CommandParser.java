@@ -635,7 +635,6 @@ public class CommandParser {
     return result;
   }
 
-
   /**
    * Parses the recurring section of the event, including repeat count and weekdays.
    *

@@ -423,7 +423,6 @@ public class CalendarGUIView implements ICalendarView {
     }
   }
 
-
   /**
    * Displays a dialog showing the events for a specific date.
    * Allows the user to view, add, or edit events for the selected date.
@@ -446,6 +445,13 @@ public class CalendarGUIView implements ICalendarView {
     refreshDayEvents.run();
 
     eventList.addMouseListener(new MouseAdapter() {
+
+      /**
+       * Handles mouse click events on the event list. If a double-click is detected,
+       * it retrieves the selected event from the list and displays its details in a popup.
+       *
+       * @param e the MouseEvent triggered by the mouse click
+       */
       @Override
       public void mouseClicked(MouseEvent e) {
         if (e.getClickCount() == 2) {
@@ -1085,6 +1091,12 @@ public class CalendarGUIView implements ICalendarView {
     });
 
     repeatCountField.getDocument().addDocumentListener(new DocumentListener() {
+      /**
+       * Called when text is inserted into a document. This method updates the fields
+       * by calling the `updateFields` method to reflect the changes.
+       *
+       * @param e the DocumentEvent that contains the information about the document change
+       */
       public void insertUpdate(DocumentEvent e) {
         updateFields();
       }
@@ -1152,7 +1164,6 @@ public class CalendarGUIView implements ICalendarView {
       return false;
     }
   }
-
 
   /**
    * Converts a set of days of the week to a string representation.
@@ -1374,7 +1385,6 @@ public class CalendarGUIView implements ICalendarView {
             || message.startsWith("Calendar exported successfully to:")) {
       return;
     }
-
 
     if (suppressCreationMessages && message.equals("Event created successfully")) {
       return;
