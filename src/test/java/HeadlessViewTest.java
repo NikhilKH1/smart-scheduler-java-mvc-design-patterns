@@ -170,13 +170,15 @@ public class HeadlessViewTest {
     }
 
     @Override
-    public void setView(calendarapp.view.ICalendarView view) {
+    public void run(Readable in, Appendable out) {
       return;
     }
 
     @Override
-    public void run(Readable in, Appendable out) {
+    public void setView(calendarapp.view.ICalendarView view) {
       return;
     }
+
+
   }
 }

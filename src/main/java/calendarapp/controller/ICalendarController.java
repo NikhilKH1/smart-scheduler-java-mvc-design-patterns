@@ -26,6 +26,15 @@ public interface ICalendarController {
   public void run(String[] args);
 
   /**
+   * Starts the calendar application by reading commands from the given input
+   * and writing outputs or messages to the provided output.
+   *
+   * @param in  the input source to read user commands from
+   * @param out the output destination to write responses and messages to
+   */
+  public void run(Readable in, Appendable out);
+
+  /**
    * Sets the view to be used by the controller.
    * This method allows the controller to interact with the specified view to display information
    * or handle user interactions.
@@ -34,5 +43,5 @@ public interface ICalendarController {
    */
   public void setView(ICalendarView view);
 
-  void run(Readable in, Appendable out);
+
 }

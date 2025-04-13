@@ -42,14 +42,15 @@ public class InteractiveCLIViewTest {
     }
 
     @Override
-    public void setView(ICalendarView view) {
+    public void run(Readable in, Appendable out) {
       return;
     }
 
     @Override
-    public void run(Readable in, Appendable out) {
+    public void setView(ICalendarView view) {
       return;
     }
+
   }
 
   private FakeController fakeController;

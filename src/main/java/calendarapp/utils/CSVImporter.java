@@ -11,7 +11,6 @@ import java.io.IOException;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashSet;
@@ -27,7 +26,7 @@ public class CSVImporter implements IImporter {
   @Override
   public void importInto(ICalendarModel model, String filePath) throws IOException {
     try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
-      String header = reader.readLine(); // Skip header
+      String header = reader.readLine();
       String line;
       DateTimeFormatter timeFormat = DateTimeFormatter.ofPattern("HH:mm");
 
@@ -75,12 +74,15 @@ public class CSVImporter implements IImporter {
             repeatUntil = tryParseDate(repeatUntilStr).atStartOfDay(model.getTimezone());
           }
 
-          event = new RecurringEvent(name, start, end, weekdays, repeatCount, repeatUntil, desc, loc, true,
-                  start.toLocalTime().equals(LocalTime.MIN) && end.toLocalTime().equals(LocalTime.of(23, 59, 59)));
+          event = new RecurringEvent(name, start, end, weekdays, repeatCount, repeatUntil,
+                  desc, loc, true, start.toLocalTime().equals(LocalTime.MIN)
+                  && end.toLocalTime().equals(LocalTime.of(23, 59, 59)));
 
         } else {
           event = new SingleEvent(name, start, end, desc, loc, true,
-                  start.toLocalTime().equals(LocalTime.MIN) && end.toLocalTime().equals(LocalTime.of(23, 59, 59)), null);
+                  start.toLocalTime().equals(LocalTime.MIN)
+                          && end.toLocalTime().equals(LocalTime.of(23, 59, 59)),
+                  null);
         }
 
         model.addEvent(event, true);

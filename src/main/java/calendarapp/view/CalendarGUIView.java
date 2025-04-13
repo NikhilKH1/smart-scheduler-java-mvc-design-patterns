@@ -1282,7 +1282,6 @@ public class CalendarGUIView implements ICalendarView {
     }
   }
 
-
   /**
    * Attempts to parse a date from the given input string.
    * It tries to parse the date in multiple formats, first in the ISO_LOCAL_DATE format
