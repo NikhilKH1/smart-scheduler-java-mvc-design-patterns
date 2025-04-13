@@ -19,6 +19,7 @@ import javax.swing.JFileChooser;
 import javax.swing.ButtonGroup;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+
 import java.awt.Color;
 import java.awt.BorderLayout;
 import java.awt.Font;
@@ -47,6 +48,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+
 import calendarapp.controller.ICalendarController;
 import calendarapp.model.event.ReadOnlyCalendarEvent;
 import calendarapp.factory.EditInput;
@@ -54,6 +56,12 @@ import calendarapp.factory.ICommandFactory;
 import calendarapp.factory.EventInput;
 import calendarapp.controller.CalendarController;
 
+/**
+ * Represents the graphical user interface (GUI) for the Calendar Application.
+ * This class provides a visual interface for interacting with calendars, managing events,
+ * switching views, and importing/exporting data. It supports multiple calendars with unique
+ * colors and timezones.
+ */
 public class CalendarGUIView implements ICalendarView {
 
   private CalendarController controller;
@@ -70,11 +78,17 @@ public class CalendarGUIView implements ICalendarView {
   private JLabel calendarNameLabel;
   private JButton importButton;
   private boolean suppressCreationMessages = false;
-  private List<ReadOnlyCalendarEvent> events;
   List<ReadOnlyCalendarEvent> lastRenderedEvents = new ArrayList<>();
   private JTextField repeatUntilField = new JTextField();
   private JTextField repeatCountField = new JTextField();
 
+
+  /**
+   * Represents the graphical user interface (GUI) for the Calendar Application.
+   * This class provides a visual interface for interacting with calendars, managing events,
+   * switching views, and importing/exporting data. It supports multiple calendars with unique
+   * colors and timezones.
+   */
   public CalendarGUIView(ICalendarController controller) {
     this.controller = (CalendarController) controller;
     this.currentMonth = YearMonth.now();
@@ -87,6 +101,10 @@ public class CalendarGUIView implements ICalendarView {
     calendarTimezones.put("Default", defaultZone.toString());
   }
 
+  /**
+   * Initializes all GUI components such as buttons, labels, dropdowns, and panels.
+   * This method sets up the basic structure of the UI but does not lay them out.
+   */
   private void initializeComponents() {
     frame = new JFrame("Calendar Application");
     frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -120,6 +138,10 @@ public class CalendarGUIView implements ICalendarView {
     importButton = new JButton("Import");
   }
 
+  /**
+   * Arranges the layout of the GUI, including the top navigation bar,
+   * calendar name display, and the central calendar panel.
+   */
   private void initializeLayout() {
     JPanel topPanel = new JPanel(new BorderLayout());
 
@@ -149,6 +171,10 @@ public class CalendarGUIView implements ICalendarView {
     frame.add(calendarPanel, BorderLayout.CENTER);
   }
 
+  /**
+   * Registers action listeners for various interactive elements like
+   * calendar selection, month navigation, add calendar, and import/export buttons.
+   */
   private void registerListeners() {
     calendarDropdown.addActionListener(e -> {
       String newSelection = (String) calendarDropdown.getSelectedItem();
@@ -186,6 +212,10 @@ public class CalendarGUIView implements ICalendarView {
   }
 
 
+  /**
+   * Refreshes the calendar panel for the current month and selected calendar.
+   * Displays day headers, day buttons, and loads events for the month.
+   */
   private void updateCalendarView() {
     calendarPanel.removeAll();
     calendarPanel.setLayout(new GridLayout(0, 7));
@@ -235,6 +265,8 @@ public class CalendarGUIView implements ICalendarView {
   }
 
   /**
+   * Displays a list of calendar events on the current month's calendar view.
+   *
    * @param events the list of calendar events to display
    */
   @Override
@@ -286,6 +318,10 @@ public class CalendarGUIView implements ICalendarView {
     calendarPanel.repaint();
   }
 
+  /**
+   * Displays a dialog to create a new calendar with a user-defined name and timezone.
+   * Validates inputs and adds the new calendar to the list if successful.
+   */
   private void addNewCalendar() {
     JPanel inputPanel = new JPanel(new GridLayout(0, 1));
     JTextField calendarNameField = new JTextField();
@@ -337,7 +373,13 @@ public class CalendarGUIView implements ICalendarView {
     }
   }
 
-
+  /**
+   * Displays a dialog showing the events for a specific date.
+   * Allows the user to view, add, or edit events for the selected date.
+   * Provides functionality for editing individual events and recurring events.
+   *
+   * @param date The date for which events are to be displayed.
+   */
   private void showEventDialog(LocalDate date) {
     String timezone = calendarTimezones.getOrDefault(selectedCalendar,
             ZoneId.systemDefault().toString());
@@ -408,6 +450,15 @@ public class CalendarGUIView implements ICalendarView {
     dialog.setVisible(true);
   }
 
+  /**
+   * Refreshes and updates the list of events for a specific day.
+   * Clears the previous events and reloads the events for the given date.
+   * Adds the events to the provided list model and updates the day events list.
+   *
+   * @param listModel The list model that displays the events in the UI.
+   * @param dayEvents The list to hold events for the specific day.
+   * @param date      The date for which events should be refreshed.
+   */
   private void refreshDayEvents(DefaultListModel<String> listModel, List<ReadOnlyCalendarEvent>
           dayEvents, LocalDate date) {
     dayEvents.clear();
@@ -431,7 +482,15 @@ public class CalendarGUIView implements ICalendarView {
     }
   }
 
-
+  /**
+   * Displays a dialog for creating a new event on the specified date.
+   * The dialog allows the user to input event details such as title, start time, end time,
+   * description, location, and recurrence information (if applicable).
+   * It validates the inputs and adds the event if all conditions are met.
+   *
+   * @param date             The date on which the event will be created.
+   * @param refreshDayEvents A runnable that refreshes the list of events for the day.
+   */
   private void showAddEventDialog(LocalDate date, Runnable refreshDayEvents) {
     JDialog addDialog = new JDialog(frame, "Create Event on " + date, true);
     JPanel inputPanel = new JPanel(new GridBagLayout());
@@ -630,6 +689,17 @@ public class CalendarGUIView implements ICalendarView {
     addDialog.setVisible(true);
   }
 
+  /**
+   * Displays a dialog for editing properties of a selected event.
+   * The user can edit the title, start time, end time, description, or location of the event.
+   * For recurring events, additional options such as repeat until, repeat times,
+   * and weekdays are available.
+   * After making changes, the event is updated and the day view is refreshed.
+   *
+   * @param selectedEvent    The event to be edited.
+   * @param refreshDayEvents A runnable to refresh the list of events for the day after editing.
+   * @param parentDialog     The parent dialog used to center the new dialog.
+   */
   private void showEditEventDialog(ReadOnlyCalendarEvent selectedEvent,
                                    Runnable refreshDayEvents, JDialog parentDialog) {
     ZonedDateTime fromStart = selectedEvent.getStartDateTime();
@@ -638,7 +708,7 @@ public class CalendarGUIView implements ICalendarView {
     JPanel editPanel = new JPanel(new BorderLayout());
     String[] singleProps = {"Title", "Start Time", "End Time", "Description", "Location"};
     String[] recurringProps = {"Title", "Start Time", "End Time", "Description",
-        "Location", "Repeat Until", "Repeat Times", "Weekdays"};
+      "Location", "Repeat Until", "Repeat Times", "Weekdays"};
     JComboBox<String> propertyDropdown = new JComboBox<>(selectedEvent.isRecurring()
             ? recurringProps : singleProps);
 
@@ -739,6 +809,16 @@ public class CalendarGUIView implements ICalendarView {
     }
   }
 
+  /**
+   * Displays a dialog for editing properties of a selected recurring event.
+   * The user can edit the title, description, location, repeat until date, repeat times,
+   * or weekdays of the recurring event.
+   * After making changes, the event is updated and the day view is refreshed.
+   *
+   * @param selectedEvent    The recurring event to be edited.
+   * @param refreshDayEvents A runnable to refresh the list of events for the day after editing.
+   * @param parentDialog     The parent dialog used to center the new dialog.
+   */
   private void showEditRecurringEventDialog(ReadOnlyCalendarEvent selectedEvent,
                                             Runnable refreshDayEvents, JDialog parentDialog) {
     ZonedDateTime fromStart = selectedEvent.getStartDateTime();
@@ -749,7 +829,7 @@ public class CalendarGUIView implements ICalendarView {
     editPanel.setPreferredSize(new Dimension(400, 200));
 
     String[] recurringProps = {"Title", "Description", "Location", "Repeat Until",
-            "Repeat Times", "Weekdays"};
+      "Repeat Times", "Weekdays"};
     JComboBox<String> propertyDropdown = new JComboBox<>(recurringProps);
     propertyDropdown.setPreferredSize(new Dimension(380, 25));
 
@@ -860,6 +940,12 @@ public class CalendarGUIView implements ICalendarView {
     }
   }
 
+  /**
+   * Refreshes the main calendar view by updating the displayed events for the current month.
+   * It calculates the start and end date-time of the current month, based on the
+   * selected calendar's timezone.
+   * Then it sends a command to fetch the events for that period and updates the calendar view.
+   */
   private void refreshMainView() {
     ZoneId zone = ZoneId.of(calendarTimezones.getOrDefault(selectedCalendar,
             ZoneId.systemDefault().toString()));
@@ -871,6 +957,14 @@ public class CalendarGUIView implements ICalendarView {
     updateCalendarView();
   }
 
+  /**
+   * Creates and returns a JPanel that allows the user to select recurring event options.
+   * The panel includes checkboxes for selecting the days of the week, fields for specifying
+   * the repeat until date and the repeat count, and appropriate listeners to toggle the
+   * availability of the repeat fields based on user input.
+   *
+   * @return A JPanel containing the recurring event selection options.
+   */
   private JPanel createRecurringPanel() {
     JPanel recurringPanel = new JPanel(new GridLayout(0, 3));
 
@@ -893,18 +987,32 @@ public class CalendarGUIView implements ICalendarView {
     recurringPanel.add(new JLabel(""));
 
     repeatUntilField.getDocument().addDocumentListener(new DocumentListener() {
+      /**
+       * Called when text is inserted into the document.
+       * Triggers an update to enable/disable the other repeat field.
+       */
       public void insertUpdate(DocumentEvent e) {
         updateFields();
       }
 
+      /**
+       * Triggered when text is removed from the document. Updates field states.
+       */
       public void removeUpdate(DocumentEvent e) {
         updateFields();
       }
 
+      /**
+       * Triggered when document attributes are changed. Updates field states.
+       */
       public void changedUpdate(DocumentEvent e) {
         updateFields();
       }
 
+      /**
+       * Enables or disables the repeat count or repeat until field based on input.
+       * If the "Repeat Until" field is filled, disables the "Repeat Times" field, and vice versa.
+       */
       private void updateFields() {
         String repeatUntilText = repeatUntilField.getText().trim();
         repeatCountField.setEnabled(repeatUntilText.isEmpty());
@@ -916,14 +1024,24 @@ public class CalendarGUIView implements ICalendarView {
         updateFields();
       }
 
+      /**
+       * Triggered when text is removed from the document. Updates field states.
+       */
       public void removeUpdate(DocumentEvent e) {
         updateFields();
       }
 
+      /**
+       * Triggered when document attributes are changed. Updates field states.
+       */
       public void changedUpdate(DocumentEvent e) {
         updateFields();
       }
 
+      /**
+       * Enables or disables the repeat count or repeat until field based on input.
+       * If the "Repeat Until" field is filled, disables the "Repeat Times" field, and vice versa.
+       */
       private void updateFields() {
         String repeatCountText = repeatCountField.getText().trim();
         repeatUntilField.setEnabled(repeatCountText.isEmpty());
@@ -934,14 +1052,33 @@ public class CalendarGUIView implements ICalendarView {
   }
 
 
+  /**
+   * Returns the JTextField used for entering the "Repeat Until" date in the recurring event panel.
+   *
+   * @param recurringPanel The panel containing the repeat fields.
+   * @return The JTextField for the "Repeat Until" field.
+   */
   private JTextField getRepeatUntilField(JPanel recurringPanel) {
     return repeatUntilField;
   }
 
+  /**
+   * Returns the JTextField used for entering the "Repeat Times" count in the recurring event panel.
+   *
+   * @param recurringPanel The panel containing the repeat fields.
+   * @return The JTextField for the "Repeat Times" field.
+   */
   private JTextField getRepeatCountField(JPanel recurringPanel) {
     return repeatCountField;
   }
 
+  /**
+   * Checks whether a given string represents a valid weekday.
+   * The input string is converted to uppercase and compared with the values in the DayOfWeek enum.
+   *
+   * @param text The string to check.
+   * @return True if the string represents a valid weekday (e.g., "Monday"), false otherwise.
+   */
   private boolean isWeekday(String text) {
     try {
       DayOfWeek.valueOf(text.toUpperCase());
@@ -952,6 +1089,12 @@ public class CalendarGUIView implements ICalendarView {
   }
 
 
+  /**
+   * Converts a set of days of the week to a string representation.
+   *
+   * @param days The set of days to convert.
+   * @return A string representing the days of the week, using 'M', 'T', 'W', 'R', 'F', 'S', 'U'
+   */
   String daysToString(Set<DayOfWeek> days) {
     if (days.isEmpty()) {
       return "MTWRFSU";
@@ -986,42 +1129,13 @@ public class CalendarGUIView implements ICalendarView {
     return sb.toString();
   }
 
-  Set<DayOfWeek> parseWeekdays(Object value) {
-    Set<DayOfWeek> days = new HashSet<>();
-    if (value == null || value.toString().trim().isEmpty()) {
-      return days;
-    }
-
-    String str = value.toString().toUpperCase().trim();
-
-    for (char c : str.toCharArray()) {
-      switch (c) {
-        case 'M':
-          days.add(DayOfWeek.MONDAY);
-          break;
-        case 'T':
-          days.add(DayOfWeek.TUESDAY);
-          break;
-        case 'W':
-          days.add(DayOfWeek.WEDNESDAY);
-          break;
-        case 'R':
-          days.add(DayOfWeek.THURSDAY);
-          break;
-        case 'F':
-          days.add(DayOfWeek.FRIDAY);
-          break;
-        case 'S':
-          days.add(DayOfWeek.SATURDAY);
-          break;
-        case 'U':
-          days.add(DayOfWeek.SUNDAY);
-          break;
-      }
-    }
-    return days;
-  }
-
+  /**
+   * Displays a popup dialog showing detailed information about a calendar event.
+   * The details include the event's subject, start and end times, description, location,
+   * and recurrence information (if applicable).
+   *
+   * @param event The event whose details are to be displayed in the popup.
+   */
   private void showEventDetailsPopup(ReadOnlyCalendarEvent event) {
     StringBuilder sb = new StringBuilder("<html>");
     sb.append("<h2>").append(event.getSubject()).append("</h2>");
@@ -1056,6 +1170,12 @@ public class CalendarGUIView implements ICalendarView {
             JOptionPane.INFORMATION_MESSAGE);
   }
 
+  /**
+   * Prompts the user to specify a filename and exports the current calendar to a CSV file.
+   * The user can select the location to save the file, and the file will be saved with a
+   * ".csv" extension.
+   * The calendar's events are then exported to the specified file.
+   */
   private void exportCalendarToCSV() {
     JTextField filenameField = new JTextField();
     JPanel panel = new JPanel(new GridLayout(0, 1));
@@ -1104,6 +1224,14 @@ public class CalendarGUIView implements ICalendarView {
     }
   }
 
+  /**
+   * Prompts the user to select a CSV file to import and processes
+   * the file to add events to the calendar.
+   * The file must be in CSV format, and the calendar's events are imported, including details
+   * such as the event's subject, start and end times, recurrence, and repetition parameters.
+   *
+   * @throws Exception If an error occurs while importing the calendar from the CSV file.
+   */
   private void importCalendarFromCSV() {
     JFileChooser fileChooser = new JFileChooser();
     int result = fileChooser.showOpenDialog(frame);
@@ -1212,6 +1340,15 @@ public class CalendarGUIView implements ICalendarView {
   }
 
 
+  /**
+   * Attempts to parse a date from the given input string.
+   * It tries to parse the date in multiple formats, first in the ISO_LOCAL_DATE format
+   * (yyyy-MM-dd), then in the MM/dd/yyyy format.
+   *
+   * @param input The string representing the date to be parsed.
+   * @return A LocalDate object representing the parsed date.
+   * @throws IllegalArgumentException if the input cannot be parsed into a valid LocalDate.
+   */
   private LocalDate tryParseDate(String input) {
     DateTimeFormatter[] formats = new DateTimeFormatter[]{
             DateTimeFormatter.ISO_LOCAL_DATE,
@@ -1227,20 +1364,31 @@ public class CalendarGUIView implements ICalendarView {
   }
 
 
+  /**
+   * Initializes the calendar view by updating it.
+   * This method is typically called when setting up or resetting the view.
+   */
   public void initialize() {
     updateCalendarView();
   }
 
+  /**
+   * Displays a message to the user through a JOptionPane dialog.
+   * This method filters out certain messages to avoid showing redundant or
+   * unnecessary notifications.
+   *
+   * @param message The message to be displayed to the user.
+   */
   @Override
   public void displayMessage(String message) {
 
     if (message.startsWith("Events on") && message.endsWith(":")) {
       return;
     }
-    if (message.startsWith("Calendar created:") ||
-            message.startsWith("Using calendar:") ||
-            message.startsWith("No events found in calendar") ||
-            message.startsWith("Calendar exported successfully to:")) {
+    if (message.startsWith("Calendar created:")
+            || message.startsWith("Using calendar:")
+            || message.startsWith("No events found in calendar")
+            || message.startsWith("Calendar exported successfully to:")) {
       return;
     }
 
@@ -1252,31 +1400,69 @@ public class CalendarGUIView implements ICalendarView {
     JOptionPane.showMessageDialog(frame, message);
   }
 
+  /**
+   * Displays an error message to the user through a JOptionPane dialog.
+   *
+   * @param errorMessage The error message to be displayed.
+   */
   @Override
   public void displayError(String errorMessage) {
     JOptionPane.showMessageDialog(frame, errorMessage, "Error", JOptionPane.ERROR_MESSAGE);
   }
 
+  /**
+   * Placeholder method for the run functionality. Currently, it does not
+   * implement any specific logic.
+   * In the future, it can be used to define actions to be executed when the application is run.
+   */
   @Override
   public void run() {
-
+    return;
   }
 
+  /**
+   * Sets the input source for the calendar view.
+   * This method delegates the responsibility of setting the input to the
+   * `setInput` method in the `ICalendarView` interface.
+   *
+   * @param in The Readable source from which input will be read.
+   */
   @Override
   public void setInput(Readable in) {
     ICalendarView.super.setInput(in);
   }
 
+  /**
+   * Sets the output destination for the calendar view.
+   * This method delegates the responsibility of setting the output to the
+   * `setOutput` method in the `ICalendarView` interface.
+   *
+   * @param out The Appendable destination to which output will be written.
+   */
   @Override
   public void setOutput(Appendable out) {
     ICalendarView.super.setOutput(out);
   }
 
-
+  /**
+   * Sets the controller for the calendar view.
+   * This method associates a controller with the calendar view, enabling
+   * interaction with the application's logic through the controller.
+   *
+   * @param controller The `CalendarController` to be set.
+   */
   public void setController(CalendarController controller) {
     this.controller = controller;
   }
 
+  /**
+   * Sets the command factory for the calendar view.
+   * This method sets up the command factory, initializes the view components,
+   * layout, and registers listeners. Additionally, it tries to create and
+   * use a default calendar by using the provided command factory.
+   *
+   * @param factory The `ICommandFactory` to be used for creating and using commands.
+   */
   public void setCommandFactory(ICommandFactory factory) {
     this.commandFactory = factory;
 
