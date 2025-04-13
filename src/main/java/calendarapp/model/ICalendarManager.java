@@ -14,8 +14,7 @@ public interface ICalendarManager {
    *
    * @param name     the name of the calendar to be added
    * @param timezone the timezone of the calendar
-   * @return true if the calendar was added successfully, false if a calendar with the
-   * same name already exists
+   * @return true if the calendar was added successfully, false if a calendar with the same name
    */
   public boolean addCalendar(String name, ZoneId timezone);
 

@@ -122,6 +122,8 @@ public class EditEventCommand implements ICalendarModelCommand {
         case ALL:
           success = model.editEventsAll(property, eventName, newValue);
           break;
+        default:
+          break;
       }
     } catch (Exception e) {
       view.displayError("Error while editing event(s): " + e.getMessage());

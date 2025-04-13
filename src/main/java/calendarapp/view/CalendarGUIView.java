@@ -69,8 +69,12 @@ public class CalendarGUIView implements ICalendarView {
   private JFrame frame;
   private JPanel calendarPanel;
   private JLabel monthLabel;
-  private JComboBox<String> calendarDropdown, viewDropdown;
-  private JButton addCalendarButton, prevMonthButton, nextMonthButton, exportButton;
+  private JComboBox<String> calendarDropdown;
+  private JComboBox<String> viewDropdown;
+  private JButton addCalendarButton;
+  private JButton prevMonthButton;
+  private JButton nextMonthButton;
+  private JButton exportButton;
   private Map<String, Color> calendarColors;
   private Map<String, String> calendarTimezones;
   private YearMonth currentMonth;
@@ -178,7 +182,9 @@ public class CalendarGUIView implements ICalendarView {
   private void registerListeners() {
     calendarDropdown.addActionListener(e -> {
       String newSelection = (String) calendarDropdown.getSelectedItem();
-      if (newSelection == null || newSelection.trim().isEmpty()) return;
+      if (newSelection == null || newSelection.trim().isEmpty()) {
+        return;
+      }
       String command = commandFactory.useCalendarCommand(newSelection);
       boolean success = controller.processCommand(command);
       if (!success) {
@@ -303,7 +309,11 @@ public class CalendarGUIView implements ICalendarView {
               }
               sb.append(e.getSubject()).append("<br>");
             }
-            if (dayEvents.size() > 2) sb.append("...");
+            {
+              if (dayEvents.size() > 2) {
+                sb.append("...");
+              }
+            }
             sb.append("</font></html>");
 
             dayButton.setText(sb.toString());
@@ -745,6 +755,8 @@ public class CalendarGUIView implements ICalendarView {
           inputLabel.setText("New Location:");
           inputField.setText(selectedEvent.getLocation());
           break;
+        default:
+          break;
       }
     });
 
@@ -766,28 +778,40 @@ public class CalendarGUIView implements ICalendarView {
       try {
         switch (selectedProp) {
           case "Title":
-            if (newValue.equals(selectedEvent.getSubject())) return;
+            if (newValue.equals(selectedEvent.getSubject())) {
+              return;
+            }
             property = "name";
             break;
           case "Start Time":
             LocalTime newStart = LocalTime.parse(newValue);
-            if (newStart.equals(fromStart.toLocalTime())) return;
+            if (newStart.equals(fromStart.toLocalTime())) {
+              return;
+            }
             property = "startdatetime";
             finalValue = fromStart.toLocalDate().atTime(newStart).toString();
             break;
           case "End Time":
             LocalTime newEnd = LocalTime.parse(newValue);
-            if (newEnd.equals(fromEnd.toLocalTime())) return;
+            if (newEnd.equals(fromEnd.toLocalTime())) {
+              return;
+            }
             property = "enddatetime";
             finalValue = fromEnd.toLocalDate().atTime(newEnd).toString();
             break;
           case "Description":
-            if (newValue.equals(selectedEvent.getDescription())) return;
+            if (newValue.equals(selectedEvent.getDescription())) {
+              return;
+            }
             property = "description";
             break;
           case "Location":
-            if (newValue.equals(selectedEvent.getLocation())) return;
+            if (newValue.equals(selectedEvent.getLocation())) {
+              return;
+            }
             property = "location";
+            break;
+          default:
             break;
         }
         if (property != null) {

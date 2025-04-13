@@ -46,7 +46,9 @@ public class HeadlessView implements ICalendarView {
       String line;
       while ((line = reader.readLine()) != null) {
         String command = line.trim();
-        if (command.isEmpty()) continue;
+        if (command.isEmpty()) {
+          continue;
+        }
 
         if (command.equalsIgnoreCase("exit")) {
           out.append("Exiting.\n");

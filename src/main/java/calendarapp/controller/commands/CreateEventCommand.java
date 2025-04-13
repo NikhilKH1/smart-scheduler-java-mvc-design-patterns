@@ -165,7 +165,7 @@ public class CreateEventCommand implements ICalendarModelCommand {
   /**
    * Gets the date until which the event should repeat.
    *
-   * @return a Temporal object representing the repeat-until date (could be ZonedDateTime or LocalDate)
+   * @return a Temporal object representing the repeat-until date
    */
   public Temporal getRepeatUntil() {
     return repeatUntil;

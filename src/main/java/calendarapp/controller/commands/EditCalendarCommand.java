@@ -59,8 +59,7 @@ public class EditCalendarCommand implements ICalendarManagerCommand {
    * Utility method to check if a string is null or blank.
    *
    * @param str the string to check
-   * @return true if the string is null, empty, or consists only of whitespace;
-   * false otherwise
+   * @return true if the string is null, empty, or consists only of whitespace; false otherwise
    */
   private boolean isNullOrBlank(String str) {
     return str == null || str.trim().isEmpty();
