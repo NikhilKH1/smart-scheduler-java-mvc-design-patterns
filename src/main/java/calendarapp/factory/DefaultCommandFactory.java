@@ -210,4 +210,11 @@ public class DefaultCommandFactory implements ICommandFactory {
     return "import cal \"" + filePath + "\"";
   }
 
+  @Override
+  public String editCalendarTimezoneCommand(String name, ZoneId newZone) {
+    return "edit calendar --name \"" + name + "\" --property timezone " + newZone;
+  }
+
+
+
 }
