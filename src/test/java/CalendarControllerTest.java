@@ -10,7 +10,10 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.InputStreamReader;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -46,6 +49,52 @@ public class CalendarControllerTest {
     view.clearMessages();
   }
 
+  @Test
+  public void testInteractiveModeRunsSuccessfully() {
+    String[] args = {"--mode", "interactive"};
+    System.setIn(new ByteArrayInputStream("exit\n".getBytes()));
+    ByteArrayOutputStream out = new ByteArrayOutputStream();
+    System.setOut(new PrintStream(out));
+
+    CalendarController controller = new CalendarController(new CalendarManager(), new CommandParser(new CalendarManager()));
+    controller.run(args);
+
+    String output = out.toString();
+    assertTrue(output.contains("Starting in Interactive CLI mode"));
+    assertTrue(output.toLowerCase().contains("exiting"));
+  }
+
+  @Test
+  public void testHeadlessModeRunsSuccessfully() throws Exception {
+    java.io.File scriptFile = java.io.File.createTempFile("testscript", ".txt");
+    java.nio.file.Files.writeString(scriptFile.toPath(), "exit\n");
+
+    String[] args = {"--mode", "headless", scriptFile.getAbsolutePath()};
+    ByteArrayOutputStream out = new ByteArrayOutputStream();
+    System.setOut(new PrintStream(out));
+
+    CalendarController controller = new CalendarController(new CalendarManager(), new CommandParser(new CalendarManager()));
+    controller.run(args);
+
+    String output = out.toString();
+    assertTrue(output.contains("Running in Headless mode with script: " + scriptFile.getAbsolutePath()));
+    scriptFile.delete();
+  }
+
+  @Test
+  public void testInvalidModePrintsHelpMessage() {
+    String[] args = {"--invalid", "option"};
+    ByteArrayOutputStream err = new ByteArrayOutputStream();
+    System.setErr(new PrintStream(err));
+
+    CalendarController controller = new CalendarController(new CalendarManager(), new CommandParser(new CalendarManager()));
+    controller.run(args);
+
+    String output = err.toString();
+    assertTrue(output.contains("Invalid arguments. Use:"));
+    assertTrue(output.contains("--mode interactive"));
+    assertTrue(output.contains("--mode headless <script-file>"));
+  }
 
   @Test
   public void testProcessCreateEvent() {

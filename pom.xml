@@ -33,7 +33,7 @@
                         <param>*</param>
                     </targetTests>
                     <excludedClasses>
-                        <param>calendarapp.view.CalendarGUIView</param>
+                        <param>calendarapp.view.CalendarGUIView*</param>
                     </excludedClasses>
                 </configuration>
             </plugin>

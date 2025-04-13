@@ -1,4 +1,6 @@
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -35,7 +37,8 @@ public class DefaultCommandFactoryTest {
     public DummyEventInput(String subject, ZonedDateTime start,
                            ZonedDateTime end,
                            String description, String location,
-                           String repeatingDays, Integer repeatTimes, ZonedDateTime repeatUntil) {
+                           String repeatingDays, Integer repeatTimes, ZonedDateTime
+                                   repeatUntil) {
       this.subject = subject;
       this.start = start;
       this.end = end;
@@ -88,7 +91,8 @@ public class DefaultCommandFactoryTest {
 
     @Override
     public boolean isRecurring() {
-      return repeatingDays != null && !repeatingDays.isEmpty();
+      return repeatingDays != null
+              && !repeatingDays.isEmpty();
     }
   }
 
@@ -148,7 +152,8 @@ public class DefaultCommandFactoryTest {
     String name = "Work";
     ZoneId zone = ZoneId.of("Asia/Kolkata");
     String command = factory.createCalendarCommand(name, zone);
-    assertEquals("create calendar --name \"Work\" --timezone Asia/Kolkata", command);
+    assertEquals("create calendar --name \"Work\" --timezone Asia/Kolkata",
+            command);
   }
 
   @Test
@@ -201,7 +206,8 @@ public class DefaultCommandFactoryTest {
     ZonedDateTime end = start.plusHours(1);
     ZonedDateTime repeatUntil = start.plusWeeks(4);
     DummyEventInput input = new DummyEventInput("Training", start, end,
-            "Monthly Training", "Auditorium", "MTWRFSU", null, repeatUntil);
+            "Monthly Training", "Auditorium", "MTWRFSU",
+            null, repeatUntil);
     String command = factory.createEventCommand(input);
     String expected = "create event \"Training\" from " + start.toLocalDateTime() +
             " to " + end.toLocalDateTime() +
@@ -212,7 +218,8 @@ public class DefaultCommandFactoryTest {
 
   @Test
   public void testCreateEditCommand_NonRecurring() {
-    ZonedDateTime fromStart = ZonedDateTime.of(2025, 6, 1, 9, 0, 0, 0, ZoneId.systemDefault());
+    ZonedDateTime fromStart = ZonedDateTime.of(2025, 6, 1, 9,
+            0, 0, 0, ZoneId.systemDefault());
     ZonedDateTime fromEnd = fromStart.plusHours(1);
     EditInput input = new DummyEditInput("description", "Meeting",
             fromStart, fromEnd, "Updated description", false);
@@ -306,21 +313,26 @@ public class DefaultCommandFactoryTest {
 
   @Test
   public void testEditCalendarTimezoneCommand_validTimezone() {
-    String result = factory.editCalendarTimezoneCommand("Work", ZoneId.of("America/New_York"));
-    assertEquals("edit calendar --name \"Work\" --property timezone America/New_York", result);
+    String result = factory.editCalendarTimezoneCommand("Work",
+            ZoneId.of("America/New_York"));
+    assertEquals("edit calendar --name \"Work\" --property "
+            + "timezone America/New_York", result);
   }
 
   @Test
   public void testEditCalendarTimezoneCommand_withSpacesInName() {
-    String result = factory.editCalendarTimezoneCommand("My Calendar", ZoneId.of("Europe/London"));
-    assertEquals("edit calendar --name \"My Calendar\" --property timezone Europe/London", result);
+    String result = factory.editCalendarTimezoneCommand("My Calendar",
+            ZoneId.of("Europe/London"));
+    assertEquals("edit calendar --name \"My Calendar\" --property "
+            + "timezone Europe/London", result);
   }
 
   @Test
   public void testEditCalendarTimezoneCommand_withDefaultTimezone() {
     ZoneId defaultZone = ZoneId.systemDefault();
     String result = factory.editCalendarTimezoneCommand("Default", defaultZone);
-    assertEquals("edit calendar --name \"Default\" --property timezone " + defaultZone, result);
+    assertEquals("edit calendar --name \"Default\" --property timezone "
+            + defaultZone, result);
   }
 
   @Test(expected = NullPointerException.class)
@@ -333,4 +345,77 @@ public class DefaultCommandFactoryTest {
     factory.editCalendarTimezoneCommand("TestCal", null);
 
   }
+
+  @Test
+  public void testImportCalendarCommand() {
+    String cmd = factory.importCalendarCommand("myfile.csv");
+    assertEquals("import cal \"myfile.csv\"", cmd);
+  }
+
+
+  @Test
+  public void testCreateEditCommand_SingleEvent_AllProperties() {
+    ZonedDateTime fromStart = ZonedDateTime.parse("2025-06-01T10:00:00Z[UTC]");
+    ZonedDateTime fromEnd = ZonedDateTime.parse("2025-06-01T11:00:00Z[UTC]");
+    EditInput input = new EditInput("description", "Team Meeting",
+            fromStart, fromEnd, "Updated Desc", false);
+    String expected = "edit event description \"Team Meeting\" from 2025-06-01T10:00 "
+            + "to 2025-06-01T11:00 with \"Updated Desc\"";
+    assertEquals(expected, factory.createEditCommand(input));
+  }
+
+  @Test
+  public void testCreateEditCommand_Recurring_RepeatingDaysMain() {
+    EditInput input = new EditInput("repeatingdays", "Yoga Class",
+            "MWF", true);
+    String expected = "edit events repeatingdays \"Yoga Class\" MWF";
+    assertEquals(expected, factory.createEditCommand(input));
+  }
+
+  @Test
+  public void testCreateEditCommand_Recurring_RepeatUntilMain() {
+    EditInput input = new EditInput("repeatuntil", "Yoga Class",
+            "2025-12-31T10:00", true);
+    String expected = "edit events repeatuntil \"Yoga Class\" \"2025-12-31T10:00\"";
+    assertEquals(expected, factory.createEditCommand(input));
+  }
+
+  @Test
+  public void testCreateEditCommand_Recurring_RepeatTimes() {
+    EditInput input = new EditInput("repeattimes", "Yoga Class",
+            "10", true);
+    String expected = "edit events repeattimes \"Yoga Class\" \"10\"";
+    assertEquals(expected, factory.createEditCommand(input));
+  }
+
+  @Test
+  public void testCreateEditCommand_Recurring_OtherPropertyMain() {
+    ZonedDateTime from = ZonedDateTime.parse("2025-06-01T09:00:00Z[UTC]");
+    EditInput input = new EditInput("location", "Yoga Class", from,
+            null, "Studio A", true);
+    String expected = "edit events location \"Yoga Class\" from 2025-06-01T09:00 "
+            + "with \"Studio A\"";
+    assertEquals(expected, factory.createEditCommand(input));
+  }
+
+  @Test
+  public void testCreateEditRecurringEventCommand_StartDatetime() {
+    ZonedDateTime from = ZonedDateTime.parse("2025-07-01T10:00:00Z[UTC]");
+    EditInput input = new EditInput("startdatetime", "Yoga Class",
+            from, null, "2025-07-05T10:00", true);
+    String expected = "edit events startdatetime \"Yoga Class\" from 2025-07-01T10:00 "
+            + "with 2025-07-05T10:00";
+    assertEquals(expected, factory.createEditRecurringEventCommand(input));
+  }
+
+  @Test
+  public void testCreateEditRecurringEventCommand_UnsupportedProperty() {
+    EditInput input = new EditInput("color", "Yoga Class",
+            "blue", true);
+    Exception ex = assertThrows(IllegalArgumentException.class,
+            () -> factory.createEditRecurringEventCommand(input));
+    assertTrue(ex.getMessage().contains("Unsupported recurring property"));
+  }
+
+
 }

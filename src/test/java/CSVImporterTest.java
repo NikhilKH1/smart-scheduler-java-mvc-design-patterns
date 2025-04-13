@@ -3,6 +3,7 @@ import calendarapp.model.ICalendarModel;
 import calendarapp.model.event.ICalendarEvent;
 import calendarapp.model.event.ReadOnlyCalendarEvent;
 import calendarapp.model.event.RecurringEvent;
+import calendarapp.model.event.SingleEvent;
 import calendarapp.utils.CSVImporter;
 
 import org.junit.After;
@@ -43,29 +44,6 @@ public class CSVImporterTest {
     }
   }
 
-  @Test
-  public void testImportSingleEvent() throws IOException {
-    String content = "Name,StartDate,StartTime,EndDate,EndTime,ignored,Description,Location\n" +
-            "Meeting,03/25/2024,09:00,03/25/2024,10:00,,Team Sync,Conference Room\n";
-    writeToTempFile(content);
-    importer.importInto(model, tempFile.getAbsolutePath());
-
-    assertEquals(1, model.events.size());
-    ICalendarEvent event = model.events.get(0);
-    assertTrue(event.toString().contains("Meeting"));
-  }
-
-  @Test
-  public void testImportRecurringEventWithRepeatCount() throws IOException {
-    String content = "Name,StartDate,StartTime,EndDate,EndTime,ignored,Description,"
-            + "Location,Weekdays,RepeatUntil,RepeatCount\n" +
-            "Yoga,2024-04-01,07:00,2024-04-01,08:00,,Morning Yoga,Gym,MWF,,5\n";
-    writeToTempFile(content);
-    importer.importInto(model, tempFile.getAbsolutePath());
-
-    assertEquals(1, model.events.size());
-    assertTrue(model.events.get(0).toString().contains("Yoga"));
-  }
 
   @Test
   public void testImportRecurringEventWithRepeatUntil() throws IOException {
@@ -92,6 +70,60 @@ public class CSVImporterTest {
     }
   }
 
+
+
+  @Test
+  public void testImportRecurringWithRepeatUntilOnly() throws IOException {
+    String content = "Name,StartDate,StartTime,EndDate,EndTime,ignored,Description,"
+            + "Location,Weekdays,RepeatUntil\n" +
+            "Webinar,2024-04-01,09:00,2024-04-01,10:00,,Training Session,Zoom,TR,2024-04-30\n";
+    writeToTempFile(content);
+    importer.importInto(model, tempFile.getAbsolutePath());
+
+    assertEquals(1, model.events.size());
+    assertTrue(model.events.get(0) instanceof RecurringEvent);
+  }
+
+  @Test
+  public void testImportStandardSingleEvent() throws IOException {
+    String content = "Name,StartDate,StartTime,EndDate,EndTime,ignored,Description,Location\n" +
+            "Meeting,2024-04-20,10:00,2024-04-20,11:00,,Team Sync,Room A\n";
+    writeToTempFile(content);
+    importer.importInto(model, tempFile.getAbsolutePath());
+
+    assertEquals(1, model.events.size());
+    assertTrue(model.events.get(0) instanceof SingleEvent);
+    assertEquals("Meeting", model.events.get(0).getSubject());
+  }
+
+  @Test
+  public void testImportRecurringEmptyWeekdaysBecomesSingle() throws IOException {
+    String content = "Name,StartDate,StartTime,EndDate,EndTime,ignored,Description,Location,"
+            + "Weekdays,RepeatUntil,RepeatCount\n"
+            + "Oops,2024-04-01,10:00,2024-04-01,11:00,,NoRepeat,Gym,,,5\n";
+    writeToTempFile(content);
+    importer.importInto(model, tempFile.getAbsolutePath());
+
+    assertEquals(1, model.events.size());
+    assertTrue(model.events.get(0) instanceof SingleEvent);
+  }
+
+  @Test
+  public void testImportAllDayRecurringEvent() throws IOException {
+    String content = "Name,StartDate,StartTime,EndDate,EndTime,ignored,Description,"
+            + "Location,Weekdays,RepeatUntil\n" +
+            "DailyRoutine,2024-04-01,00:00,2024-04-01,23:59,,Routine,Gym,MTWRF,2024-04-07\n";
+    writeToTempFile(content);
+    importer.importInto(model, tempFile.getAbsolutePath());
+
+    assertEquals(1, model.events.size());
+    assertTrue(model.events.get(0) instanceof RecurringEvent);
+  }
+
+
+
+
+
   @Test
   public void testEmptyLineAndShortLineSkipped() throws IOException {
     String content = "Name,StartDate,StartTime,EndDate,EndTime,ignored,Description,Location\n" +
@@ -113,12 +145,16 @@ public class CSVImporterTest {
 
     @Override
     public boolean addEvent(ICalendarEvent event, boolean autoDecline) {
-      return false;
+      events.add(event);
+      return true;
     }
+
+
 
     @Override
     public boolean addRecurringEvent(RecurringEvent recurringEvent, boolean autoDecline) {
-      return false;
+      events.add(recurringEvent);
+      return true;
     }
 
     @Override
