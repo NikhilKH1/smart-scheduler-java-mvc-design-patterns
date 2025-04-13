@@ -56,7 +56,8 @@ public class CalendarControllerTest {
     ByteArrayOutputStream out = new ByteArrayOutputStream();
     System.setOut(new PrintStream(out));
 
-    CalendarController controller = new CalendarController(new CalendarManager(), new CommandParser(new CalendarManager()));
+    CalendarController controller = new CalendarController(new CalendarManager(),
+            new CommandParser(new CalendarManager()));
     controller.run(args);
 
     String output = out.toString();
@@ -73,11 +74,13 @@ public class CalendarControllerTest {
     ByteArrayOutputStream out = new ByteArrayOutputStream();
     System.setOut(new PrintStream(out));
 
-    CalendarController controller = new CalendarController(new CalendarManager(), new CommandParser(new CalendarManager()));
+    CalendarController controller = new CalendarController(new CalendarManager(),
+            new CommandParser(new CalendarManager()));
     controller.run(args);
 
     String output = out.toString();
-    assertTrue(output.contains("Running in Headless mode with script: " + scriptFile.getAbsolutePath()));
+    assertTrue(output.contains("Running in Headless mode with script: "
+            + scriptFile.getAbsolutePath()));
     scriptFile.delete();
   }
 
@@ -87,7 +90,8 @@ public class CalendarControllerTest {
     ByteArrayOutputStream err = new ByteArrayOutputStream();
     System.setErr(new PrintStream(err));
 
-    CalendarController controller = new CalendarController(new CalendarManager(), new CommandParser(new CalendarManager()));
+    CalendarController controller = new CalendarController(new CalendarManager(),
+            new CommandParser(new CalendarManager()));
     controller.run(args);
 
     String output = err.toString();

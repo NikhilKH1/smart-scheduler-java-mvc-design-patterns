@@ -413,7 +413,7 @@ public class DefaultCommandFactoryTest {
     EditInput input = new EditInput("color", "Yoga Class",
             "blue", true);
     Exception ex = assertThrows(IllegalArgumentException.class,
-            () -> factory.createEditRecurringEventCommand(input));
+      () -> factory.createEditRecurringEventCommand(input));
     assertTrue(ex.getMessage().contains("Unsupported recurring property"));
   }
 

@@ -5,6 +5,7 @@ import calendarapp.model.event.ReadOnlyCalendarEvent;
 import calendarapp.model.event.RecurringEvent;
 import calendarapp.utils.IImporter;
 import calendarapp.view.ICalendarView;
+
 import org.junit.Test;
 
 import java.io.IOException;
@@ -13,44 +14,154 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
+/**
+ * Test file for ImportCalendarCommand.
+ */
 public class ImportCalendarCommandTest {
 
   private static class FakeView implements ICalendarView {
     String message = "";
     String error = "";
 
-    @Override public void displayMessage(String message) { this.message = message; }
-    @Override public void displayError(String errorMessage) { this.error = errorMessage; }
-    @Override public void displayEvents(List<ReadOnlyCalendarEvent> events) {}
-    @Override public void run() {}
-    @Override public void setInput(Readable in) {}
-    @Override public void setOutput(Appendable out) {}
+    @Override
+    public void displayMessage(String message) {
+      this.message = message;
+    }
+
+    @Override
+    public void displayError(String errorMessage) {
+      this.error = errorMessage;
+    }
+
+    @Override
+    public void displayEvents(List<ReadOnlyCalendarEvent> events) {
+      return;
+    }
+
+    @Override
+    public void run() {
+      return;
+    }
+
+    @Override
+    public void setInput(Readable in) {
+      return;
+    }
+
+    @Override
+    public void setOutput(Appendable out) {
+      return;
+    }
   }
 
   private static class FakeModel implements ICalendarModel {
     boolean importCalled = false;
 
-    @Override public ZoneId getTimezone() { return ZoneId.systemDefault(); }
-    @Override public void updateTimezone(ZoneId newTimezone) {}
-    @Override public boolean addEvent(ICalendarEvent event, boolean autoDecline) { return false; }
-    @Override public boolean addRecurringEvent(RecurringEvent recurringEvent, boolean autoDecline) { return false; }
-    @Override public List<ReadOnlyCalendarEvent> getEvents() { return List.of(); }
-    @Override public List<ReadOnlyCalendarEvent> getEventsOnDate(LocalDate date) { return List.of(); }
-    @Override public List<ReadOnlyCalendarEvent> getEventsBetween(ZonedDateTime start, ZonedDateTime end) { return List.of(); }
-    @Override public boolean isBusyAt(ZonedDateTime dateTime) { return false; }
-    @Override public boolean editEvent(ICalendarEvent oldEvent, ICalendarEvent newEvent) { return false; }
-    @Override public boolean editRecurringEvent(String eventName, String property, String newValue) { return false; }
-    @Override public boolean editSingleEvent(String property, String eventName, ZonedDateTime originalStart, ZonedDateTime originalEnd, String newValue) { return false; }
-    @Override public boolean editEventsFrom(String property, String eventName, ZonedDateTime fromDateTime, String newValue) { return false; }
-    @Override public boolean editEventsAll(String property, String eventName, String newValue) { return false; }
-    @Override public String getName() { return "Fake"; }
-    @Override public boolean copySingleEventTo(ICalendarModel sourceCalendar, String eventName, ZonedDateTime sourceDateTime, ICalendarModel targetCalendar, ZonedDateTime targetDateTime) { return false; }
-    @Override public boolean copyEventsOnDateTo(ICalendarModel sourceCalendar, ZonedDateTime sourceDate, ICalendarModel targetCalendar, ZonedDateTime targetDate) { return false; }
-    @Override public boolean copyEventsBetweenTo(ICalendarModel sourceCalendar, ZonedDateTime startDate, ZonedDateTime endDate, ICalendarModel targetCalendar, ZonedDateTime targetStartDate) { return false; }
-    @Override public List<ReadOnlyCalendarEvent> getReadOnlyEventsOnDate(LocalDate date) { return List.of(); }
-    @Override public List<ReadOnlyCalendarEvent> getAllReadOnlyEvents() { return List.of(); }
+    @Override
+    public ZoneId getTimezone() {
+      return ZoneId.systemDefault();
+    }
+
+    @Override
+    public void updateTimezone(ZoneId newTimezone) {
+      return;
+    }
+
+    @Override
+    public boolean addEvent(ICalendarEvent event, boolean autoDecline) {
+      return false;
+    }
+
+    @Override
+    public boolean addRecurringEvent(RecurringEvent recurringEvent, boolean autoDecline) {
+      return false;
+    }
+
+    @Override
+    public List<ReadOnlyCalendarEvent> getEvents() {
+      return List.of();
+    }
+
+    @Override
+    public List<ReadOnlyCalendarEvent> getEventsOnDate(LocalDate date) {
+      return List.of();
+    }
+
+    @Override
+    public List<ReadOnlyCalendarEvent> getEventsBetween(ZonedDateTime start, ZonedDateTime end) {
+      return List.of();
+    }
+
+    @Override
+    public boolean isBusyAt(ZonedDateTime dateTime) {
+      return false;
+    }
+
+    @Override
+    public boolean editEvent(ICalendarEvent oldEvent, ICalendarEvent newEvent) {
+      return false;
+    }
+
+    @Override
+    public boolean editRecurringEvent(String eventName, String property, String newValue) {
+      return false;
+    }
+
+    @Override
+    public boolean editSingleEvent(String property, String eventName, ZonedDateTime originalStart,
+                                   ZonedDateTime originalEnd, String newValue) {
+      return false;
+    }
+
+    @Override
+    public boolean editEventsFrom(String property, String eventName, ZonedDateTime fromDateTime,
+                                  String newValue) {
+      return false;
+    }
+
+    @Override
+    public boolean editEventsAll(String property, String eventName, String newValue) {
+      return false;
+    }
+
+    @Override
+    public String getName() {
+      return "Fake";
+    }
+
+    @Override
+    public boolean copySingleEventTo(ICalendarModel sourceCalendar, String eventName,
+                                     ZonedDateTime sourceDateTime, ICalendarModel targetCalendar,
+                                     ZonedDateTime targetDateTime) {
+      return false;
+    }
+
+    @Override
+    public boolean copyEventsOnDateTo(ICalendarModel sourceCalendar, ZonedDateTime sourceDate,
+                                      ICalendarModel targetCalendar, ZonedDateTime targetDate) {
+      return false;
+    }
+
+    @Override
+    public boolean copyEventsBetweenTo(ICalendarModel sourceCalendar, ZonedDateTime startDate,
+                                       ZonedDateTime endDate, ICalendarModel targetCalendar,
+                                       ZonedDateTime targetStartDate) {
+      return false;
+    }
+
+    @Override
+    public List<ReadOnlyCalendarEvent> getReadOnlyEventsOnDate(LocalDate date) {
+      return List.of();
+    }
+
+    @Override
+    public List<ReadOnlyCalendarEvent> getAllReadOnlyEvents() {
+      return List.of();
+    }
   }
 
   private static class FakeImporter implements IImporter {
@@ -114,7 +225,8 @@ public class ImportCalendarCommandTest {
     FakeView view = new FakeView();
     FakeImporter importer = new FakeImporter(true, model);
 
-    ImportCalendarCommand command = new TestableImportCalendarCommand("broken.csv", importer);
+    ImportCalendarCommand command = new TestableImportCalendarCommand("broken.csv",
+            importer);
 
     boolean result = command.execute(model, view);
 
