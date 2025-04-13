@@ -72,4 +72,6 @@ public interface ICommandFactory {
 
   public String importCalendarCommand(String filePath);
 
+  public String editCalendarTimezoneCommand(String name, ZoneId newZone);
+
 }

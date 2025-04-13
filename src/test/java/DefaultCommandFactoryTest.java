@@ -303,4 +303,34 @@ public class DefaultCommandFactoryTest {
     String expected = "edit events repeatuntil \"Meeting\" \"2025-06-30\"";
     assertEquals(expected, command);
   }
+
+  @Test
+  public void testEditCalendarTimezoneCommand_validTimezone() {
+    String result = factory.editCalendarTimezoneCommand("Work", ZoneId.of("America/New_York"));
+    assertEquals("edit calendar --name \"Work\" --property timezone America/New_York", result);
+  }
+
+  @Test
+  public void testEditCalendarTimezoneCommand_withSpacesInName() {
+    String result = factory.editCalendarTimezoneCommand("My Calendar", ZoneId.of("Europe/London"));
+    assertEquals("edit calendar --name \"My Calendar\" --property timezone Europe/London", result);
+  }
+
+  @Test
+  public void testEditCalendarTimezoneCommand_withDefaultTimezone() {
+    ZoneId defaultZone = ZoneId.systemDefault();
+    String result = factory.editCalendarTimezoneCommand("Default", defaultZone);
+    assertEquals("edit calendar --name \"Default\" --property timezone " + defaultZone, result);
+  }
+
+  @Test(expected = NullPointerException.class)
+  public void testEditCalendarTimezoneCommand_nullName() {
+    factory.editCalendarTimezoneCommand(null, ZoneId.of("UTC"));
+  }
+
+  @Test(expected = NullPointerException.class)
+  public void testEditCalendarTimezoneCommand_nullZone() {
+    factory.editCalendarTimezoneCommand("TestCal", null);
+
+  }
 }

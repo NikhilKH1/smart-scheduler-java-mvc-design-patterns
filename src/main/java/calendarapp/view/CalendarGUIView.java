@@ -81,6 +81,7 @@ public class CalendarGUIView implements ICalendarView {
   private String selectedCalendar;
   private JLabel calendarNameLabel;
   private JButton importButton;
+  private JButton changeTimezoneButton;
   private boolean suppressCreationMessages = false;
   List<ReadOnlyCalendarEvent> lastRenderedEvents = new ArrayList<>();
   private JTextField repeatUntilField = new JTextField();
@@ -140,6 +141,7 @@ public class CalendarGUIView implements ICalendarView {
 
     exportButton = new JButton("Export");
     importButton = new JButton("Import");
+    changeTimezoneButton = new JButton("Change Timezone");
   }
 
   /**
@@ -152,6 +154,7 @@ public class CalendarGUIView implements ICalendarView {
     JPanel leftPanel = new JPanel();
     leftPanel.add(addCalendarButton);
     leftPanel.add(calendarDropdown);
+    leftPanel.add(changeTimezoneButton);
 
     JPanel centerPanel = new JPanel(new BorderLayout());
     JPanel navPanel = new JPanel();
@@ -215,6 +218,8 @@ public class CalendarGUIView implements ICalendarView {
     exportButton.addActionListener(e -> exportCalendarToCSV());
 
     importButton.addActionListener(e -> importCalendarFromCSV());
+
+    changeTimezoneButton.addActionListener(e -> showChangeTimezoneDialog());
   }
 
 
@@ -382,6 +387,42 @@ public class CalendarGUIView implements ICalendarView {
       }
     }
   }
+
+  /**
+   * Displays a dialog allowing the user to change the timezone of the currently selected calendar.
+   * The user can choose a new timezone from a dropdown list of all available `ZoneId`s.
+   * If the selected timezone is different from the current one, a backend command is issued
+   * to update the calendar's timezone. On success, the internal timezone map is updated,
+   * the calendar view is refreshed, and the user is notified.
+   *
+   * If the timezone change fails (e.g., due to invalid calendar name or backend error),
+   * an error dialog is shown. If the user cancels the operation, no changes are made.
+   */
+  private void showChangeTimezoneDialog() {
+    String[] zones = ZoneId.getAvailableZoneIds().stream().sorted().toArray(String[]::new);
+    JComboBox<String> zoneDropdown = new JComboBox<>(zones);
+    zoneDropdown.setSelectedItem(calendarTimezones.getOrDefault(selectedCalendar, ZoneId.systemDefault().toString()));
+
+    int result = JOptionPane.showConfirmDialog(frame, zoneDropdown,
+            "Select New Timezone for '" + selectedCalendar + "'", JOptionPane.OK_CANCEL_OPTION);
+
+    if (result == JOptionPane.OK_OPTION) {
+      String selectedZone = (String) zoneDropdown.getSelectedItem();
+      if (selectedZone != null && !selectedZone.equals(calendarTimezones.get(selectedCalendar))) {
+        String command = commandFactory.editCalendarTimezoneCommand(selectedCalendar, ZoneId.of(selectedZone));
+        if (controller.processCommand(command)) {
+          calendarTimezones.put(selectedCalendar, selectedZone);
+          JOptionPane.showMessageDialog(frame,
+                  "Timezone updated to " + selectedZone + " for calendar: " + selectedCalendar);
+          refreshMainView();
+        } else {
+          JOptionPane.showMessageDialog(frame, "Failed to update timezone.",
+                  "Error", JOptionPane.ERROR_MESSAGE);
+        }
+      }
+    }
+  }
+
 
   /**
    * Displays a dialog showing the events for a specific date.
