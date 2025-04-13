@@ -335,12 +335,12 @@ public class DefaultCommandFactoryTest {
             + defaultZone, result);
   }
 
-  @Test(expected = NullPointerException.class)
+  @Test(expected = IllegalArgumentException.class)
   public void testEditCalendarTimezoneCommand_nullName() {
     factory.editCalendarTimezoneCommand(null, ZoneId.of("UTC"));
   }
 
-  @Test(expected = NullPointerException.class)
+  @Test(expected = IllegalArgumentException.class)
   public void testEditCalendarTimezoneCommand_nullZone() {
     factory.editCalendarTimezoneCommand("TestCal", null);
 
