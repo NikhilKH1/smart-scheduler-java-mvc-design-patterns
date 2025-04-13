@@ -31,9 +31,7 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -394,26 +392,29 @@ public class CalendarGUIView implements ICalendarView {
    * If the selected timezone is different from the current one, a backend command is issued
    * to update the calendar's timezone. On success, the internal timezone map is updated,
    * the calendar view is refreshed, and the user is notified.
-   *
    * If the timezone change fails (e.g., due to invalid calendar name or backend error),
    * an error dialog is shown. If the user cancels the operation, no changes are made.
    */
   private void showChangeTimezoneDialog() {
     String[] zones = ZoneId.getAvailableZoneIds().stream().sorted().toArray(String[]::new);
     JComboBox<String> zoneDropdown = new JComboBox<>(zones);
-    zoneDropdown.setSelectedItem(calendarTimezones.getOrDefault(selectedCalendar, ZoneId.systemDefault().toString()));
+    zoneDropdown.setSelectedItem(calendarTimezones.getOrDefault(selectedCalendar,
+            ZoneId.systemDefault().toString()));
 
     int result = JOptionPane.showConfirmDialog(frame, zoneDropdown,
-            "Select New Timezone for '" + selectedCalendar + "'", JOptionPane.OK_CANCEL_OPTION);
+            "Select New Timezone for '" + selectedCalendar + "'",
+            JOptionPane.OK_CANCEL_OPTION);
 
     if (result == JOptionPane.OK_OPTION) {
       String selectedZone = (String) zoneDropdown.getSelectedItem();
       if (selectedZone != null && !selectedZone.equals(calendarTimezones.get(selectedCalendar))) {
-        String command = commandFactory.editCalendarTimezoneCommand(selectedCalendar, ZoneId.of(selectedZone));
+        String command = commandFactory.editCalendarTimezoneCommand(selectedCalendar,
+                ZoneId.of(selectedZone));
         if (controller.processCommand(command)) {
           calendarTimezones.put(selectedCalendar, selectedZone);
           JOptionPane.showMessageDialog(frame,
-                  "Timezone updated to " + selectedZone + " for calendar: " + selectedCalendar);
+                  "Timezone updated to " + selectedZone + " for calendar: "
+                          + selectedCalendar);
           refreshMainView();
         } else {
           JOptionPane.showMessageDialog(frame, "Failed to update timezone.",
@@ -945,6 +946,8 @@ public class CalendarGUIView implements ICalendarView {
             inputLabel.setText("New Repeat Times (integer):");
             inputField.setText("");
             break;
+          default:
+            break;
         }
         inputPanel.add(inputLabel);
         inputPanel.add(inputField);
@@ -990,6 +993,8 @@ public class CalendarGUIView implements ICalendarView {
             break;
           case "Weekdays":
             property = "repeatingdays";
+            break;
+          default:
             break;
         }
         if (property != null) {
@@ -1231,7 +1236,6 @@ public class CalendarGUIView implements ICalendarView {
       if (event.repeatUntil() != null) {
         sb.append("<p><b>Repeat Until:</b> ").append(event.repeatUntil()).append("</p>");
       } else if (event.getRepeatCount() != null && event.getRepeatCount() > 0) {
-      } else if (event.getRepeatCount() != null && event.getRepeatCount() > 0) {
         sb.append("<p><b>Repeat Count:</b> ").append(event.getRepeatCount()).append("</p>");
       }
     } else {
@@ -1311,7 +1315,9 @@ public class CalendarGUIView implements ICalendarView {
   private void importCalendarFromCSV() {
     JFileChooser fileChooser = new JFileChooser();
     int result = fileChooser.showOpenDialog(frame);
-    if (result != JFileChooser.APPROVE_OPTION) return;
+    if (result != JFileChooser.APPROVE_OPTION) {
+      return;
+    }
 
     File file = fileChooser.getSelectedFile();
     if (file == null || !file.getName().endsWith(".csv")) {
@@ -1345,8 +1351,8 @@ public class CalendarGUIView implements ICalendarView {
    */
   private LocalDate tryParseDate(String input) {
     DateTimeFormatter[] formats = new DateTimeFormatter[]{
-            DateTimeFormatter.ISO_LOCAL_DATE,
-            DateTimeFormatter.ofPattern("MM/dd/yyyy")
+    DateTimeFormatter.ISO_LOCAL_DATE,
+    DateTimeFormatter.ofPattern("MM/dd/yyyy")
     };
     for (DateTimeFormatter fmt : formats) {
       try {

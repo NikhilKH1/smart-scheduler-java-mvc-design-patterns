@@ -60,7 +60,7 @@ public class CommandParser {
 
   /**
    * Parses the "import cal" command to import calendar events from a specified CSV file.
-   * The expected format is import cal <filePath.csv>, where filePath.csv
+   * The expected format is import cal "filePath.csv", where filePath.csv
    * can be quoted or unquoted. This method validates the command structure, ensures
    * the file has a ".csv" extension, and constructs an ImportCalendarCommand
    * to process the import using a suitable IImporter.

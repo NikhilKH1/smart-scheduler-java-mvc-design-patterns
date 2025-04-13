@@ -16,11 +16,18 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * Imports events from a CSV file into the active calendar. Supports both single
+ * and recurring events based on the presence of recurrence-related fields. Parses
+ * Google Calendar-style CSVs with support for timezone-aware timestamps, descriptions,
+ * and locations. Implements the IImporter interface.
+ */
+
 public class CSVImporter implements IImporter {
 
   private static final DateTimeFormatter[] DATE_FORMATS = new DateTimeFormatter[]{
-          DateTimeFormatter.ofPattern("MM/dd/yyyy"),
-          DateTimeFormatter.ISO_LOCAL_DATE
+    DateTimeFormatter.ofPattern("MM/dd/yyyy"),
+    DateTimeFormatter.ISO_LOCAL_DATE
   };
 
   @Override
@@ -32,7 +39,9 @@ public class CSVImporter implements IImporter {
 
       while ((line = reader.readLine()) != null) {
         String[] parts = line.split(",", -1);
-        if (parts.length < 7) continue;
+        if (parts.length < 7) {
+          continue;
+        }
 
         String name = parts[0].replace("\"", "").trim();
         LocalDate startDate = tryParseDate(parts[1].trim());
@@ -94,7 +103,9 @@ public class CSVImporter implements IImporter {
     for (DateTimeFormatter fmt : DATE_FORMATS) {
       try {
         return LocalDate.parse(input, fmt);
-      } catch (Exception ignored) {}
+      } catch (Exception ignored) {
+        System.out.println("Error parsing date: " + input);
+      }
     }
     throw new IllegalArgumentException("Invalid date format: " + input);
   }
@@ -103,13 +114,29 @@ public class CSVImporter implements IImporter {
     Set<DayOfWeek> result = new HashSet<>();
     for (char c : input.toUpperCase().toCharArray()) {
       switch (c) {
-        case 'M': result.add(DayOfWeek.MONDAY); break;
-        case 'T': result.add(DayOfWeek.TUESDAY); break;
-        case 'W': result.add(DayOfWeek.WEDNESDAY); break;
-        case 'R': result.add(DayOfWeek.THURSDAY); break;
-        case 'F': result.add(DayOfWeek.FRIDAY); break;
-        case 'S': result.add(DayOfWeek.SATURDAY); break;
-        case 'U': result.add(DayOfWeek.SUNDAY); break;
+        case 'M':
+          result.add(DayOfWeek.MONDAY);
+          break;
+        case 'T':
+          result.add(DayOfWeek.TUESDAY);
+          break;
+        case 'W':
+          result.add(DayOfWeek.WEDNESDAY);
+          break;
+        case 'R':
+          result.add(DayOfWeek.THURSDAY);
+          break;
+        case 'F':
+          result.add(DayOfWeek.FRIDAY);
+          break;
+        case 'S':
+          result.add(DayOfWeek.SATURDAY);
+          break;
+        case 'U':
+          result.add(DayOfWeek.SUNDAY);
+          break;
+        default:
+          break;
       }
     }
     return result;
