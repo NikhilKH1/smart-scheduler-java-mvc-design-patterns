@@ -1,11 +1,11 @@
 package calendarapp.model.event;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.ZonedDateTime;
 
 /**
- * This class represents a single (non-recurring) calendar event.
- * A single event contains the standard event details and may include a series identifier
- * if it is part of a recurring event series.
+ * Represents a single (non-recurring) calendar event.
  */
 public class SingleEvent extends AbstractCalendarEvent {
 
@@ -24,7 +24,7 @@ public class SingleEvent extends AbstractCalendarEvent {
    * @param seriesId      an identifier linking the event to a recurring series,
    *                      or null if not applicable
    */
-  public SingleEvent(String subject, LocalDateTime startDateTime, LocalDateTime endDateTime,
+  public SingleEvent(String subject, ZonedDateTime startDateTime, ZonedDateTime endDateTime,
                      String description, String location, boolean isPublic,
                      boolean isAllDay, String seriesId) {
     this.subject = subject;
@@ -44,5 +44,105 @@ public class SingleEvent extends AbstractCalendarEvent {
    */
   public String getSeriesId() {
     return seriesId;
+  }
+
+  /**
+   * Returns true if the event is recurring.
+   * A single event is considered non-recurring unless it is part of a recurring series.
+   *
+   * @return true if the event is recurring, false otherwise
+   */
+  @Override
+  public boolean isRecurring() {
+    return this.seriesId != null;
+  }
+
+  /**
+   * Returns an empty string for weekdays, as single events do not have recurring weekdays.
+   *
+   * @return an empty string
+   */
+  @Override
+  public String getWeekdays() {
+    return "";
+  }
+
+  /**
+   * Returns null as there is no repeat until date for single events.
+   *
+   * @return null
+   */
+  @Override
+  public ZonedDateTime repeatUntil() {
+    return null;
+  }
+
+  /**
+   * Returns zero as there is no repeat count for single events.
+   *
+   * @return 0
+   */
+  @Override
+  public Integer getRepeatCount() {
+    return 0;
+  }
+
+  /**
+   * Returns a new SingleEvent updated with the specified property.
+   *
+   * @param property The property to update.
+   * @param newValue The new value for the property.
+   * @return A new SingleEvent instance with the updated property.
+   * @throws IllegalArgumentException if the property is unsupported
+   */
+  public SingleEvent withUpdatedProperty(String property, String newValue) {
+    String newSubject = this.subject;
+    String newDescription = this.description;
+    String newLocation = this.location;
+    ZonedDateTime newStart = this.startDateTime;
+    ZonedDateTime newEnd = this.endDateTime;
+    boolean newIsPublic = this.isPublic;
+
+    switch (property.toLowerCase().trim()) {
+      case "name":
+        newSubject = newValue;
+        break;
+      case "description":
+        newDescription = newValue;
+        break;
+      case "location":
+        newLocation = newValue;
+        break;
+      case "startdatetime":
+        newStart = ZonedDateTime.parse(newValue);
+        break;
+      case "enddatetime":
+        newEnd = ZonedDateTime.parse(newValue);
+        break;
+      case "startdate":
+        newStart = LocalDate.parse(newValue).atTime(newStart.toLocalTime())
+                .atZone(newStart.getZone());
+        break;
+      case "enddate":
+        newEnd = LocalDate.parse(newValue).atTime(newEnd.toLocalTime())
+                .atZone(newEnd.getZone());
+        break;
+      case "starttime":
+        newStart = newStart.toLocalDate().atTime(LocalTime.parse(newValue))
+                .atZone(newStart.getZone());
+        break;
+      case "endtime":
+        newEnd = newEnd.toLocalDate().atTime(LocalTime.parse(newValue))
+                .atZone(newEnd.getZone());
+        break;
+      case "public":
+        newIsPublic = Boolean.parseBoolean(newValue);
+        break;
+      default:
+        throw new IllegalArgumentException("Unsupported property: " + property);
+    }
+
+    return new SingleEvent(newSubject, newStart, newEnd, newDescription,
+            newLocation, newIsPublic, this.isAllDay, this.seriesId);
   }
 }

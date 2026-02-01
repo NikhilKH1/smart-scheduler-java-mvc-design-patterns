@@ -1,110 +1,408 @@
+import calendarapp.controller.commands.CreateEventCommand;
+import calendarapp.model.ICalendarModel;
+import calendarapp.model.event.ICalendarEvent;
+import calendarapp.model.event.ReadOnlyCalendarEvent;
+import calendarapp.model.event.RecurringEvent;
+import calendarapp.model.event.SingleEvent;
+import calendarapp.view.ICalendarView;
 
 import org.junit.Before;
 import org.junit.Test;
 
-import java.time.LocalDateTime;
-
-import calendarapp.model.CalendarModel;
-import calendarapp.model.commands.CreateEventCommand;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+
 
 /**
  * JUnit tests for the CreateEventCommand class.
  */
 public class CreateEventCommandTest {
-  private CreateEventCommand singleEventCommand;
-  private CreateEventCommand recurringEventCommand;
+  private ZonedDateTime start;
+  private ZonedDateTime end;
+  private ZonedDateTime repeatUntil;
 
   @Before
   public void setUp() {
-    LocalDateTime start = LocalDateTime.of(2025, 7, 1, 9, 0);
-    LocalDateTime end = LocalDateTime.of(2025, 7, 1, 10, 0);
-
-    singleEventCommand = new CreateEventCommand(
-            "Workout", start, end, false, "Gym session",
-            "Fitness Club",
-            true, false, false, "", 0,
-            null
-    );
-
-    recurringEventCommand = new CreateEventCommand(
-            "Morning Run", start, end, false, "Daily run",
-            "Park",
-            true, false, true, "MTWRF", 10,
-            LocalDateTime.of(2025, 7, 15, 9, 0)
-    );
+    start = ZonedDateTime.of(2025, 7, 1, 9, 0,
+            0, 0, ZoneId.of("UTC"));
+    end = ZonedDateTime.of(2025, 7, 1, 10, 0,
+            0, 0, ZoneId.of("UTC"));
+    repeatUntil = ZonedDateTime.of(2025, 7, 15, 9,
+            0, 0, 0, ZoneId.of("UTC"));
   }
 
   @Test
-  public void testSingleEventInitialization() {
-    assertEquals("Workout", singleEventCommand.getEventName());
-    assertEquals(LocalDateTime.of(2025, 7, 1, 9, 0),
-            singleEventCommand.getStartDateTime());
-    assertEquals(LocalDateTime.of(2025, 7, 1, 10, 0),
-            singleEventCommand.getEndDateTime());
-    assertEquals("Gym session", singleEventCommand.getDescription());
-    assertEquals("Fitness Club", singleEventCommand.getLocation());
-    assertTrue(singleEventCommand.isPublic());
-    assertFalse(singleEventCommand.isAllDay());
-    assertFalse(singleEventCommand.isRecurring());
-    assertEquals("", singleEventCommand.getWeekdays());
-    assertEquals(0, singleEventCommand.getRepeatCount());
-    assertNull(singleEventCommand.getRepeatUntil());
-  }
-
-  @Test
-  public void testRecurringEventInitialization() {
-    assertEquals("Morning Run", recurringEventCommand.getEventName());
-    assertEquals(LocalDateTime.of(2025, 7, 1, 9, 0),
-            recurringEventCommand.getStartDateTime());
-    assertEquals(LocalDateTime.of(2025, 7, 1, 10, 0),
-            recurringEventCommand.getEndDateTime());
-    assertEquals("Daily run", recurringEventCommand.getDescription());
-    assertEquals("Park", recurringEventCommand.getLocation());
-    assertTrue(recurringEventCommand.isPublic());
-    assertFalse(recurringEventCommand.isAllDay());
-    assertTrue(recurringEventCommand.isRecurring());
-    assertEquals("MTWRF", recurringEventCommand.getWeekdays());
-    assertEquals(10, recurringEventCommand.getRepeatCount());
-    assertEquals(LocalDateTime.of(2025, 7, 15, 9, 0),
-            recurringEventCommand.getRepeatUntil());
-  }
-
-  @Test
-  public void testAutoDeclineFlag() {
-    CreateEventCommand command = new CreateEventCommand(
-            "Team Meeting", LocalDateTime.of(2025, 8, 1,
-            10, 0),
-            LocalDateTime.of(2025, 8, 1, 11, 0),
-            true,
-            "Sprint review", "Office", false, false,
-            false, "", 0, null
-    );
-    assertTrue(command.isAutoDecline());
-  }
-
-  @Test
-  public void testCreateEventCommand() {
-    CalendarModel model = new CalendarModel();
-    LocalDateTime start = LocalDateTime.of(2025, 6, 1, 9, 0);
-    LocalDateTime end = LocalDateTime.of(2025, 6, 1, 10, 0);
-
+  public void testGettersForRecurringEventCommand() {
     CreateEventCommand cmd = new CreateEventCommand(
-            "Team Meeting", start, end, false, "Sync up",
-            "Room A", true, false, false, "",
-            0, null
-    );
+            "Yoga", start, end, true,
+            "Morning Yoga Session", "Park",
+            false, true, true,
+            "MWF", 5, repeatUntil);
 
-    assertEquals("Team Meeting", cmd.getEventName());
+    assertEquals("Yoga", cmd.getEventName());
     assertEquals(start, cmd.getStartDateTime());
     assertEquals(end, cmd.getEndDateTime());
-    assertEquals("Sync up", cmd.getDescription());
-    assertEquals("Room A", cmd.getLocation());
-    assertTrue(cmd.isPublic());
+    assertTrue(cmd.isAutoDecline());
+    assertEquals("Morning Yoga Session", cmd.getDescription());
+    assertEquals("Park", cmd.getLocation());
+    assertFalse(cmd.isPublic());
+    assertTrue(cmd.isAllDay());
+    assertTrue(cmd.isRecurring());
+    assertEquals("MWF", cmd.getWeekdays());
+    assertEquals(5, cmd.getRepeatCount());
+    assertEquals(repeatUntil, cmd.getRepeatUntil());
   }
 
+  @Test
+  public void testGettersForSingleEventCommand() {
+    CreateEventCommand cmd = new CreateEventCommand(
+            "Dentist", start, end, false,
+            "Dental check-up", "Clinic",
+            true, false, false,
+            "", 0, null);
+
+    assertEquals("Dentist", cmd.getEventName());
+    assertEquals(start, cmd.getStartDateTime());
+    assertEquals(end, cmd.getEndDateTime());
+    assertFalse(cmd.isAutoDecline());
+    assertEquals("Dental check-up", cmd.getDescription());
+    assertEquals("Clinic", cmd.getLocation());
+    assertTrue(cmd.isPublic());
+    assertFalse(cmd.isAllDay());
+    assertFalse(cmd.isRecurring());
+    assertEquals("", cmd.getWeekdays());
+    assertEquals(0, cmd.getRepeatCount());
+    assertEquals(null, cmd.getRepeatUntil());
+  }
+
+
+  @Test
+  public void testExecuteSingleEventSuccess() {
+    List<String> output = new ArrayList<>();
+    CreateEventCommand cmd = new CreateEventCommand(
+            "Workout", start, end, true, "Gym session",
+            "Fitness Club", true, false, false,
+            "", 0, null);
+
+    ICalendarModel model = new DummyModel(true, true);
+    ICalendarView view = getCapturingView(output);
+
+    boolean result = cmd.execute(model, view);
+    System.out.println(output.get(0));
+    assertEquals("ERROR: Event creation failed due to conflict", output.get(0));
+  }
+
+  @Test
+  public void testExecuteRecurringEventSuccess() {
+    List<String> output = new ArrayList<>();
+    CreateEventCommand cmd = new CreateEventCommand(
+            "Morning Run", start, end, true, "Daily run",
+            "Park", true, false, true, "MTWRF",
+            10, repeatUntil);
+
+    ICalendarModel model = new DummyModel(true, true);
+    ICalendarView view = getCapturingView(output);
+
+    boolean result = cmd.execute(model, view);
+    assertTrue(result);
+    assertEquals("Event created successfully", output.get(0));
+  }
+
+  @Test
+  public void testExecuteFailsDueToConflict() {
+    List<String> output = new ArrayList<>();
+    CreateEventCommand cmd = new CreateEventCommand(
+            "Team Meeting", start, end, true, "Sync",
+            "Room A", true, false, false, "",
+            0, null);
+
+    ICalendarModel model = new DummyModel(false, false);
+    ICalendarView view = getCapturingView(output);
+
+    boolean result = cmd.execute(model, view);
+    assertFalse(result);
+    assertEquals("ERROR: Event creation failed due to conflict", output.get(0));
+  }
+
+  @Test
+  public void testExecuteHandlesException() {
+    List<String> output = new ArrayList<>();
+    CreateEventCommand cmd = new CreateEventCommand(
+            "Faulty Event", start, end, true, "Oops",
+            "Crash Site", true, false, false, "",
+            0, null);
+
+    ICalendarModel model = new ICalendarModel() {
+      public boolean addEvent(SingleEvent event, boolean checkConflicts) {
+        throw new IllegalArgumentException("Simulated failure");
+      }
+
+      @Override
+      public boolean addEvent(ICalendarEvent event, boolean autoDecline) {
+        return false;
+      }
+
+      @Override
+      public boolean addRecurringEvent(RecurringEvent event, boolean autoDecline) {
+        return false;
+      }
+
+      @Override
+      public List getEvents() {
+        return null;
+      }
+
+      @Override
+      public List<ReadOnlyCalendarEvent> getEventsOnDate(LocalDate date) {
+        return List.of();
+      }
+
+      @Override
+      public List<ReadOnlyCalendarEvent> getEventsBetween(ZonedDateTime start, ZonedDateTime end) {
+        return List.of();
+      }
+
+
+      @Override
+      public boolean isBusyAt(ZonedDateTime dateTime) {
+        return false;
+      }
+
+      @Override
+      public boolean editEvent(ICalendarEvent oldEvent, ICalendarEvent newEvent) {
+        return false;
+      }
+
+      @Override
+      public boolean editRecurringEvent(String eventName, String property, String newValue) {
+        return false;
+      }
+
+      @Override
+      public boolean editSingleEvent(String property, String eventName,
+                                     ZonedDateTime originalStart, ZonedDateTime originalEnd,
+                                     String newValue) {
+        return false;
+      }
+
+      @Override
+      public boolean editEventsFrom(String property, String eventName, ZonedDateTime fromDateTime,
+                                    String newValue) {
+        return false;
+      }
+
+      @Override
+      public boolean editEventsAll(String property, String eventName, String newValue) {
+        return false;
+      }
+
+      @Override
+      public String getName() {
+        return "";
+      }
+
+      @Override
+      public ZoneId getTimezone() {
+        return ZoneId.of("UTC");
+      }
+
+      @Override
+      public void updateTimezone(ZoneId newTimezone) {
+        return;
+      }
+
+      @Override
+      public boolean copySingleEventTo(ICalendarModel sourceCalendar, String eventName,
+                                       ZonedDateTime sourceDateTime, ICalendarModel targetCalendar,
+                                       ZonedDateTime targetDateTime) {
+        return false;
+      }
+
+      @Override
+      public boolean copyEventsOnDateTo(ICalendarModel sourceCalendar, ZonedDateTime sourceDate,
+                                        ICalendarModel targetCalendar, ZonedDateTime targetDate) {
+        return false;
+      }
+
+      @Override
+      public boolean copyEventsBetweenTo(ICalendarModel sourceCalendar, ZonedDateTime startDate,
+                                         ZonedDateTime endDate, ICalendarModel targetCalendar,
+                                         ZonedDateTime targetStartDate) {
+        return false;
+      }
+
+      @Override
+      public List<ReadOnlyCalendarEvent> getReadOnlyEventsOnDate(LocalDate date) {
+        return List.of();
+      }
+
+      @Override
+      public List<ReadOnlyCalendarEvent> getAllReadOnlyEvents() {
+        return List.of();
+      }
+    };
+
+    ICalendarView view = getCapturingView(output);
+
+    boolean result = cmd.execute(model, view);
+    assertFalse(result);
+    assertEquals("ERROR: Event creation failed due to conflict", output.get(0));
+  }
+
+  private ICalendarView getCapturingView(List<String> output) {
+    return new ICalendarView() {
+      @Override
+      public void displayMessage(String msg) {
+        output.add(msg);
+      }
+
+      @Override
+      public void displayError(String msg) {
+        output.add("ERROR: " + msg);
+      }
+
+      @Override
+      public void run() {
+        return;
+      }
+
+      @Override
+      public void setInput(Readable in) {
+        ICalendarView.super.setInput(in);
+      }
+
+      @Override
+      public void setOutput(Appendable out) {
+        ICalendarView.super.setOutput(out);
+      }
+
+      @Override
+      public void displayEvents(List events) {
+        return;
+      }
+    };
+  }
+
+  private static class DummyModel implements ICalendarModel {
+    private final boolean singleEventSuccess;
+    private final boolean recurringEventSuccess;
+
+    DummyModel(boolean singleEventSuccess, boolean recurringEventSuccess) {
+      this.singleEventSuccess = singleEventSuccess;
+      this.recurringEventSuccess = recurringEventSuccess;
+    }
+
+    public boolean addEvent(SingleEvent event, boolean checkConflicts) {
+      return singleEventSuccess;
+    }
+
+    @Override
+    public boolean addEvent(ICalendarEvent event, boolean autoDecline) {
+      return false;
+    }
+
+    @Override
+    public boolean addRecurringEvent(RecurringEvent event, boolean autoDecline) {
+      return recurringEventSuccess;
+    }
+
+    @Override
+    public List getEvents() {
+      return null;
+    }
+
+    @Override
+    public List<ReadOnlyCalendarEvent> getEventsOnDate(LocalDate date) {
+      return List.of();
+    }
+
+    @Override
+    public List<ReadOnlyCalendarEvent> getEventsBetween(ZonedDateTime start, ZonedDateTime end) {
+      return List.of();
+    }
+
+    @Override
+    public boolean isBusyAt(ZonedDateTime dateTime) {
+      return false;
+    }
+
+    @Override
+    public boolean editEvent(ICalendarEvent oldEvent, ICalendarEvent newEvent) {
+      return false;
+    }
+
+    @Override
+    public boolean editRecurringEvent(String eventName, String property, String newValue) {
+      return false;
+    }
+
+    @Override
+    public boolean editSingleEvent(String property, String eventName, ZonedDateTime originalStart,
+                                   ZonedDateTime originalEnd, String newValue) {
+      return false;
+    }
+
+    @Override
+    public boolean editEventsFrom(String property, String eventName, ZonedDateTime fromDateTime,
+                                  String newValue) {
+      return false;
+    }
+
+    @Override
+    public boolean editEventsAll(String property, String eventName, String newValue) {
+      return false;
+    }
+
+    @Override
+    public String getName() {
+      return "";
+    }
+
+    @Override
+    public ZoneId getTimezone() {
+      return ZoneId.of("UTC");
+    }
+
+    @Override
+    public void updateTimezone(ZoneId newTimezone) {
+      return;
+    }
+
+    @Override
+    public boolean copySingleEventTo(ICalendarModel sourceCalendar, String eventName,
+                                     ZonedDateTime sourceDateTime, ICalendarModel targetCalendar,
+                                     ZonedDateTime targetDateTime) {
+      return false;
+    }
+
+    @Override
+    public boolean copyEventsOnDateTo(ICalendarModel sourceCalendar, ZonedDateTime sourceDate,
+                                      ICalendarModel targetCalendar, ZonedDateTime targetDate) {
+      return false;
+    }
+
+    @Override
+    public boolean copyEventsBetweenTo(ICalendarModel sourceCalendar, ZonedDateTime startDate,
+                                       ZonedDateTime endDate, ICalendarModel targetCalendar,
+                                       ZonedDateTime targetStartDate) {
+      return false;
+    }
+
+    @Override
+    public List<ReadOnlyCalendarEvent> getReadOnlyEventsOnDate(LocalDate date) {
+      return List.of();
+    }
+
+    @Override
+    public List<ReadOnlyCalendarEvent> getAllReadOnlyEvents() {
+      return List.of();
+    }
+  }
 }

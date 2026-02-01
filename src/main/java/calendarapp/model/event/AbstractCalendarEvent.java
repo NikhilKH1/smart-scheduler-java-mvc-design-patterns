@@ -1,16 +1,16 @@
 package calendarapp.model.event;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 /**
  * This abstract class provides a common implementation for calendar events.
  * It holds properties such as subject, start and end date/time, description, location,
  * and flags for public and all-day events.
  */
-public abstract class AbstractCalendarEvent implements CalendarEvent {
+public abstract class AbstractCalendarEvent implements ICalendarEvent {
   protected String subject;
-  protected LocalDateTime startDateTime;
-  protected LocalDateTime endDateTime;
+  protected ZonedDateTime startDateTime;
+  protected ZonedDateTime endDateTime;
   protected String description;
   protected String location;
   protected boolean isPublic;
@@ -32,7 +32,7 @@ public abstract class AbstractCalendarEvent implements CalendarEvent {
    * @return the event start date and time
    */
   @Override
-  public LocalDateTime getStartDateTime() {
+  public ZonedDateTime getStartDateTime() {
     return startDateTime;
   }
 
@@ -42,7 +42,7 @@ public abstract class AbstractCalendarEvent implements CalendarEvent {
    * @return the event end date and time
    */
   @Override
-  public LocalDateTime getEndDateTime() {
+  public ZonedDateTime getEndDateTime() {
     return endDateTime;
   }
 
@@ -87,13 +87,12 @@ public abstract class AbstractCalendarEvent implements CalendarEvent {
   }
 
   /**
-   * Returns a basic string representation of the event (used for debugging/logging).
-   * The full display logic is handled separately in CalendarView.
+   * Returns a copy of the event with the specified property updated.
    *
-   * @return a string representation of the event
+   * @param property the property name to update
+   * @param newValue the new value of the property
+   * @return a new instance of the event with the updated property
    */
-  @Override
-  public String toString() {
-    return subject + " (" + startDateTime + " - " + endDateTime + ")";
-  }
+  public abstract ICalendarEvent withUpdatedProperty(String property, String newValue);
+
 }

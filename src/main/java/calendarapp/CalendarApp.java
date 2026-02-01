@@ -1,128 +1,29 @@
 package calendarapp;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.Scanner;
-
 import calendarapp.controller.CalendarController;
-import calendarapp.model.CalendarModel;
-import calendarapp.view.CalendarView;
+import calendarapp.controller.CommandParser;
+import calendarapp.controller.ICalendarController;
+import calendarapp.model.CalendarManager;
+import calendarapp.model.ICalendarManager;
 
 /**
- * Main class for running the calendar application.
- * The application can run in interactive mode or headless mode.
+ * The main entry point for the Calendar application. This class initializes the core
+ * components of the calendar system, including the calendar manager, command parser,
+ * and controller. It then runs the application based on the provided arguments.
  */
 public class CalendarApp {
 
   /**
-   * The main entry point of the application.
-   * Depending on the command-line arguments, the application runs in interactive mode or
-   * headless mode.
+   * The main method for the Calendar application. It initializes the necessary components and
+   * starts the application by running the controller with the given arguments.
    *
-   * @param args command-line arguments; use "--mode interactive" for interactive mode or
-   *             "--mode headless commandsfile" for headless mode
+   * @param args command-line arguments that are passed to the controller's run method
+   * @see CalendarController run(String[])
    */
   public static void main(String[] args) {
-    CalendarModel model = new CalendarModel();
-    CalendarView view = new CalendarView();
-    CalendarController controller = new CalendarController(model, view);
-
-    if (args.length >= 2 && args[0].equalsIgnoreCase("--mode")) {
-      String mode = args[1].toLowerCase();
-      if (mode.equals("interactive")) {
-        runInteractiveMode(controller, model, view);
-      } else if (mode.equals("headless") && args.length == 3) {
-        runHeadlessMode(controller, model, view, args[2]);
-      } else {
-        System.err.println("Usage: --mode interactive OR --mode headless <commands-file>");
-        System.exit(1);
-      }
-    } else {
-      runInteractiveMode(controller, model, view);
-    }
-  }
-
-  /**
-   * Runs the application in interactive mode.
-   * Commands are read from standard input, processed,
-   * and the current list of events is displayed after each command.
-   *
-   * @param controller the CalendarController to process commands
-   * @param model      the CalendarModel holding event data
-   * @param view       the CalendarView used to display events and messages
-   */
-  public static void runInteractiveMode(CalendarController controller,
-                                        CalendarModel model, CalendarView view) {
-    Scanner scanner = new Scanner(System.in);
-    System.out.println("Enter commands (type 'exit' to quit):");
-    while (true) {
-      System.out.print("> ");
-      String command = scanner.nextLine();
-      if (command.equalsIgnoreCase("exit")) {
-        break;
-      }
-      controller.processCommand(command);
-      if (!command.trim().toLowerCase().startsWith("print")) {
-        System.out.println("----- All Events -----");
-        view.displayEvents(model.getEvents());
-        System.out.println("----------------------");
-      }
-    }
-    scanner.close();
-  }
-
-  /**
-   * Runs the application in headless mode.
-   * Commands are read from the specified file and processed one by one.
-   * After processing each command, the current list of events is displayed.
-   *
-   * @param controller the CalendarController to process commands
-   * @param model      the CalendarModel holding event data
-   * @param view       the CalendarView used to display events and messages
-   * @param fileName   the name of the file containing commands
-   */
-  public static void runHeadlessMode(CalendarController controller,
-                                     CalendarModel model, CalendarView view, String fileName) {
-    try (BufferedReader reader = new BufferedReader(new FileReader(fileName))) {
-      String command;
-      while ((command = reader.readLine()) != null) {
-        String trimmed = command.trim();
-        if (trimmed.isEmpty()) {
-          continue;
-        }
-
-        if (trimmed.equalsIgnoreCase("exit")) {
-          System.out.println("Exit command encountered. Terminating headless mode.");
-          break;
-        }
-
-        if (!trimmed.toLowerCase().matches("^(create event|edit event|edit events|"
-                + "print events on|print events from|show status on|export cal).*")) {
-          System.err.println("Error: Invalid command encountered: '" + trimmed + "'. Terminating.");
-          System.exit(1);
-        }
-
-        try {
-          boolean success = controller.processCommand(trimmed);
-          if (!success) {
-            System.err.println("Error executing command: '" + trimmed + "'. Command failed.");
-            System.exit(1);
-          }
-          if (!trimmed.toLowerCase().startsWith("print")) {
-            System.out.println("----- All Events -----");
-            view.displayEvents(model.getEvents());
-            System.out.println("----------------------");
-          }
-        } catch (Exception e) {
-          System.err.println("Error executing command: '" + trimmed + "'");
-          System.err.println("Reason: " + e.getMessage());
-          System.exit(1);
-        }
-      }
-    } catch (IOException e) {
-      System.err.println("Error reading commands file: " + e.getMessage());
-      System.exit(1);
-    }
+    ICalendarManager manager = new CalendarManager();
+    CommandParser parser = new CommandParser(manager);
+    ICalendarController controller = new CalendarController(manager, parser);
+    controller.run(args);
   }
 }

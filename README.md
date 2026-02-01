@@ -1,123 +1,140 @@
 # Calendar Application
 
-This project involves designing and implementing a virtual calendar application. The goal is to mimic core features commonly found in popular calendar applications like Google Calendar or Apple's iCalendar.
+This project is an enhanced version of a calendar application that allows users to manage multiple calendars, handle timezones, create and edit events, and copy events between calendars. The application follows the Model-View-Controller (MVC) design pattern and utilizes abstraction, dynamic dispatch, and the command pattern.
 
-## Key Features
+## Design Changes and Justifications
 
-- **Event Management:**
-    - Add and manage single and recurring events.
-    - Edit event properties, including start/end times, descriptions, locations, and recurrence patterns.
+#### Multiple Calendar Support
 
-- **Event Querying:**
-    - Retrieve events based on specific dates or date/time ranges.
-    - Check availability at particular dates and times.
+1. **Added ICalendarManager and CalendarManager**
+* **Justification**:  Enables the management of multiple calendars within the application. This allows users to create, use, and edit named calendars efficiently.
 
-- **Export Functionality:**
-    - Export calendar data to a CSV format compatible with standard calendar applications.
+2. **Separated calendar-level and event-level command interfaces**
+* **Justification**: Introduced ICalendarManagerCommand and ICalendarModelCommand, both extending a base ICommand interface which remains unchanged from Assignment 4. This clearly distinguishes commands that operate on calendars (e.g., create, use, edit calendar) from those that operate on events (e.g., create, edit, query events), improving scalability and modularity.
 
-## Architecture
+3. **Added new command classes (CreateCalendarCommand, UseCalendarCommand, EditCalendarCommand)**
+* **Justification**: The project continues to follow the Command Design Pattern from Assignment 4. In this assignment, we built upon that approach to support additional features, such as multi-calendar functionality. By extending the existing command structure, we were able to introduce new commands for calendar-level operations without modifying the core logic of the application.
 
-The project follows the **Model-View-Controller (MVC)** architecture, clearly separating responsibilities:
-- **Model:** Handles data representation and core calendar logic.
-- **View:** Manages presentation of calendar data.
-- **Controller:** Processes user input and coordinates interactions between Model and View.
+#### Timezone Support
 
-## Technical Concepts
+4. **Replaced LocalDateTime with the abstract Temporal type throughout the model and event classes**
+* **Justification**: Enables compatibility with both ZonedDateTime and other Temporal types. This abstraction allows for timezone-aware event creation, editing, and querying without breaking backward compatibility.
 
-This project demonstrates essential programming principles:
+#### Modular IO and Input Handling
+5. **Created an io package with ICommandSource, ConsoleCommandSource, and FileCommandSource**
+* **Justification**: Decouples input sources from core logic. This modular structure allows input to come from various sources (e.g., console, files), making the app extensible for GUI or web interfaces in the future.
 
-- **Abstraction and Abstract Data Types:**
-    - Interfaces and abstract classes (e.g., `CalendarEvent`, `AbstractCalendarEvent`) encapsulate event details and define clear interactions.
+#### Exporter Extensibility
+6. **Introduced the IExporter interface**
+* **Justification**: Enabling future extensions with minimal modifications. In Assignment 4, we had a CSV exporter within the utils package. In this assignment, we introduced an Exporter interface to support different formats, making it easier to add new export types like PDF or TXT when needed.
 
-- **Command Pattern:**
-    - Implementation of command objects (`CreateEventCommand`, `EditEventCommand`, `ExportCalendarCommand`) decouples operation invocation from execution.
+## How to Run the Program
 
-- **Dynamic Dispatch:**
-    - Leveraging dynamic dispatch techniques to handle various command types, enhancing flexibility and maintainability.
+### Running from the Terminal (Using JAR File)
 
-- **Functional Programming:**
-    - Utilizing lambda expressions for concise and efficient command processing within the controller.
+1. Ensure that you have Java installed (Java 11).
+2. Open a terminal and navigate to the directory containing the `calendarapp.jar` file.
+3. Run the application in interactive mode:
 
-- **Modular Design:**
-    - Emphasizes modularity to facilitate future enhancements and scalability.
 
-## How to Run
+    java -jar calendarapp.jar --mode interactive
 
-### Compilation
+- This mode allows users to input commands interactively.
 
-1. Navigate to the project's root directory in a terminal.
-2. Compile Java source files:
-   ```bash
-   javac -d target/classes src/calendarapp/**/*.java
-   ```
+4. Run the application in headless mode:
+ 
+- To run Valid Commands file:
 
-### Running the Application
 
-The main entry point is the `CalendarApp` class. The application supports two modes:
+    java -jar calendarapp.jar --mode headless ValidCommands.txt
+- To run Invalid Commands file:
 
-#### Interactive Mode
 
-Allows users to type commands directly and view immediate feedback.
+    java -jar calendarapp.jar --mode headless InvalidCommands.txt
 
-Run in interactive mode:
-```bash
-java -cp target/classes calendarapp.CalendarApp --mode interactive
-```
+## Working Features
+### New Features Added:
 
-Type commands at the prompt, and use `exit` to quit.
+### Multiple Calendars
 
-##### Supported Commands
+Users can create, use, and edit multiple named calendars.
 
-- **Create Event:**
-  ```
-  create event --autoDecline <eventName> from <dateTime> to <dateTime>
-  ```
+### Timezone Support
 
-- **Create Recurring Event:**
-  ```
-  create event --autoDecline <eventName> from <dateTime> to <dateTime> repeats <weekdays> for <N> times
-  create event --autoDecline <eventName> from <dateTime> to <dateTime> repeats <weekdays> until <dateTime>
-  ```
+Each calendar has its own timezone.
 
-- **Edit Single Event:**
-  ```
-  edit event <property> <eventName> from <dateTime> to <dateTime> with <NewValue>
-  ```
+Events are automatically adjusted when changing timezones.
 
-- **Edit Recurring Event:**
-  ```
-  edit events <property> <eventName> from <dateTime> with <NewValue>
-  edit events <property> <eventName> <NewValue>
-  ```
+### Event Copying
 
-- **Query Events:**
-  ```
-  print events on <date>
-  print events from <dateTime> to <dateTime>
-  show status on <dateTime>
-  ```
+Users can copy events within the same calendar or across different calendars.
 
-- **Export Calendar:**
-  ```
-  export cal <filename.csv>
-  ```
+### Existing Features
+#### Event Creation:
+Create single events and recurring events.
+Specify details such as start and end date/time, description, location, public/private status, and all-day events.
+#### Event Querying:
+Query events on a specific date.
+Query events within a given date and time range.
+Check if busy at a specific time.
+#### Event Editing:
+Edit the properties like event name, description, location, startdatetime and enddatetime for single event.
+Edit the additional properties like repeatuntil, repeatingdays, repeattimes for recurring event.
+#### Exporting:
+Export calendar events to a CSV file compatible with Google Calendar.
+The folder for testing the export command is placed in test/res folder. Please use them before running the CSVExporterTest.
 
-#### Headless Mode
 
-Executes commands sequentially from a provided file:
-```bash
-java -cp target/classes calendarapp.CalendarApp --mode headless <commands-file>
-```
-Replace `<commands-file>` with your command file path.
+## Additional commands supported:
+
+##### To create a new calendar:
+- create calendar --name \<calName> --timezone area/location
+
+##### To edit a calendar:
+- edit calendar --name \<name-of-calendar> --property \<property-name> \<new-property-value>
+
+##### To use a calendar:
+- use calendar --name \<name-of-calendar>
+
+##### To copy event/events from one calendar to another/same calendar:
+- copy event \<eventName> on \<date> --target \<calendarName> to \<date>
+
+
+- copy events on \<date> --target \<calendarName> to \<date>
+
+
+- copy events between \<startDate> and \<endDate> --target \<calendarName> to \<startDate>
 
 ## Team Contributions
+### Nikhil:
 
-The project was collaboratively developed by two contributors:
+- Implemented event copying within and across calendars.
+- Refined the command set.
+- Adjusted the autoDecline behavior.
 
-- **Nikhil:**
-    - Single and recurring events, command parsing, conflict checking, calendar model, and view implementation.
+### Nisha:
 
-- **Nisha:**
-    - Event editing, event querying, controller management, command execution, and utilities.
+- Designed and implemented multiple calendars.
+- Timezone support across multiple calendars.
+- Commands for creating, using, and editing calendars.
 
-Both contributors jointly developed comprehensive test cases.
+### Both:
+
+- Jointly worked on writing the test cases.
+
+## Concepts covered in the project:
+
+#### Abstraction and Abstract Data Types:
+The project uses interfaces and abstract classes (such as ICalendarEvent and AbstractCalendarEvent) to encapsulate event details and provide clear contracts.
+#### Command Design Pattern:
+In this project, we used commands like CreateEventCommand, EditEventCommand, and CopyEventsBetweenDatesCommand to separate the logic of executing operations from the part of the system that invokes them. This approach was also used in the previous assignment. It allowed us to easily add new features, like supporting multiple calendars, by simply creating new command classes without affecting the existing code.
+#### Model-View-Controller (MVC):
+The project is structured using the Model-View-Controller (MVC) design pattern. The Model handles the calendar data and logic, the View displays the information, and the Controller processes user inputs and updates the Model and View accordingly.
+#### Dynamic Dispatch:
+Methods such as processCommand use dynamic dispatch to handle various types of commands, like manage, edit and use calendars and also creating events, querying events, etc.
+#### Factory Pattern:
+In the project, command objects and calendar models are created based on the input received. This approach helps manage the creation of different objects and ensures that the right type of object is used for the given task, following the idea of a factory. This makes it easier to add or modify the types of objects without changing the core logic.
+#### Other Concepts:
+Emphasis on modular design to facilitate future enhancements.
+
+
